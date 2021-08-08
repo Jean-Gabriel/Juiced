@@ -1,6 +1,6 @@
 import { TokenKind } from "./kinds";
 
-type TokenFields = {
+type TokenInformation = {
     lexeme: string
     line: number
 }
@@ -9,24 +9,24 @@ export type StringLiteralTokenKind = TokenKind.IDENTIFIER
 type StringLiteralToken = {
     kind: StringLiteralTokenKind
     literal: string
-} & TokenFields
+} & TokenInformation
 
 export type NumberLiteralTokenKind = TokenKind.INT | TokenKind.FLOAT
 type NumberLiteralToken = {
     kind: NumberLiteralTokenKind
     literal: number
-} & TokenFields
+} & TokenInformation
 
 export type BooleanLiteralTokenKind = TokenKind.BOOLEAN
 type BooleanLiteralToken = {
     kind: BooleanLiteralTokenKind
     literal: boolean
-} & TokenFields
+} & TokenInformation
 
 export type NonLiteralTokenKind = Omit<TokenKind, StringLiteralTokenKind | NumberLiteralTokenKind | BooleanLiteralTokenKind>
 type NonLiteralToken = {
     kind: NonLiteralTokenKind
-} & TokenFields
+} & TokenInformation
 
 export type Token = 
     | StringLiteralToken

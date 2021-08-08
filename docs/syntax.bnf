@@ -9,22 +9,21 @@ top-level-declaration ::=
 export-declaration ::=
     | 'export' declaration
 
-declaration ::= 'let' identifier '=' (
+declaration ::=
     | function-declaration
     | variable-declaration
-)
 
-function-declaration ::= function-arguments (':' type) '->' function-body
+function-declaration ::= 'let' identifier '=' function-arguments (':' type) '->' function-body
 function-arguments ::= '(' ((typed-identifier) (',' typed-identifier)* ))? ')'
 function-body ::= block
 
 variable-declaration ::= 
-    | expression
+    | 'let' identifier '=' expression
 
 block ::=  '{' statements* '}'
 
 statements ::= 
-    | declaration
+    | variable-declaration
     | expression
 
 expression ::= 
@@ -38,6 +37,7 @@ unary ::=
     | ( "!" | "-" ) unary 
     | expression
     | identifier
+    | LITERAL
 
 typed-identifier ::= identifier ':' type
 type ::= 
