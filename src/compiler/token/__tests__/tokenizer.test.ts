@@ -1,8 +1,8 @@
-import { TokenFixture } from "../../../../test/compiler/token/token"
-import { createSourceReader } from "../../source/reader"
-import { TokenKind } from "../kinds"
-import { Token } from "../token"
-import { createTokenizer } from "../tokenizer"
+import { TokenFixture } from "../../../../test/compiler/token/token";
+import { createSourceReader } from "../../source/reader";
+import { TokenKind } from "../kinds";
+import type { Token } from "../token";
+import { createTokenizer } from "../tokenizer";
 
 describe('Tokenizer', () => {
     it.each([
@@ -31,8 +31,8 @@ describe('Tokenizer', () => {
         ['bool', TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE))],
         ['export', TokenFixture.create(_ => _.atLine(1).withLexeme('export').nonLiteral(TokenKind.EXPORT))]
     ])('it should create token for %s', (char: string, expected: Token) => {
-        expectTokenize(char).createsTokens(expected)
-    })
+        expectTokenize(char).createsTokens(expected);
+    });
 
     it('should ignore not supported symbols', () => {
         // $ is the not supported symbol
@@ -41,8 +41,8 @@ describe('Tokenizer', () => {
         `).createsTokens(
             TokenFixture.create(_ => _.atLine(1).withLexeme('let').nonLiteral(TokenKind.LET)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('main').withLiteral('main').string(TokenKind.IDENTIFIER))
-        )
-    })
+        );
+    });
 
     it('should tokenize a function declaration', () => {
         expectTokenize(`
@@ -65,8 +65,8 @@ describe('Tokenizer', () => {
             TokenFixture.create(_ => _.atLine(2).withLexeme('*').nonLiteral(TokenKind.STAR)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(3).withLexeme('}').nonLiteral(TokenKind.CLOSE_BRACKETS)),
-        )
-    })
+        );
+    });
 
     it('should tokenize a varaible declaration', () => {
         expectTokenize(`
@@ -76,8 +76,8 @@ describe('Tokenizer', () => {
             TokenFixture.create(_ => _.atLine(1).withLexeme('count').withLiteral('count').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('=').nonLiteral(TokenKind.EQUAL)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('1').withLiteral(1).number(TokenKind.INT))
-        )
-    })
+        );
+    });
 
     it.each([
         ['1', TokenFixture.create(_ => _.atLine(1).withLexeme('1').withLiteral(1).number(TokenKind.INT))],
@@ -85,19 +85,19 @@ describe('Tokenizer', () => {
         ['true', TokenFixture.create(_ => _.atLine(1).withLexeme('true').withLiteral(true).boolean())],
         ['false', TokenFixture.create(_ => _.atLine(1).withLexeme('false').withLiteral(false).boolean())],
     ])('it should tokenize primitive %s', (primitive: string, expected) => {
-        expectTokenize(primitive).createsTokens(expected)
-    })
+        expectTokenize(primitive).createsTokens(expected);
+    });
 
     const expectTokenize = (sequence: string) => {
-        const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '')
+        const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
-        const sourceReader = () => createSourceReader(withoutStartAndEndLineBreak)
-        const tokenizer = createTokenizer(sourceReader)
-    
-        const tokens = tokenizer.tokenize()
+        const sourceReader = () => createSourceReader(withoutStartAndEndLineBreak);
+        const tokenizer = createTokenizer(sourceReader);
+
+        const tokens = tokenizer.tokenize();
 
         return {
             createsTokens: (...expected: Token[]) => expected.forEach(token => expect(tokens).toContainEqual(token))
-        }
-    }
-})
+        };
+    };
+});

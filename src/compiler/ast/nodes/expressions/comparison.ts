@@ -7,4 +7,4 @@ export interface ComparisonExpression extends ExpressionNode {
     right: ExpressionNode
     operator: ComparisonOperator
     left: ExpressionNode
-} 
+}

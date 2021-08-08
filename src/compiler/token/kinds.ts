@@ -30,7 +30,7 @@ export enum TokenKind {
     INT,
     FLOAT,
     BOOLEAN,
-    
+
     BOOLEAN_TYPE,
     INT_TYPE,
     FLOAT_TYPE,

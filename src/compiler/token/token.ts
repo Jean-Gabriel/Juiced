@@ -1,4 +1,4 @@
-import { TokenKind } from "./kinds";
+import type { TokenKind } from "./kinds";
 
 type TokenInformation = {
     lexeme: string
@@ -28,7 +28,7 @@ type NonLiteralToken = {
     kind: NonLiteralTokenKind
 } & TokenInformation
 
-export type Token = 
+export type Token =
     | StringLiteralToken
     | NumberLiteralToken
     | BooleanLiteralToken

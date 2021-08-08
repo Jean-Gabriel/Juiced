@@ -10,6 +10,6 @@ interface StatementVisitor<T> {
     visitExpression(expression: Expression): T
 }
 
-export type Statement = 
+export type Statement =
     | VariableDeclaration
     | Expression

@@ -12,7 +12,7 @@ interface ExpressionVisitor<T> {
     visitUnaryExpression(expression: UnaryExpression): T
 }
 
-export type Expression = 
+export type Expression =
     | ComparisonExpression
     | BinaryExpression
     | UnaryExpression

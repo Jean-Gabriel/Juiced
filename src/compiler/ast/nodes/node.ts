@@ -9,7 +9,7 @@ enum AstNodeKind {
     COMPARISON,
     BINARY,
     UNARY,
-    
+
     LITERAL
 }
 

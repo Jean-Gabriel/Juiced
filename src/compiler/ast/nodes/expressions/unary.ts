@@ -5,4 +5,4 @@ export interface UnaryExpression extends ExpressionNode {
 
     expression: ExpressionNode
     operator: UnaryExpression
-} 
+}

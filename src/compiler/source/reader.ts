@@ -5,7 +5,7 @@ type Props = {
 export const createSourceReader = (content: string) => new SourceReader({ content });
 
 export class SourceReader {
-    private readonly content: string; 
+    private readonly content: string;
 
     private index = 0;
     private line = 1;
@@ -16,30 +16,30 @@ export class SourceReader {
     }
 
     advanceWhile(condition: (char: string) => boolean) {
-        let current = this.current()
+        let current = this.current();
 
-        while(current && condition(current)) {
+        while (current && condition(current)) {
             this.index++;
-            current = this.current()
+            current = this.current();
         }
     }
 
     read(): string | null {
-        if(this.isAtEnd()) {
-            return null
+        if (this.isAtEnd()) {
+            return null;
         }
 
-        const current = this.content.charAt(this.index++)
-        if(current !== "\n") {
-            return current
+        const current = this.content.charAt(this.index++);
+        if (current !== "\n") {
+            return current;
         }
 
         this.line++;
-        return this.content.charAt(this.index++)
+        return this.content.charAt(this.index++);
     }
 
     match(expected: string): boolean {
-        if(this.isAtEnd() || this.current() != expected) {
+        if (this.isAtEnd() || this.current() != expected) {
             return false;
         }
 
@@ -48,7 +48,7 @@ export class SourceReader {
     }
 
     pin() {
-        this.pinStart = this.index
+        this.pinStart = this.index;
     }
 
     pinned(): string {
@@ -60,11 +60,11 @@ export class SourceReader {
     }
 
     isAtEnd(): boolean {
-        return this.index >= this.content.length
+        return this.index >= this.content.length;
     }
 
     current() {
-        if(this.isAtEnd()) {
+        if (this.isAtEnd()) {
             return null;
         }
 
@@ -73,8 +73,8 @@ export class SourceReader {
 
     next() {
         const nextIndex = this.index + 1;
-        if(nextIndex >= this.content.length) {
-            return null
+        if (nextIndex >= this.content.length) {
+            return null;
         }
 
         return this.content.charAt(nextIndex);

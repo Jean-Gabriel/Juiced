@@ -1,125 +1,125 @@
-import { createSourceReader } from '../reader'
+import { createSourceReader } from '../reader';
 
 describe('SourceReader', () => {
 
-    const givenSourceReader = (content: string) => createSourceReader(content)
+    const givenSourceReader = (content: string) => createSourceReader(content);
 
     it('should initially be at start first line', () => {
-        const reader = givenSourceReader('')
+        const reader = givenSourceReader('');
 
-        reader.read()
+        reader.read();
 
-        expect(reader.lineIndex()).toEqual(1)
-    })
+        expect(reader.lineIndex()).toEqual(1);
+    });
 
     it('should get pinned string', () => {
-        const content = 'test_'
-        const reader = givenSourceReader(content)
-        reader.pin()
-        reader.advanceWhile((char) => char !== '_')
+        const content = 'test_';
+        const reader = givenSourceReader(content);
+        reader.pin();
+        reader.advanceWhile((char) => char !== '_');
 
-        const pinned = reader.pinned()
+        const pinned = reader.pinned();
 
-        const expected = 'test'
-        expect(pinned).toEqual(expected)
-    })
+        const expected = 'test';
+        expect(pinned).toEqual(expected);
+    });
 
     it('should advance while condition is true', () => {
-        const content = 'test_'
-        const reader = givenSourceReader(content)
+        const content = 'test_';
+        const reader = givenSourceReader(content);
 
-        reader.advanceWhile((char) => char !== '_')
+        reader.advanceWhile((char) => char !== '_');
 
-        expect(reader.current()).toEqual('_')
-    })
+        expect(reader.current()).toEqual('_');
+    });
 
     it('should advance until end if condition is never met', () => {
-        const content = 'test_'
-        const reader = givenSourceReader(content)
+        const content = 'test_';
+        const reader = givenSourceReader(content);
 
-        reader.advanceWhile((char) => char !== '!')
+        reader.advanceWhile((char) => char !== '!');
 
-        expect(reader.isAtEnd()).toBeTruthy()
-    })
+        expect(reader.isAtEnd()).toBeTruthy();
+    });
 
     it('should not advance if condition is met instantly', () => {
-        const content = '_test'
-        const reader = givenSourceReader(content)
+        const content = '_test';
+        const reader = givenSourceReader(content);
 
-        reader.advanceWhile((char) => char !== '_')
+        reader.advanceWhile((char) => char !== '_');
 
-        expect(reader.current()).toEqual('_')
-    })
+        expect(reader.current()).toEqual('_');
+    });
 
     it('should not read char when reader is at end of file', () => {
-        const reader = givenSourceReader('')
+        const reader = givenSourceReader('');
 
-        expect(reader.read()).toBeNull()
-    })
+        expect(reader.read()).toBeNull();
+    });
 
     it('should increment line when reading new line', () => {
-        const reader = givenSourceReader('\n')
+        const reader = givenSourceReader('\n');
 
-        reader.read()
+        reader.read();
 
-        expect(reader.lineIndex()).toEqual(2)
-    })
+        expect(reader.lineIndex()).toEqual(2);
+    });
 
     it('should return read char', () => {
-        const reader = givenSourceReader('Test')
+        const reader = givenSourceReader('Test');
 
-        const char = reader.read()
+        const char = reader.read();
 
-        expect(char).toEqual('T')
-    })
+        expect(char).toEqual('T');
+    });
 
     it('should advance if current char matches', () => {
-        const reader = givenSourceReader('Test')
+        const reader = givenSourceReader('Test');
 
-        reader.match('T')
+        reader.match('T');
 
-        expect(reader.current()).toEqual('e')
-    })
+        expect(reader.current()).toEqual('e');
+    });
 
     it('should be case sensitive when matching', () => {
-        const reader = givenSourceReader('Test')
+        const reader = givenSourceReader('Test');
 
-        expect(reader.match('t')).toBeFalsy()
-    })
+        expect(reader.match('t')).toBeFalsy();
+    });
 
     it('should not match different char', () => {
-        const reader = givenSourceReader('c')
+        const reader = givenSourceReader('c');
 
-        expect(reader.match('T')).toBeFalsy()
-    })
+        expect(reader.match('T')).toBeFalsy();
+    });
 
     it('should not match if reader is at end of file', () => {
-        const reader = givenSourceReader('')
+        const reader = givenSourceReader('');
 
-        expect(reader.match('T')).toBeFalsy()
-    })
+        expect(reader.match('T')).toBeFalsy();
+    });
 
     it('should not have current char if reader is at end of file', () => {
-        const reader = givenSourceReader('')
+        const reader = givenSourceReader('');
 
-        expect(reader.current()).toBeNull()
-    })
+        expect(reader.current()).toBeNull();
+    });
 
     it('should return next char in source', () => {
-        const reader = givenSourceReader('Te')
+        const reader = givenSourceReader('Te');
 
-        expect(reader.next()).toBe('e')
-    })
+        expect(reader.next()).toBe('e');
+    });
 
     it('should not have next char if reader is at end of file', () => {
-        const reader = givenSourceReader('')
+        const reader = givenSourceReader('');
 
-        expect(reader.next()).toBeNull()
-    })
+        expect(reader.next()).toBeNull();
+    });
 
     it('should not have next char if reader is at last char of source', () => {
-        const reader = givenSourceReader('T')
+        const reader = givenSourceReader('T');
 
-        expect(reader.next()).toBeNull()
-    })
-})
+        expect(reader.next()).toBeNull();
+    });
+});

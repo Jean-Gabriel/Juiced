@@ -7,4 +7,4 @@ export interface BinaryExpression extends ExpressionNode {
     right: ExpressionNode
     operator: BinaryOperator
     left: ExpressionNode
-} 
+}

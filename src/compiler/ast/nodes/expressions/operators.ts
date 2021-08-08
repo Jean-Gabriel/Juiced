@@ -17,7 +17,7 @@ export enum OperatorKind {
     MINUS
 }
 
-export type ComparisonOperator = 
+export type ComparisonOperator =
     | OperatorKind.EQUAL
     | OperatorKind.NOT_EQUAL
     | OperatorKind.GREATHER_THAN
@@ -25,7 +25,7 @@ export type ComparisonOperator =
     | OperatorKind.LESS_THAN
     | OperatorKind.LESS_EQUAL
 
-export type BinaryOperator = 
+export type BinaryOperator =
     | OperatorKind.ADDITION
     | OperatorKind.DIVISION
     | OperatorKind.MULTIPLICATION

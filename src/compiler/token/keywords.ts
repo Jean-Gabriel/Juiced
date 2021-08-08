@@ -1,5 +1,5 @@
 import { TokenKind } from "./kinds";
-import { NonLiteralTokenKind } from "./token";
+import type { NonLiteralTokenKind } from "./token";
 
 export const keywords = new Map<string, NonLiteralTokenKind>([
     ['let', TokenKind.LET],
@@ -7,4 +7,4 @@ export const keywords = new Map<string, NonLiteralTokenKind>([
     ['i32', TokenKind.INT_TYPE],
     ['bool', TokenKind.BOOLEAN_TYPE],
     ['export', TokenKind.EXPORT]
-])
+]);

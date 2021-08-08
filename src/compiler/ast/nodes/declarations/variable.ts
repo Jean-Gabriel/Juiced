@@ -1,4 +1,4 @@
-import { Expression } from "../expressions/expression";
+import type { Expression } from "../expressions/expression";
 import type { Identifier } from "../identifier";
 import type { DeclarationNode } from "./declaration";
 
@@ -7,4 +7,4 @@ export interface VariableDeclaration extends DeclarationNode {
 
     identifier: Identifier
     expression: Expression[]
-} 
+}

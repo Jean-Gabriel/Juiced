@@ -10,6 +10,6 @@ interface DeclarationVisitor<T> {
     visitVariableDeclaration(declaration: VariableDeclaration): T
 }
 
-type Declaration = 
+type Declaration =
     | FunctionDeclaration
     | VariableDeclaration
