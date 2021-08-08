@@ -1,0 +1,48 @@
+juice-file ::= 
+    | top-level-declaration*
+    | EOF 
+
+top-level-declaration ::= 
+    | export-declaration
+    | expression
+
+export-declaration ::=
+    | 'export' declaration
+
+declaration ::= 'let' identifier '=' (
+    | function-declaration
+    | variable-declaration
+)
+
+function-declaration ::= function-arguments (':' type) '->' function-body
+function-arguments ::= '(' ((typed-identifier) (',' typed-identifier)* ))? ')'
+function-body ::= block
+
+variable-declaration ::= 
+    | expression
+
+block ::=  '{' statements* '}'
+
+statements ::= 
+    | declaration
+    | expression
+
+expression ::= 
+    | equality
+
+equality ::= comparison ( ( "!=" | "==" ) comparison )*
+comparison ::= addition ( ( ">" | ">=" | "<" | "<=" ) addition )*
+addition ::= multiplication ( ( "-" | "+" ) multiplication )*
+multiplication ::= unary ( ( "/" | "*" ) unary )*
+unary ::= 
+    | ( "!" | "-" ) unary 
+    | expression
+    | identifier
+
+typed-identifier ::= identifier ':' type
+type ::= 
+    | BOOLEAN_TYPE
+    | INT_TYPE
+    | FLOAT_TYPE
+
+identifier ::= IDENTIFIER

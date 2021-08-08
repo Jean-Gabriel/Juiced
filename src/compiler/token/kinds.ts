@@ -1,0 +1,37 @@
+export enum TokenKind {
+    LET,
+    EXPORT,
+
+    EQUAL,
+    BANG_EQUAL,
+    EQUAL_EQUAL,
+    GREATHER_THAN,
+    GREATHER_EQUAL,
+    LESS_THAN,
+    LESS_EQUAL,
+    MINUS,
+    PLUS,
+    SLASH,
+    STAR,
+    BANG,
+
+    OPEN_PARENTHESIS,
+    CLOSE_PARENTHESIS,
+    OPEN_BRACKETS,
+    CLOSE_BRACKETS,
+
+    COLON,
+    COMA,
+
+    ARROW,
+
+    IDENTIFIER,
+
+    INT,
+    FLOAT,
+    BOOLEAN,
+    
+    BOOLEAN_TYPE,
+    INT_TYPE,
+    FLOAT_TYPE,
+}

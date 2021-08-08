@@ -1,0 +1,20 @@
+{
+  "name": "juiced-assembly-script",
+  "version": "1.0.0",
+  "description": "Just another way to juice up your WebAssembly application",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Jean-Gabriel Doyon",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.1.0",
+    "typescript": "^4.3.5",
+    "@types/jest": "^26.0.24",
+    "@types/node": "^16.4.13",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.4"
+  }
+}
