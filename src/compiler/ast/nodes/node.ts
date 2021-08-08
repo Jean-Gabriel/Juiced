@@ -1,4 +1,6 @@
 enum AstNodeKind {
+    PROGRAM,
+
     EXPORT,
 
     FUNCTION_DECLARATION,
