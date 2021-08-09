@@ -2,14 +2,14 @@ import chalk from "chalk";
 import type { Diagnostic as Diagnostic, DiagnosticReporter } from '../reporter';
 import { DiagnosticCategory } from '../reporter';
 
-export const createChalkDiagnosticReporter = (): DiagnosticReporter => new ChalkDiagnosticReporter();
+export const createChalkDirectDiagnosticReporter = (): DiagnosticReporter => new ChalkDirectDiagnosticReporter();
 
 const colors: { [key in DiagnosticCategory]: string } = {
     [DiagnosticCategory.INFO]: chalk.blueBright('[INFO]'),
     [DiagnosticCategory.ERROR]: chalk.redBright('[ERROR]')
 };
 
-class ChalkDiagnosticReporter implements DiagnosticReporter {
+class ChalkDirectDiagnosticReporter implements DiagnosticReporter {
     private readonly diagnostics: Diagnostic[] = []
 
     emit(diagnostic: Diagnostic) {
