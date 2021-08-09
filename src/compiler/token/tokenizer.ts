@@ -1,3 +1,5 @@
+import type { DiagnosticReporter } from "../../diagnostic/reporter";
+import { DiagnosticCategory } from "../../diagnostic/reporter";
 import type { SourceReader } from "../source/reader";
 import { isBoolean, parseBoolean } from "../utils/boolean";
 import { isAlpha, isAlphaNumeric, isDigit } from "../utils/char";
@@ -9,12 +11,16 @@ interface Tokenizer {
     tokenize: () => Token[]
 }
 
-export const createTokenizer = (createSourceReader: () => SourceReader): Tokenizer => {
+export const createTokenizer = (
+    createSourceReader: () => SourceReader,
+    createDiagnosticReporter: () => DiagnosticReporter
+): Tokenizer => {
     const IGNORED = ['', ' ', ' \r', '\t'];
 
     const tokenize = (): Token[] => {
         const tokens: Token[] = [];
         const reader = createSourceReader();
+        const reporter = createDiagnosticReporter();
 
         const createToken = () => {
             const lexeme = reader.pinned();
@@ -57,6 +63,11 @@ export const createTokenizer = (createSourceReader: () => SourceReader): Tokeniz
 
             return createToken().stringLiteral(TokenKind.IDENTIFIER, pinned);
         };
+
+        const error = (message: string) => {
+            reporter.emit({ category: DiagnosticCategory.ERROR, message });
+        };
+
 
         const next = (): Token | null => {
             reader.pin();
@@ -122,6 +133,7 @@ export const createTokenizer = (createSourceReader: () => SourceReader): Tokeniz
                         return createAlphaNumericToken();
                     }
 
+                    error(`Invalid character ${char} at line ${reader.lineIndex()}`);
                     return null;
                 }
             }
@@ -133,6 +145,10 @@ export const createTokenizer = (createSourceReader: () => SourceReader): Tokeniz
             if (token) {
                 tokens.push(token);
             }
+        }
+
+        if(reporter.errored()) {
+            throw new Error('Encountered illegal characters while creating tokens.');
         }
 
         return tokens;

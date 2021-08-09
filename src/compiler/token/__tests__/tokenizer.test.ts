@@ -1,4 +1,5 @@
 import { TokenFixture } from "../../../../test/compiler/token/token";
+import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
 import { createSourceReader } from "../../source/reader";
 import { TokenKind } from "../kinds";
 import type { Token } from "../token";
@@ -34,14 +35,8 @@ describe('Tokenizer', () => {
         expectTokenize(char).createsTokens(expected);
     });
 
-    it('should ignore not supported symbols', () => {
-        // $ is the not supported symbol
-        expectTokenize(`
-            let $main 
-        `).createsTokens(
-            TokenFixture.create(_ => _.atLine(1).withLexeme('let').nonLiteral(TokenKind.LET)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme('main').withLiteral('main').string(TokenKind.IDENTIFIER))
-        );
+    it('should throw error at the end of tokenizing if it reported errors', () => {
+        expectTokenize(`let $main $`).reportsError(2);
     });
 
     it('should tokenize a function declaration', () => {
@@ -92,12 +87,19 @@ describe('Tokenizer', () => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
         const sourceReader = () => createSourceReader(withoutStartAndEndLineBreak);
-        const tokenizer = createTokenizer(sourceReader);
+        const diagnosticReporter = () => createTestDiagnoticsReporter();
 
-        const tokens = tokenizer.tokenize();
+        const tokenizer = createTokenizer(sourceReader, diagnosticReporter);
 
         return {
-            createsTokens: (...expected: Token[]) => expected.forEach(token => expect(tokens).toContainEqual(token))
+            createsTokens: (...expected: Token[]) => {
+                const tokens = tokenizer.tokenize();
+                expected.forEach(token => expect(tokens).toContainEqual(token));
+            },
+            reportsError: (numberOfErrors: number) => {
+                expect(() => tokenizer.tokenize()).toThrowError();
+                expect(diagnosticReporter().emit).toHaveBeenCalledTimes(numberOfErrors);
+            }
         };
     };
 });
