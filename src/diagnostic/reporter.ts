@@ -1,5 +1,4 @@
 export enum DiagnosticCategory {
-    INFO = 'INFO',
     ERROR = 'ERROR'
 }
 

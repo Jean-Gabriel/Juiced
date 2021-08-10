@@ -1,4 +1,5 @@
 import type { Identifier, TypedIdentifier } from "../identifier";
+import type { Statement } from "../statements/statement";
 import type { DeclarationNode } from "./declaration";
 
 export interface FunctionDeclaration extends DeclarationNode {
@@ -7,5 +8,5 @@ export interface FunctionDeclaration extends DeclarationNode {
     identifier: Identifier
     arguments: TypedIdentifier[]
     type: Identifier
-    body: any[]
+    body: Statement[]
 }

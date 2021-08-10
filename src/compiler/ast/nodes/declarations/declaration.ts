@@ -5,11 +5,11 @@ export interface DeclarationNode extends AstNode {
     acceptDeclarationVisitor<T>(visitor: DeclarationVisitor<T>): T
 }
 
-interface DeclarationVisitor<T> {
+export interface DeclarationVisitor<T> {
     visitFunctionDeclaration(declaration: FunctionDeclaration): T
     visitVariableDeclaration(declaration: VariableDeclaration): T
 }
 
-type Declaration =
+export type Declaration =
     | FunctionDeclaration
     | VariableDeclaration

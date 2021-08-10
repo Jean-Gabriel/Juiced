@@ -5,7 +5,6 @@ import { DiagnosticCategory } from '../reporter';
 export const createChalkDirectDiagnosticReporter = (): DiagnosticReporter => new ChalkDirectDiagnosticReporter();
 
 const colors: { [key in DiagnosticCategory]: string } = {
-    [DiagnosticCategory.INFO]: chalk.blueBright('[INFO]'),
     [DiagnosticCategory.ERROR]: chalk.redBright('[ERROR]')
 };
 

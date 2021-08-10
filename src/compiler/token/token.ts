@@ -23,7 +23,7 @@ type BooleanLiteralToken = {
     literal: boolean
 } & TokenInformation
 
-export type NonLiteralTokenKind = Omit<TokenKind, StringLiteralTokenKind | NumberLiteralTokenKind | BooleanLiteralTokenKind>
+export type NonLiteralTokenKind = Exclude<TokenKind, StringLiteralTokenKind & NumberLiteralTokenKind & BooleanLiteralTokenKind>
 type NonLiteralToken = {
     kind: NonLiteralTokenKind
 } & TokenInformation

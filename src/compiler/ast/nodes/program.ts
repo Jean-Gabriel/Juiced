@@ -1,11 +1,11 @@
-import type { DeclarationNode } from "./declarations/declaration";
+import type { Declaration } from "./declarations/declaration";
 
 export interface Program extends AstNode {
     kind: AstNodeKind.PROGRAM
-    declarations: DeclarationNode[]
-    acceptModuleVisitor<T>(visitor: ProgramVisitor<T>): T
+    declarations: Declaration[]
+    acceptProgramVisitor<T>(visitor: ProgramVisitor<T>): T
 }
 
-interface ProgramVisitor<T> {
+export interface ProgramVisitor<T> {
     visitProgram(program: Program): T
 }
