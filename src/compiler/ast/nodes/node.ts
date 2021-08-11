@@ -8,11 +8,12 @@ enum AstNodeKind {
 
     ACCESSOR,
 
-    COMPARISON,
     BINARY,
     UNARY,
 
-    LITERAL
+    INT_LITERAL,
+    FLOAT_LITERAL,
+    BOOLEAN_LITERAL
 }
 
 interface AstNode {

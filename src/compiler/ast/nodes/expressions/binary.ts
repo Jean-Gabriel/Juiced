@@ -1,10 +1,11 @@
-import type { ExpressionNode } from "./expression";
+import type { StatementNode } from "../statements/statement";
+import type { Expression, ExpressionNode } from "./expression";
 import type { BinaryOperator } from "./operators";
 
-export interface BinaryExpression extends ExpressionNode {
+export interface BinaryExpression extends ExpressionNode, StatementNode {
     kind: AstNodeKind.BINARY
 
-    right: ExpressionNode
+    right: Expression
     operator: BinaryOperator
-    left: ExpressionNode
+    left: Expression
 }

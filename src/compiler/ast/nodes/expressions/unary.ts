@@ -1,8 +1,10 @@
-import type { ExpressionNode } from "./expression";
+import type { StatementNode } from "../statements/statement";
+import type { Expression, ExpressionNode } from "./expression";
+import type { UnaryOperator } from "./operators";
 
-export interface UnaryExpression extends ExpressionNode {
+export interface UnaryExpression extends ExpressionNode, StatementNode {
     kind: AstNodeKind.UNARY
 
-    expression: ExpressionNode
-    operator: UnaryExpression
+    operator: UnaryOperator
+    expression: Expression
 }

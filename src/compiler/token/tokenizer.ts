@@ -113,8 +113,8 @@ export const createTokenizer = (
                     else { return createNonLiteralToken(TokenKind.EQUAL); }
                 }
                 case '>': {
-                    if (reader.match('=')) { return createNonLiteralToken(TokenKind.GREATHER_EQUAL); }
-                    else { return createNonLiteralToken(TokenKind.GREATHER_THAN); }
+                    if (reader.match('=')) { return createNonLiteralToken(TokenKind.GREATER_EQUAL); }
+                    else { return createNonLiteralToken(TokenKind.GREATER_THAN); }
                 }
                 case '<': {
                     if (reader.match('=')) { return createNonLiteralToken(TokenKind.LESS_EQUAL); }

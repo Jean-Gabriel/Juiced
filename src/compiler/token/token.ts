@@ -1,4 +1,4 @@
-import type { TokenKind } from "./kinds";
+import { TokenKind } from "./kinds";
 
 type TokenInformation = {
     lexeme: string
@@ -6,25 +6,28 @@ type TokenInformation = {
 }
 
 export type StringLiteralTokenKind = TokenKind.IDENTIFIER
-type StringLiteralToken = {
+export const stringLiteralToken = (token: Token): token is StringLiteralToken => [TokenKind.IDENTIFIER].includes(token.kind) ;
+export type StringLiteralToken = {
     kind: StringLiteralTokenKind
     literal: string
 } & TokenInformation
 
 export type NumberLiteralTokenKind = TokenKind.INT | TokenKind.FLOAT
-type NumberLiteralToken = {
+export const numberLiteralToken = (token: Token): token is NumberLiteralToken => [TokenKind.INT, TokenKind.FLOAT].includes(token.kind);
+export type NumberLiteralToken = {
     kind: NumberLiteralTokenKind
     literal: number
 } & TokenInformation
 
 export type BooleanLiteralTokenKind = TokenKind.BOOLEAN
-type BooleanLiteralToken = {
+export const booleanLiteralToken = (token: Token): token is BooleanLiteralToken => [TokenKind.BOOLEAN].includes(token.kind);
+export type BooleanLiteralToken = {
     kind: BooleanLiteralTokenKind
     literal: boolean
 } & TokenInformation
 
 export type NonLiteralTokenKind = Exclude<TokenKind, StringLiteralTokenKind & NumberLiteralTokenKind & BooleanLiteralTokenKind>
-type NonLiteralToken = {
+export type NonLiteralToken = {
     kind: NonLiteralTokenKind
 } & TokenInformation
 

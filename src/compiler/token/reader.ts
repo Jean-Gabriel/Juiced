@@ -1,3 +1,4 @@
+import { runInThisContext } from "vm";
 import type { TokenKind } from "./kinds";
 import type { Token } from "./token";
 
@@ -15,6 +16,20 @@ export default class TokenReader {
 
     constructor({ tokens }: Props) {
         this.tokens = tokens;
+    }
+
+    advance(): Token {
+        if(this.isAtEnd()) {
+            return this.current();
+        }
+
+        return this.tokens[this.index++];
+    }
+
+    matches(...kinds: TokenKind[]): boolean {
+        const current = this.current();
+
+        return kinds.includes(current.kind);
     }
 
     consume(...kinds: TokenKind[]): Optional<Token> {
