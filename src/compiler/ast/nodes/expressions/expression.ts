@@ -1,3 +1,4 @@
+import type { AstNode } from "../node";
 import type { Accessor } from "./accessor";
 import type { BinaryExpression } from "./binary";
 import type { BooleanLiteral, FloatLiteral, IntLiteral, Literal } from "./literal";

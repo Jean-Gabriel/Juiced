@@ -1,5 +1,6 @@
 import type { Expression } from "../expressions/expression";
 import type { Identifier } from "../identifier";
+import type { AstNodeKind } from "../node";
 import type { StatementNode } from "../statements/statement";
 import type { DeclarationNode } from "./declaration";
 

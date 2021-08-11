@@ -2,7 +2,7 @@ import { createSourceReader } from '../reader';
 
 describe('SourceReader', () => {
 
-    const givenSourceReader = (content: string) => createSourceReader(content);
+    const givenSourceReader = (content: string) => createSourceReader({ content });
 
     it('should initially be at start first line', () => {
         const reader = givenSourceReader('');

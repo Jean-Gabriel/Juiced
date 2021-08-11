@@ -2,7 +2,7 @@ type Props = {
     content: string
 }
 
-export const createSourceReader = (content: string) => new SourceReader({ content });
+export const createSourceReader = ({content}: Props) => new SourceReader({ content });
 
 export class SourceReader {
     private readonly content: string;

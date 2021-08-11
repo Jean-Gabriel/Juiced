@@ -1,8 +1,8 @@
-import type { Declaration } from "./declarations/declaration";
+import type { Export } from "./export";
 import type { Expression } from "./expressions/expression";
 import type { AstNode, AstNodeKind } from "./node";
 
-export type TopLevelDeclaration = Declaration | Expression
+export type TopLevelDeclaration = Export | Expression
 
 export interface Program extends AstNode {
     kind: AstNodeKind.PROGRAM

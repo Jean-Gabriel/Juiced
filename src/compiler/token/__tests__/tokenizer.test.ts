@@ -86,7 +86,7 @@ describe('Tokenizer', () => {
     const expectTokenize = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
-        const sourceReader = () => createSourceReader(withoutStartAndEndLineBreak);
+        const sourceReader = () => createSourceReader({ content: withoutStartAndEndLineBreak });
         const diagnosticReporter = () => createTestDiagnoticsReporter();
 
         const tokenizer = createTokenizer(sourceReader, diagnosticReporter);

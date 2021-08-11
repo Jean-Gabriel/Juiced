@@ -1,3 +1,4 @@
+import type { AstNodeKind } from "../node";
 import type { StatementNode } from "../statements/statement";
 import type { Expression, ExpressionNode } from "./expression";
 import type { BinaryOperator } from "./operators";

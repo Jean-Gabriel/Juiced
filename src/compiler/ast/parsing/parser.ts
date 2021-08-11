@@ -1,6 +1,5 @@
 import type { DiagnosticReporter } from "../../../diagnostic/reporter";
 import type TokenReader from "../../token/reader";
-import type { Declaration } from "../nodes/declarations/declaration";
 import type { Program, TopLevelDeclaration } from "../nodes/program";
 import AstBuilder from "../nodes/builder";
 import { TokenKind } from "../../token/kinds";
@@ -27,7 +26,7 @@ export const createParser = (
         const reader = createTokenReader();
         const reporter = createDiagnosticReporter();
 
-        const topLevelDeclaration = (): Declaration | Expression => {
+        const topLevelDeclaration = (): TopLevelDeclaration => {
             if(reader.currentIs(TokenKind.EXPORT)) {
                 return exportDeclaration();
             }
@@ -37,7 +36,9 @@ export const createParser = (
 
         const exportDeclaration = () => {
             reader.consume(TokenKind.EXPORT).orElseThrow(new ParsingError('Expected export keyword at start of export declaration.'));
-            return declaration();
+            const exported = declaration();
+
+            return AstBuilder.exportation(exported);
         };
 
         const declaration = () => {

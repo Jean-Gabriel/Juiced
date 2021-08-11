@@ -1,5 +1,5 @@
 import type { Accessor } from "./expressions/accessor";
-import type { DeclarationVisitor } from "./declarations/declaration";
+import type { Declaration, DeclarationVisitor } from "./declarations/declaration";
 import type { FunctionDeclaration } from "./declarations/function";
 import type { VariableDeclaration } from "./declarations/variable";
 import type { BinaryExpression } from "./expressions/binary";
@@ -11,6 +11,7 @@ import type { Program, ProgramVisitor, TopLevelDeclaration } from "./program";
 import type { Statement, StatementVisitor } from "./statements/statement";
 import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/literal";
 import { AstNodeKind } from "./node";
+import type { Export, ExportVisitor } from "./export";
 
 const program = (declarations: TopLevelDeclaration[]): Program => {
     return {
@@ -130,6 +131,16 @@ const booleanLiteral = (bool: boolean): BooleanLiteral => {
     };
 };
 
+const exportation = (declaration: Declaration): Export => {
+    return {
+        kind: AstNodeKind.EXPORT,
+        declaration,
+        acceptExport<T>(visitor: ExportVisitor<T>) {
+            return visitor.visitExport(this);
+        }
+    };
+};
+
 
 const identifier = (value: string): Identifier => {
     return { value };
@@ -144,6 +155,7 @@ const AstBuilder = {
     accessor,
     identifier,
     intLiteral,
+    exportation,
     floatLiteral,
     booleanLiteral,
     typedIdentifier,

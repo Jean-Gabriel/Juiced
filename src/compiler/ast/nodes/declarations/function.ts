@@ -1,4 +1,5 @@
 import type { Identifier, TypedIdentifier } from "../identifier";
+import type { AstNodeKind } from "../node";
 import type { Statement } from "../statements/statement";
 import type { DeclarationNode } from "./declaration";
 
