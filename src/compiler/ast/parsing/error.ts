@@ -1,4 +1,4 @@
-class ParsingError extends Error {
+export class ParsingError extends Error {
     constructor(
         public message: string
     ) {

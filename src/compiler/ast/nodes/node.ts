@@ -1,4 +1,4 @@
-enum AstNodeKind {
+export enum AstNodeKind {
     PROGRAM,
 
     EXPORT,
@@ -16,6 +16,6 @@ enum AstNodeKind {
     BOOLEAN_LITERAL
 }
 
-interface AstNode {
+export interface AstNode {
     kind: AstNodeKind
 }

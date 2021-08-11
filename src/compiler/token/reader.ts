@@ -1,4 +1,4 @@
-import { runInThisContext } from "vm";
+import { Optional } from "../../common/Optional";
 import type { TokenKind } from "./kinds";
 import type { Token } from "./token";
 
@@ -6,7 +6,7 @@ interface Props {
     tokens: Token[]
 }
 
-const createTokenReader = (tokens: Token[]) => new TokenReader({ tokens });
+export const createTokenReader = (tokens: Token[]) => new TokenReader({ tokens });
 
 export default class TokenReader {
 

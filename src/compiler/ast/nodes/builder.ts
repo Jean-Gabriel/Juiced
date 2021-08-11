@@ -10,6 +10,7 @@ import type { Identifier, TypedIdentifier } from "./identifier";
 import type { Program, ProgramVisitor, TopLevelDeclaration } from "./program";
 import type { Statement, StatementVisitor } from "./statements/statement";
 import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/literal";
+import { AstNodeKind } from "./node";
 
 const program = (declarations: TopLevelDeclaration[]): Program => {
     return {

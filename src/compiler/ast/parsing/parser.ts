@@ -12,12 +12,13 @@ import { numberLiteralToken } from "../../token/token";
 import { stringLiteralToken } from "../../token/token";
 import { binaryOperators, unaryOperators } from "../nodes/expressions/operators";
 import type { Expression } from "../nodes/expressions/expression";
+import { ParsingError } from "./error";
 
 interface Parser {
     parse: () => Program
 }
 
-const createParser = (
+export const createParser = (
     createTokenReader: () => TokenReader,
     createDiagnosticReporter: () => DiagnosticReporter
 ): Parser => {
@@ -195,7 +196,7 @@ const createParser = (
             if(reader.matches(TokenKind.INT)) {
                 const int = reader.consume(TokenKind.INT)
                     .mapType(numberLiteralToken)
-                    .orElseThrow(new ParsingError('Expected int as int literal primary'));
+                    .orElseThrow(new ParsingError('Expected int as int literal primary.'));
 
                 return AstBuilder.intLiteral(int.literal);
             }
@@ -203,7 +204,7 @@ const createParser = (
             if(reader.matches(TokenKind.FLOAT)) {
                 const float = reader.consume(TokenKind.FLOAT)
                     .mapType(numberLiteralToken)
-                    .orElseThrow(new ParsingError('Expected float as float literal primary'));
+                    .orElseThrow(new ParsingError('Expected float as float literal primary.'));
 
                 return AstBuilder.floatLiteral(float.literal);
             }
@@ -211,15 +212,15 @@ const createParser = (
             if(reader.matches(TokenKind.BOOLEAN)) {
                 const boolean = reader.consume(TokenKind.BOOLEAN)
                     .mapType(booleanLiteralToken)
-                    .orElseThrow(new ParsingError('Expected boolean as boolean literal primary'));
+                    .orElseThrow(new ParsingError('Expected boolean as boolean literal primary.'));
 
                 return AstBuilder.booleanLiteral(boolean.literal);
             }
 
             if(reader.matches(TokenKind.IDENTIFIER)) {
-                const identifier = reader.consume(TokenKind.BOOLEAN)
+                const identifier = reader.consume(TokenKind.IDENTIFIER)
                     .mapType(stringLiteralToken)
-                    .orElseThrow(new ParsingError('Expected identifier as accessor primary'));
+                    .orElseThrow(new ParsingError('Expected identifier as accessor.'));
 
                 return AstBuilder.accessor(AstBuilder.identifier(identifier.literal));
             }

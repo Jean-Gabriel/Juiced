@@ -1,4 +1,4 @@
-class Optional<T> {
+export class Optional<T> {
     static of<T>(value: T) {
         return new Optional(value);
     }
@@ -29,7 +29,7 @@ class Optional<T> {
         }
 
         const mapped = f(this.value);
-        if(!mapped) {
+        if(mapped === null || mapped === undefined) {
             return Optional.empty();
         }
 

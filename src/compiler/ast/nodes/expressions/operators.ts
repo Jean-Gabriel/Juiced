@@ -30,6 +30,7 @@ export const binaryOperators = new Map<TokenKind, BinaryOperator>([
     [TokenKind.PLUS, OperatorKind.PLUS],
     [TokenKind.SLASH, OperatorKind.DIVISION],
     [TokenKind.STAR, OperatorKind.MULTIPLICATION],
+    [TokenKind.MINUS, OperatorKind.MINUS],
 ]);
 
 export const unaryOperators = new Map<TokenKind, UnaryOperator>([
@@ -41,7 +42,7 @@ export type UnaryOperator =
     | OperatorKind.NOT
     | OperatorKind.MINUS
 
-export type BinaryOperator = Exclude<OperatorKind, UnaryOperator>
+export type BinaryOperator = Exclude<OperatorKind, OperatorKind.NOT>
 
 export type Operator =
     | BinaryOperator

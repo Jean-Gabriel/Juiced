@@ -1,3 +1,4 @@
+import type { AstNode } from "../node";
 import type { FunctionDeclaration } from "./function";
 import type { VariableDeclaration } from "./variable";
 
