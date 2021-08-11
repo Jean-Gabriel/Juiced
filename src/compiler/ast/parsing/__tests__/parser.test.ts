@@ -1,6 +1,6 @@
 import { createChalkDirectDiagnosticReporter } from "../../../../diagnostic/chalk/reporter";
 import { createSourceReader } from "../../../source/reader";
-import TokenReader, { createTokenReader } from "../../../token/reader";
+import { createTokenReader } from "../../../token/reader";
 import { createTokenizer } from "../../../token/tokenizer";
 import { createParser } from "../parser";
 

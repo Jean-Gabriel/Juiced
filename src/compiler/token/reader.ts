@@ -18,20 +18,6 @@ export default class TokenReader {
         this.tokens = tokens;
     }
 
-    advance(): Token {
-        if(this.isAtEnd()) {
-            return this.current();
-        }
-
-        return this.tokens[this.index++];
-    }
-
-    matches(...kinds: TokenKind[]): boolean {
-        const current = this.current();
-
-        return kinds.includes(current.kind);
-    }
-
     consume(...kinds: TokenKind[]): Optional<Token> {
         if(this.isAtEnd()) {
             return Optional.empty();
@@ -46,12 +32,10 @@ export default class TokenReader {
         return Optional.of(current);
     }
 
-    current(): Token {
-        if(this.isAtEnd()) {
-            return this.tokens[this.index - 1];
-        }
+    currentIs(...kinds: TokenKind[]): boolean {
+        const token = this.isAtEnd() ? this.tokens[this.index - 1] : this.tokens[this.index];
 
-        return this.tokens[this.index];
+        return kinds.includes(token.kind);
     }
 
     isAtEnd(): boolean {

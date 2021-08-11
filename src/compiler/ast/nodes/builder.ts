@@ -1,10 +1,10 @@
 import type { Accessor } from "./expressions/accessor";
-import type { Declaration, DeclarationVisitor } from "./declarations/declaration";
+import type { DeclarationVisitor } from "./declarations/declaration";
 import type { FunctionDeclaration } from "./declarations/function";
 import type { VariableDeclaration } from "./declarations/variable";
 import type { BinaryExpression } from "./expressions/binary";
 import type { Expression, ExpressionVisitor } from "./expressions/expression";
-import type { BinaryOperator, Operator, UnaryOperator } from "./expressions/operators";
+import type { BinaryOperator, UnaryOperator } from "./expressions/operators";
 import type { UnaryExpression } from "./expressions/unary";
 import type { Identifier, TypedIdentifier } from "./identifier";
 import type { Program, ProgramVisitor, TopLevelDeclaration } from "./program";

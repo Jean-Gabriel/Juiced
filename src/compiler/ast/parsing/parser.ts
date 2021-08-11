@@ -1,6 +1,6 @@
 import type { DiagnosticReporter } from "../../../diagnostic/reporter";
 import type TokenReader from "../../token/reader";
-import type { Declaration, DeclarationNode } from "../nodes/declarations/declaration";
+import type { Declaration } from "../nodes/declarations/declaration";
 import type { Program, TopLevelDeclaration } from "../nodes/program";
 import AstBuilder from "../nodes/builder";
 import { TokenKind } from "../../token/kinds";
@@ -28,8 +28,7 @@ export const createParser = (
         const reporter = createDiagnosticReporter();
 
         const topLevelDeclaration = (): Declaration | Expression => {
-            const current = reader.current();
-            if(current.kind === TokenKind.EXPORT) {
+            if(reader.currentIs(TokenKind.EXPORT)) {
                 return exportDeclaration();
             }
 
@@ -43,11 +42,10 @@ export const createParser = (
 
         const declaration = () => {
             reader.consume(TokenKind.LET).orElseThrow(new ParsingError('Expected declaration after export keyword.'));
-            const identifier = reader.consume(TokenKind.IDENTIFIER).mapType(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
+            const identifier = reader.consume(TokenKind.IDENTIFIER).mapGuard(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
             reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError('Expected = after identifier.'));
 
-            const current = reader.current();
-            if(current.kind === TokenKind.OPEN_PARENTHESIS) {
+            if(reader.currentIs(TokenKind.OPEN_PARENTHESIS)) {
                 return functionDeclaration(identifier);
             }
 
@@ -55,7 +53,7 @@ export const createParser = (
         };
 
         const statement = () => {
-            if(reader.matches(TokenKind.LET)) {
+            if(reader.currentIs(TokenKind.LET)) {
                 return variableDeclarationStatement();
             }
 
@@ -64,7 +62,7 @@ export const createParser = (
 
         const variableDeclarationStatement = () => {
             reader.consume(TokenKind.LET).orElseThrow(new ParsingError('Expected let after for variable declaration.'));
-            const identifier = reader.consume(TokenKind.IDENTIFIER).mapType(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
+            const identifier = reader.consume(TokenKind.IDENTIFIER).mapGuard(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
             reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError('Expected = after identifier.'));
 
             return variableDeclaration(identifier);
@@ -88,12 +86,12 @@ export const createParser = (
         const functionArguments = () => {
             const args: TypedIdentifier[] = [];
 
-            while(reader.current().kind !== TokenKind.CLOSE_PARENTHESIS) {
+            while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS)) {
                 if(args.length) {
                     reader.consume(TokenKind.COMA).orElseThrow(new ParsingError('Arguments needs to be separated by a coma.'));
                 }
 
-                const identifier = reader.consume(TokenKind.IDENTIFIER).mapType(stringLiteralToken).orElseThrow(new ParsingError('Arguments needs an identifier before colon and type.'));
+                const identifier = reader.consume(TokenKind.IDENTIFIER).mapGuard(stringLiteralToken).orElseThrow(new ParsingError('Arguments needs an identifier before colon and type.'));
                 reader.consume(TokenKind.COLON).orElseThrow(new ParsingError('Arguments needs a colon after identifier and type.'));
                 const type = reader.consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE).orElseThrow(new ParsingError('Arguments needs a type after colon.'));
 
@@ -106,7 +104,7 @@ export const createParser = (
         const functionBody = () => {
             const statements: Statement[] = [];
 
-            while(reader.current().kind !== TokenKind.CLOSE_BRACKETS) {
+            while(!reader.currentIs(TokenKind.CLOSE_BRACKETS)) {
                 statements.push(statement());
             }
 
@@ -122,9 +120,9 @@ export const createParser = (
         const expression = (): Expression => {
             let left = comparison();
 
-            while(reader.matches(TokenKind.BANG_EQUAL, TokenKind.EQUAL_EQUAL)) {
+            while(reader.currentIs(TokenKind.BANG_EQUAL, TokenKind.EQUAL_EQUAL)) {
                 const operator = reader.consume(TokenKind.BANG_EQUAL, TokenKind.EQUAL_EQUAL)
-                    .mapNotNull((value) => binaryOperators.get(value.kind))
+                    .map((value) => binaryOperators.get(value.kind))
                     .orElseThrow(new ParsingError('Expected == or != operator at start of equality.'));
 
                 const right = comparison();
@@ -137,9 +135,9 @@ export const createParser = (
         const comparison = (): Expression => {
             let left = addition();
 
-            while(reader.matches(TokenKind.GREATER_THAN, TokenKind.GREATER_EQUAL, TokenKind.LESS_THAN, TokenKind.LESS_EQUAL)) {
+            while(reader.currentIs(TokenKind.GREATER_THAN, TokenKind.GREATER_EQUAL, TokenKind.LESS_THAN, TokenKind.LESS_EQUAL)) {
                 const operator = reader.consume(TokenKind.GREATER_THAN, TokenKind.GREATER_EQUAL, TokenKind.LESS_THAN, TokenKind.LESS_EQUAL)
-                    .mapNotNull((value) => binaryOperators.get(value.kind))
+                    .map((value) => binaryOperators.get(value.kind))
                     .orElseThrow(new ParsingError('Expected <, <=, > or >= operator at start of comparison.'));
 
                 const right = addition();
@@ -152,9 +150,9 @@ export const createParser = (
         const addition = (): Expression => {
             let left = multiplication();
 
-            while(reader.matches(TokenKind.MINUS, TokenKind.PLUS)) {
+            while(reader.currentIs(TokenKind.MINUS, TokenKind.PLUS)) {
                 const operator = reader.consume(TokenKind.MINUS, TokenKind.PLUS)
-                    .mapNotNull((value) => binaryOperators.get(value.kind))
+                    .map((value) => binaryOperators.get(value.kind))
                     .orElseThrow(new ParsingError('Expected + or - operator at start of addition.'));
 
                 const right = multiplication();
@@ -167,9 +165,9 @@ export const createParser = (
         const multiplication = (): Expression => {
             let left = unary();
 
-            while(reader.matches(TokenKind.SLASH, TokenKind.STAR)) {
+            while(reader.currentIs(TokenKind.SLASH, TokenKind.STAR)) {
                 const operator = reader.consume(TokenKind.SLASH, TokenKind.STAR)
-                    .mapNotNull((value) => binaryOperators.get(value.kind))
+                    .map((value) => binaryOperators.get(value.kind))
                     .orElseThrow(new ParsingError('Expected / or * operator at start of multiplication.'));
 
                 const right = unary();
@@ -180,9 +178,9 @@ export const createParser = (
         };
 
         const unary = (): Expression => {
-            if(reader.matches(TokenKind.MINUS, TokenKind.BANG)) {
+            if(reader.currentIs(TokenKind.MINUS, TokenKind.BANG)) {
                 const operator = reader.consume(TokenKind.MINUS, TokenKind.BANG)
-                    .mapNotNull((value) => unaryOperators.get(value.kind))
+                    .map((value) => unaryOperators.get(value.kind))
                     .orElseThrow(new ParsingError('Expected - or + operator at start of unary.'));
 
                 const right = unary();
@@ -193,33 +191,33 @@ export const createParser = (
         };
 
         const primary = (): Expression => {
-            if(reader.matches(TokenKind.INT)) {
+            if(reader.currentIs(TokenKind.INT)) {
                 const int = reader.consume(TokenKind.INT)
-                    .mapType(numberLiteralToken)
+                    .mapGuard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected int as int literal primary.'));
 
                 return AstBuilder.intLiteral(int.literal);
             }
 
-            if(reader.matches(TokenKind.FLOAT)) {
+            if(reader.currentIs(TokenKind.FLOAT)) {
                 const float = reader.consume(TokenKind.FLOAT)
-                    .mapType(numberLiteralToken)
+                    .mapGuard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected float as float literal primary.'));
 
                 return AstBuilder.floatLiteral(float.literal);
             }
 
-            if(reader.matches(TokenKind.BOOLEAN)) {
+            if(reader.currentIs(TokenKind.BOOLEAN)) {
                 const boolean = reader.consume(TokenKind.BOOLEAN)
-                    .mapType(booleanLiteralToken)
+                    .mapGuard(booleanLiteralToken)
                     .orElseThrow(new ParsingError('Expected boolean as boolean literal primary.'));
 
                 return AstBuilder.booleanLiteral(boolean.literal);
             }
 
-            if(reader.matches(TokenKind.IDENTIFIER)) {
+            if(reader.currentIs(TokenKind.IDENTIFIER)) {
                 const identifier = reader.consume(TokenKind.IDENTIFIER)
-                    .mapType(stringLiteralToken)
+                    .mapGuard(stringLiteralToken)
                     .orElseThrow(new ParsingError('Expected identifier as accessor.'));
 
                 return AstBuilder.accessor(AstBuilder.identifier(identifier.literal));

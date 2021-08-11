@@ -2,7 +2,8 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "unused-imports"
   ],
   "extends": [
     "prettier"
@@ -10,6 +11,7 @@
   "rules": {
     "semi": "error",
     "@typescript-eslint/consistent-type-imports": "error",
+    "unused-imports/no-unused-imports": "error",
     "no-trailing-spaces": [
       "error",
       {
