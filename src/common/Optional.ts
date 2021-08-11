@@ -11,7 +11,7 @@ export class Optional<T> {
         private readonly value: T | null
     ) {}
 
-    mapGuard<S extends T>(f: (value: T) => value is S): Optional<S> {
+    unguard<S extends T>(f: (value: T) => value is NonNullable<S>): Optional<S> {
         if(this.value === null) {
             return Optional.empty();
         }

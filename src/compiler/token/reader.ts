@@ -1,4 +1,4 @@
-import { Optional } from "../../common/Optional";
+import { Optional } from "../../common/optional";
 import type { TokenKind } from "./kinds";
 import type { Token } from "./token";
 

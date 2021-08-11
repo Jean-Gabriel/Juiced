@@ -42,7 +42,7 @@ export const createParser = (
 
         const declaration = () => {
             reader.consume(TokenKind.LET).orElseThrow(new ParsingError('Expected declaration after export keyword.'));
-            const identifier = reader.consume(TokenKind.IDENTIFIER).mapGuard(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
+            const identifier = reader.consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
             reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError('Expected = after identifier.'));
 
             if(reader.currentIs(TokenKind.OPEN_PARENTHESIS)) {
@@ -62,7 +62,7 @@ export const createParser = (
 
         const variableDeclarationStatement = () => {
             reader.consume(TokenKind.LET).orElseThrow(new ParsingError('Expected let after for variable declaration.'));
-            const identifier = reader.consume(TokenKind.IDENTIFIER).mapGuard(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
+            const identifier = reader.consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken).orElseThrow(new ParsingError('Expected identifier after let keyword.'));
             reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError('Expected = after identifier.'));
 
             return variableDeclaration(identifier);
@@ -91,7 +91,7 @@ export const createParser = (
                     reader.consume(TokenKind.COMA).orElseThrow(new ParsingError('Arguments needs to be separated by a coma.'));
                 }
 
-                const identifier = reader.consume(TokenKind.IDENTIFIER).mapGuard(stringLiteralToken).orElseThrow(new ParsingError('Arguments needs an identifier before colon and type.'));
+                const identifier = reader.consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken).orElseThrow(new ParsingError('Arguments needs an identifier before colon and type.'));
                 reader.consume(TokenKind.COLON).orElseThrow(new ParsingError('Arguments needs a colon after identifier and type.'));
                 const type = reader.consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE).orElseThrow(new ParsingError('Arguments needs a type after colon.'));
 
@@ -193,7 +193,7 @@ export const createParser = (
         const primary = (): Expression => {
             if(reader.currentIs(TokenKind.INT)) {
                 const int = reader.consume(TokenKind.INT)
-                    .mapGuard(numberLiteralToken)
+                    .unguard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected int as int literal primary.'));
 
                 return AstBuilder.intLiteral(int.literal);
@@ -201,7 +201,7 @@ export const createParser = (
 
             if(reader.currentIs(TokenKind.FLOAT)) {
                 const float = reader.consume(TokenKind.FLOAT)
-                    .mapGuard(numberLiteralToken)
+                    .unguard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected float as float literal primary.'));
 
                 return AstBuilder.floatLiteral(float.literal);
@@ -209,7 +209,7 @@ export const createParser = (
 
             if(reader.currentIs(TokenKind.BOOLEAN)) {
                 const boolean = reader.consume(TokenKind.BOOLEAN)
-                    .mapGuard(booleanLiteralToken)
+                    .unguard(booleanLiteralToken)
                     .orElseThrow(new ParsingError('Expected boolean as boolean literal primary.'));
 
                 return AstBuilder.booleanLiteral(boolean.literal);
@@ -217,7 +217,7 @@ export const createParser = (
 
             if(reader.currentIs(TokenKind.IDENTIFIER)) {
                 const identifier = reader.consume(TokenKind.IDENTIFIER)
-                    .mapGuard(stringLiteralToken)
+                    .unguard(stringLiteralToken)
                     .orElseThrow(new ParsingError('Expected identifier as accessor.'));
 
                 return AstBuilder.accessor(AstBuilder.identifier(identifier.literal));
