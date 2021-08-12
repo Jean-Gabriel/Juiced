@@ -133,7 +133,7 @@ export const createTokenizer = (
                         return createAlphaNumericToken();
                     }
 
-                    error(`Invalid character ${char} at line ${reader.lineIndex()}`);
+                    error(`Invalid character ${char} at line ${reader.lineIndex()} at index ${reader.position()}`);
                     return null;
                 }
             }
@@ -148,6 +148,7 @@ export const createTokenizer = (
         }
 
         if(reporter.errored()) {
+            reporter.report();
             throw new Error('Encountered illegal characters while creating tokens.');
         }
 

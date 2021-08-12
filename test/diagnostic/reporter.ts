@@ -1,6 +1,7 @@
 let errored = false;
 const reporter = {
     emit: jest.fn().mockImplementation(() => errored = true),
+    report: jest.fn(),
     errored: () => errored
 };
 

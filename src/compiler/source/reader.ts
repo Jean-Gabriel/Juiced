@@ -79,4 +79,8 @@ export class SourceReader {
 
         return this.content.charAt(nextIndex);
     }
+
+    position() {
+        return this.index;
+    }
 }

@@ -2,19 +2,28 @@ import chalk from "chalk";
 import type { Diagnostic as Diagnostic, DiagnosticReporter } from '../reporter';
 import { DiagnosticCategory } from '../reporter';
 
-export const createChalkDirectDiagnosticReporter = (): DiagnosticReporter => new ChalkDirectDiagnosticReporter();
+export const createChalkDiagnosticReporter = (): DiagnosticReporter => new ChalkDiagnosticReporter();
 
 const colors: { [key in DiagnosticCategory]: string } = {
     [DiagnosticCategory.ERROR]: chalk.redBright('[ERROR]')
 };
 
-class ChalkDirectDiagnosticReporter implements DiagnosticReporter {
+class ChalkDiagnosticReporter implements DiagnosticReporter {
     private readonly diagnostics: Diagnostic[] = []
 
     emit(diagnostic: Diagnostic) {
         this.diagnostics.push(diagnostic);
         console.log(`${colors[diagnostic.category]}: ${diagnostic.message}`);
     };
+
+    report() {
+        if(!this.diagnostics.length) {
+            return;
+        }
+
+        console.log(`Encoutered ${chalk.red(this.diagnostics.length)} errors.\n`);
+        this.diagnostics.forEach(diagnostic => console.log(`${colors[diagnostic.category]}: ${diagnostic.message}`));
+    }
 
     errored() {
         return this.diagnostics.some(d => d.category === DiagnosticCategory.ERROR);

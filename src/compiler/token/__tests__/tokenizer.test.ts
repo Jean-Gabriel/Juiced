@@ -99,6 +99,7 @@ describe('Tokenizer', () => {
             reportsError: (numberOfErrors: number) => {
                 expect(() => tokenizer.tokenize()).toThrowError();
                 expect(diagnosticReporter().emit).toHaveBeenCalledTimes(numberOfErrors);
+                expect(diagnosticReporter().report).toHaveBeenCalledTimes(1);
             }
         };
     };
