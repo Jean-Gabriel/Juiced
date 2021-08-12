@@ -18,6 +18,14 @@ export default class TokenReader {
         this.tokens = tokens;
     }
 
+    advance() {
+        if(this.isAtEnd()) {
+            return;
+        }
+
+        return this.index++;
+    }
+
     consume(...kinds: TokenKind[]): Optional<Token> {
         if(this.isAtEnd()) {
             return Optional.empty();

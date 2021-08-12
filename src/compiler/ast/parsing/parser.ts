@@ -1,4 +1,5 @@
 import type { DiagnosticReporter } from "../../../diagnostic/reporter";
+import { DiagnosticCategory } from "../../../diagnostic/reporter";
 import type TokenReader from "../../token/reader";
 import type { Program, TopLevelDeclaration } from "../nodes/program";
 import AstBuilder from "../nodes/builder";
@@ -11,7 +12,7 @@ import { numberLiteralToken } from "../../token/token";
 import { stringLiteralToken } from "../../token/token";
 import { binaryOperators, unaryOperators } from "../nodes/expressions/operators";
 import type { Expression } from "../nodes/expressions/expression";
-import { ParsingError } from "./error";
+import { isParsingError, ParsingError } from "./error";
 
 interface Parser {
     parse: () => Program
@@ -227,11 +228,29 @@ export const createParser = (
             throw new ParsingError('Expected a float, int, boolean or identifier as a primary.');
         };
 
+        const handleError = (error: unknown) => {
+            if(!isParsingError(error)) {
+                throw error;
+            }
+
+            reporter.emit({ category: DiagnosticCategory.ERROR, message: error.message });
+        };
+
         const nodes: TopLevelDeclaration[] = [];
         while(!reader.isAtEnd()) {
-            const node = topLevelDeclaration();
+            try {
+                const node = topLevelDeclaration();
+                nodes.push(node);
+            } catch (e: unknown) {
+                handleError(e);
+                break; // do to recover after error
+            }
 
-            nodes.push(node);
+        }
+
+        if(reporter.errored()) {
+            reporter.report();
+            throw new Error('Errors were encountered while parsing program.');
         }
 
         return AstBuilder.program(nodes);

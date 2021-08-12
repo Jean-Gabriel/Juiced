@@ -1,9 +1,4 @@
 let errored = false;
-const reporter = {
-    emit: jest.fn().mockImplementation(() => errored = true),
-    report: jest.fn(),
-    errored: () => errored
-};
 
 const reset = () => {
     errored = false;
@@ -12,5 +7,9 @@ const reset = () => {
 export const createTestDiagnoticsReporter = () => {
     reset();
 
-    return reporter;
+    return {
+        emit: jest.fn().mockImplementation(() => errored = true),
+        report: jest.fn(),
+        errored: () => errored
+    };;
 };

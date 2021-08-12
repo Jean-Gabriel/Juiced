@@ -86,10 +86,11 @@ describe('Tokenizer', () => {
     const expectTokenize = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
-        const sourceReader = () => createSourceReader({ content: withoutStartAndEndLineBreak });
-        const diagnosticReporter = () => createTestDiagnoticsReporter();
-
-        const tokenizer = createTokenizer(sourceReader, diagnosticReporter);
+        const reporter = createTestDiagnoticsReporter();
+        const tokenizer = createTokenizer(
+            () => createSourceReader({ content: withoutStartAndEndLineBreak }),
+            () => reporter
+        );
 
         return {
             createsTokens: (...expected: Token[]) => {
@@ -98,8 +99,8 @@ describe('Tokenizer', () => {
             },
             reportsError: (numberOfErrors: number) => {
                 expect(() => tokenizer.tokenize()).toThrowError();
-                expect(diagnosticReporter().emit).toHaveBeenCalledTimes(numberOfErrors);
-                expect(diagnosticReporter().report).toHaveBeenCalledTimes(1);
+                expect(reporter.emit).toHaveBeenCalledTimes(numberOfErrors);
+                expect(reporter.report).toHaveBeenCalledTimes(1);
             }
         };
     };

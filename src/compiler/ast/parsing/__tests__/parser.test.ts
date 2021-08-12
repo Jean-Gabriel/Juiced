@@ -136,37 +136,40 @@ describe('Parser', () => {
     it('should not parse not exported top level expression', () => {
         expectParse(`
             let a = () -> int32 {}
-        `).errors();
+        `).errors(1);
     });
 
     it('should not parse top level variable declaration', () => {
         expectParse(`
             let a = 1
-        `).errors();
+        `).errors(1);
     });
 
     const expectParse = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
-        const sourceReader = () => createSourceReader({ content: withoutStartAndEndLineBreak });
-        const diagnosticReporter = () => createTestDiagnoticsReporter();
-
-        const tokenizer = createTokenizer(sourceReader, diagnosticReporter);
-        const tokens = tokenizer.tokenize();
-
-        const parser = createParser(
-            () => createTokenReader({ tokens }),
+        const tokenizer = createTokenizer(
+            () => createSourceReader({ content: withoutStartAndEndLineBreak }),
             () => createTestDiagnoticsReporter()
         );
 
+        const tokens = tokenizer.tokenize();
+
+        const reporter = createTestDiagnoticsReporter();
+        const parser = createParser(
+            () => createTokenReader({ tokens }),
+            () => reporter
+        );
 
         return {
             createsAst: (expected: Program) => {
                 const ast = parser.parse();
                 expect(JSON.stringify(ast)).toStrictEqual(JSON.stringify(expected));
             },
-            errors: () => {
+            errors: (numberOfError: number) => {
                 expect(() => parser.parse()).toThrowError();
+                expect(reporter.emit).toHaveBeenCalledTimes(numberOfError);
+                expect(reporter.report).toHaveBeenCalledTimes(1);
             }
         };
     };
