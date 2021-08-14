@@ -135,7 +135,8 @@ describe('Parser', () => {
 
     it('should not parse not exported top level expression', () => {
         expectParse(`
-            let a = () -> int32 {}
+            let a = () -> i32 {}
+            export let a = () -> i32 {}
         `).errors(1);
     });
 

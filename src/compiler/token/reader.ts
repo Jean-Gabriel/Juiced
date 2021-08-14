@@ -41,8 +41,11 @@ export default class TokenReader {
     }
 
     currentIs(...kinds: TokenKind[]): boolean {
-        const token = this.isAtEnd() ? this.tokens[this.index - 1] : this.tokens[this.index];
+        if(this.isAtEnd()) {
+            return false;
+        }
 
+        const token = this.tokens[this.index];
         return kinds.includes(token.kind);
     }
 

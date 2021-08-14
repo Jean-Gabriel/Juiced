@@ -1,3 +1,4 @@
+
 export class Optional<T> {
     static of<T>(value: T) {
         return new Optional(value);
@@ -42,5 +43,19 @@ export class Optional<T> {
         }
 
         return this.value;
+    }
+
+    orElseMap(f: () => T): T {
+        if(this.value === null) {
+            return f();
+        }
+
+        return this.value;
+    }
+
+    ifEmpty(f: () => void) {
+        if(this.value === null) {
+            return f();
+        }
     }
 }
