@@ -4,12 +4,12 @@ import type { AstNode, AstNodeKind } from "./node";
 
 export type TopLevelDeclaration = Export | Expression
 
-export interface Program extends AstNode {
-    kind: AstNodeKind.PROGRAM
+export interface Source extends AstNode {
+    kind: AstNodeKind.SOURCE
     declarations: TopLevelDeclaration[]
-    acceptProgramVisitor<T>(visitor: ProgramVisitor<T>): T
+    acceptSourceVisitor<T>(visitor: SourceVisitor<T>): T
 }
 
-export interface ProgramVisitor<T> {
-    visitProgram(program: Program): T
+export interface SourceVisitor<T> {
+    visitSource(source: Source): T
 }

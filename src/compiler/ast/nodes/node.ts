@@ -1,5 +1,5 @@
 export enum AstNodeKind {
-    PROGRAM,
+    SOURCE,
 
     EXPORT,
 

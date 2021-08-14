@@ -1,7 +1,7 @@
 import type { DiagnosticReporter } from "../../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../../diagnostic/reporter";
 import type TokenReader from "../../token/reader";
-import type { Program, TopLevelDeclaration } from "../nodes/program";
+import type { Source, TopLevelDeclaration } from "../nodes/source";
 import AstBuilder from "../nodes/builder";
 import { TokenKind } from "../../token/kinds";
 import type { TypedIdentifier } from "../nodes/identifier";
@@ -15,7 +15,7 @@ import type { Expression } from "../nodes/expressions/expression";
 import { isParsingError, ParsingError } from "./error";
 
 interface Parser {
-    parse: () => Program
+    parse: () => Source
 }
 
 interface ErrorHandlingOptions {
@@ -39,7 +39,7 @@ export const createParser = (
     const EMPTY_VARIABLE_DECLARATION = AstBuilder.variableDeclaration(EMPTY_IDENTIFIER, EMPTY_EXPRESSION);
     const EMPTY_EXPORT = AstBuilder.exportation(EMPTY_VARIABLE_DECLARATION);
 
-    const parse = (): Program => {
+    const parse = (): Source => {
         const reader = createTokenReader();
         const reporter = createDiagnosticReporter();
 
@@ -267,32 +267,32 @@ export const createParser = (
 
         const primary = (): Expression => {
             if(reader.currentIs(TokenKind.INT)) {
-                const int = reader.consume(TokenKind.INT)
-                    .unguard(numberLiteralToken)
+                const int = reader
+                    .consume(TokenKind.INT).unguard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected int as int literal primary.'));
 
                 return AstBuilder.intLiteral(int.literal);
             }
 
             if(reader.currentIs(TokenKind.FLOAT)) {
-                const float = reader.consume(TokenKind.FLOAT)
-                    .unguard(numberLiteralToken)
+                const float = reader
+                    .consume(TokenKind.FLOAT).unguard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected float as float literal primary.'));
 
                 return AstBuilder.floatLiteral(float.literal);
             }
 
             if(reader.currentIs(TokenKind.BOOLEAN)) {
-                const boolean = reader.consume(TokenKind.BOOLEAN)
-                    .unguard(booleanLiteralToken)
+                const boolean = reader
+                    .consume(TokenKind.BOOLEAN).unguard(booleanLiteralToken)
                     .orElseThrow(new ParsingError('Expected boolean as boolean literal primary.'));
 
                 return AstBuilder.booleanLiteral(boolean.literal);
             }
 
             if(reader.currentIs(TokenKind.IDENTIFIER)) {
-                const identifier = reader.consume(TokenKind.IDENTIFIER)
-                    .unguard(stringLiteralToken)
+                const identifier = reader
+                    .consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken)
                     .orElseThrow(new ParsingError('Expected identifier as accessor.'));
 
                 return AstBuilder.accessor(AstBuilder.identifier(identifier.literal));
@@ -328,12 +328,11 @@ export const createParser = (
         }
 
         if(reporter.errored()) {
-            console.dir(nodes, { depth: null });
             reporter.report();
             throw new Error('Errors were encountered while parsing program.');
         }
 
-        return AstBuilder.program(nodes);
+        return AstBuilder.source(nodes);
     };
 
     return {

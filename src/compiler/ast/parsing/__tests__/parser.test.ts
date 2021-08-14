@@ -4,7 +4,7 @@ import { createTokenReader } from "../../../token/reader";
 import { createTokenizer } from "../../../token/tokenizer";
 import AstBuilder from "../../nodes/builder";
 import { OperatorKind } from "../../nodes/expressions/operators";
-import type { Program } from "../../nodes/program";
+import type { Source } from "../../nodes/source";
 import { createParser } from "../parser";
 
 describe('Parser', () => {
@@ -12,7 +12,7 @@ describe('Parser', () => {
         expectParse(`
             export let add = (a: i32, b: i32) -> i32 {}
         `).createsAst(
-            AstBuilder.program([
+            AstBuilder.source([
                 AstBuilder.exportation(
                     AstBuilder.functionDeclaration(
                         AstBuilder.identifier('add'),
@@ -31,7 +31,7 @@ describe('Parser', () => {
                 let x = a == b
             }
         `).createsAst(
-            AstBuilder.program([
+            AstBuilder.source([
                 AstBuilder.exportation(
                     AstBuilder.functionDeclaration(
                         AstBuilder.identifier('areEqual'),
@@ -59,7 +59,7 @@ describe('Parser', () => {
                 2 * -4
             }
         `).createsAst(
-            AstBuilder.program([
+            AstBuilder.source([
                 AstBuilder.exportation(
                     AstBuilder.functionDeclaration(
                         AstBuilder.identifier('math'),
@@ -85,7 +85,7 @@ describe('Parser', () => {
         expectParse(`
             2
         `).createsAst(
-            AstBuilder.program([
+            AstBuilder.source([
                 AstBuilder.intLiteral(2)
             ])
         );
@@ -95,7 +95,7 @@ describe('Parser', () => {
         expectParse(`
             2.0
         `).createsAst(
-            AstBuilder.program([
+            AstBuilder.source([
                 AstBuilder.floatLiteral(2)
             ])
         );
@@ -105,7 +105,7 @@ describe('Parser', () => {
         expectParse(`
             !false == true
         `).createsAst(
-            AstBuilder.program([
+            AstBuilder.source([
                 AstBuilder.binaryExpression(
                     AstBuilder.unaryExpression(
                         OperatorKind.NOT,
@@ -123,7 +123,7 @@ describe('Parser', () => {
         expectParse(`
             1 * 2
         `).createsAst(
-            AstBuilder.program([
+            AstBuilder.source([
                 AstBuilder.binaryExpression(
                     AstBuilder.intLiteral(1),
                     OperatorKind.MULTIPLICATION,
@@ -137,7 +137,7 @@ describe('Parser', () => {
         expectParse(`
             let a = 1 + 1
             export let a = (a: i32 b: i32) -> i32 {
-                () => 1
+                () -> 1
                 let x = a + b
                 x
             }
@@ -149,14 +149,13 @@ describe('Parser', () => {
 
     it('it should recover from broken expression', () => {
         expectParse(`
-            export let a = (a: i32 b: i32) -> i32 {
+            export let a = (a: i32, b: i32) -> i32 {
                 1 + + 2 3
                 let x = 1
                 x
             }
-        `).errors(2);
+        `).errors(1);
         // Error: unexpected expression
-        //      1 + + and + 2 3 
     });
 
     it('should not parse not exported top level expression', () => {
@@ -189,7 +188,7 @@ describe('Parser', () => {
         );
 
         return {
-            createsAst: (expected: Program) => {
+            createsAst: (expected: Source) => {
                 const ast = parser.parse();
                 expect(JSON.stringify(ast)).toStrictEqual(JSON.stringify(expected));
             },

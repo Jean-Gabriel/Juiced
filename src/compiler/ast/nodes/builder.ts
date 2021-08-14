@@ -7,18 +7,18 @@ import type { Expression, ExpressionVisitor } from "./expressions/expression";
 import type { BinaryOperator, UnaryOperator } from "./expressions/operators";
 import type { UnaryExpression } from "./expressions/unary";
 import type { Identifier, TypedIdentifier } from "./identifier";
-import type { Program, ProgramVisitor, TopLevelDeclaration } from "./program";
+import type { Source, SourceVisitor, TopLevelDeclaration } from "./source";
 import type { Statement, StatementVisitor } from "./statements/statement";
 import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/literal";
 import { AstNodeKind } from "./node";
 import type { Export, ExportVisitor } from "./export";
 
-const program = (declarations: TopLevelDeclaration[]): Program => {
+const source = (declarations: TopLevelDeclaration[]): Source => {
     return {
-        kind: AstNodeKind.PROGRAM,
+        kind: AstNodeKind.SOURCE,
         declarations,
-        acceptProgramVisitor<T>(visitor: ProgramVisitor<T>) {
-            return visitor.visitProgram(this);
+        acceptSourceVisitor<T>(visitor: SourceVisitor<T>) {
+            return visitor.visitSource(this);
         }
     };
 };
@@ -151,7 +151,7 @@ const typedIdentifier = (value: string, type: string): TypedIdentifier => {
 };
 
 const AstBuilder = {
-    program,
+    source,
     accessor,
     identifier,
     intLiteral,
