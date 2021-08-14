@@ -16,20 +16,20 @@ jobs:
         with:
           node-version: 12.x
       - name: Checkout repository code
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
       - name: Install depenencies
-      - uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v2.3.0
         with:
           cmd: install
       - name: Test
-      - uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v2.3.0
         with:
           cmd: test
       - name: Lint
-      - uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v2.3.0
         with:
           cmd: lint
       - name: Typecheck
-      - uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v2.3.0
         with:
           cmd: typecheck
