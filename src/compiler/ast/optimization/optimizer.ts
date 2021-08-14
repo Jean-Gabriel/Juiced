@@ -59,7 +59,7 @@ export const createAstOptimizer = ({ source }: Props): AstOptimizer => {
 
 
     const optimize = () => {
-        const toOptimized = AstBuilder.source([...source.declarations]);
+        const toOptimized = AstBuilder.source({ declarations: [...source.declarations] });
 
         const possiblyUsed = possiblyUsedTopLevelDeclarations(toOptimized.declarations);
 
@@ -76,7 +76,7 @@ export const createAstOptimizer = ({ source }: Props): AstOptimizer => {
             declaration.body = [...possiblyUsedStatements(declaration.body)];
         }
 
-        return AstBuilder.source(possiblyUsed);
+        return AstBuilder.source({ declarations: possiblyUsed });
     };
 
     return {

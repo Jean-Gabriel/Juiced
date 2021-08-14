@@ -13,7 +13,8 @@ import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/lit
 import { AstNodeKind } from "./node";
 import type { Export, ExportVisitor } from "./export";
 
-const source = (declarations: TopLevelDeclaration[]): Source => {
+type SourceProps = { declarations: TopLevelDeclaration[] }
+const source = ({ declarations }: SourceProps): Source => {
     return {
         kind: AstNodeKind.SOURCE,
         declarations,
@@ -23,7 +24,8 @@ const source = (declarations: TopLevelDeclaration[]): Source => {
     };
 };
 
-const functionDeclaration = (identifier: Identifier, args: TypedIdentifier[], type: Identifier, statements: Statement[]): FunctionDeclaration => {
+type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Identifier, statements: Statement[] }
+const functionDeclaration = ({ identifier, args, type, statements }: FunctionDeclarationProps): FunctionDeclaration => {
     return {
         kind: AstNodeKind.FUNCTION_DECLARATION,
         identifier,
@@ -36,7 +38,8 @@ const functionDeclaration = (identifier: Identifier, args: TypedIdentifier[], ty
     };
 };
 
-const variableDeclaration = (identifier: Identifier, expression: Expression): VariableDeclaration => {
+type VariableDeclarationProps = { identifier: Identifier, expression: Expression }
+const variableDeclaration = ({ identifier, expression }: VariableDeclarationProps): VariableDeclaration => {
     return {
         kind: AstNodeKind.VARIABLE_DECLARATION,
         identifier,
@@ -50,7 +53,8 @@ const variableDeclaration = (identifier: Identifier, expression: Expression): Va
     };
 };
 
-const binaryExpression = (left: Expression, operator: BinaryOperator, right: Expression): BinaryExpression => {
+type BinaryExpressionProps = { left: Expression, operator: BinaryOperator, right: Expression }
+const binaryExpression = ({ left, operator, right }: BinaryExpressionProps): BinaryExpression => {
     return {
         kind: AstNodeKind.BINARY,
         left,
@@ -65,7 +69,8 @@ const binaryExpression = (left: Expression, operator: BinaryOperator, right: Exp
     };
 };
 
-const unaryExpression = (operator: UnaryOperator, expression: Expression): UnaryExpression => {
+type UnaryExpressionProps = ({ operator: UnaryOperator, expression: Expression })
+const unaryExpression = ({ operator, expression }: UnaryExpressionProps): UnaryExpression => {
     return {
         kind: AstNodeKind.UNARY,
         operator,
@@ -79,7 +84,8 @@ const unaryExpression = (operator: UnaryOperator, expression: Expression): Unary
     };
 };
 
-const accessor = (identifier: Identifier): Accessor => {
+type AccessorProps = { identifier: Identifier }
+const accessor = ({ identifier }: AccessorProps): Accessor => {
     return {
         kind: AstNodeKind.ACCESSOR,
         identifier,
@@ -92,7 +98,8 @@ const accessor = (identifier: Identifier): Accessor => {
     };
 };
 
-const intLiteral = (int: number): IntLiteral => {
+type IntLiteralProps = { int: number }
+const intLiteral = ({ int }: IntLiteralProps ): IntLiteral => {
     return {
         kind: AstNodeKind.INT_LITERAL,
         value: int,
@@ -105,7 +112,8 @@ const intLiteral = (int: number): IntLiteral => {
     };
 };
 
-const floatLiteral = (float: number): FloatLiteral => {
+type FloatLiteralProps = { float: number }
+const floatLiteral = ({ float }: FloatLiteralProps): FloatLiteral => {
     return {
         kind: AstNodeKind.FLOAT_LITERAL,
         value: float,
@@ -118,7 +126,8 @@ const floatLiteral = (float: number): FloatLiteral => {
     };
 };
 
-const booleanLiteral = (bool: boolean): BooleanLiteral => {
+type BooleanLiteralProps = { bool: boolean }
+const booleanLiteral = ({ bool }: BooleanLiteralProps): BooleanLiteral => {
     return {
         kind: AstNodeKind.BOOLEAN_LITERAL,
         value: bool,
@@ -131,7 +140,8 @@ const booleanLiteral = (bool: boolean): BooleanLiteral => {
     };
 };
 
-const exportation = (declaration: Declaration): Export => {
+type ExportationProps = { declaration: Declaration }
+const exportation = ({ declaration }: ExportationProps): Export => {
     return {
         kind: AstNodeKind.EXPORT,
         declaration,
@@ -141,12 +151,13 @@ const exportation = (declaration: Declaration): Export => {
     };
 };
 
-
-const identifier = (value: string): Identifier => {
+type IdentifierProps = { value: string }
+const identifier = ({ value }: IdentifierProps): Identifier => {
     return { value };
 };
 
-const typedIdentifier = (value: string, type: string): TypedIdentifier => {
+type TypedIdentifierProps = { value: string, type: string }
+const typedIdentifier = ({ value, type }: TypedIdentifierProps): TypedIdentifier => {
     return { value, type };
 };
 

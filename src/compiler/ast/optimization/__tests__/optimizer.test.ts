@@ -14,7 +14,7 @@ describe('AstOptimizer', () => {
         expectOptimizedAst(`
             2 + 2 - 1 / 5 * 6
         `).toEqual(
-            AstBuilder.source([])
+            AstBuilder.source({ declarations: [] })
         );
     });
 
@@ -24,26 +24,28 @@ describe('AstOptimizer', () => {
             export let fun = () -> i32 {}
             export let val = 1 + 1
         `).toEqual(
-            AstBuilder.source([
-                AstBuilder.exportation(
-                    AstBuilder.functionDeclaration(
-                        AstBuilder.identifier('fun'),
-                        [],
-                        AstBuilder.identifier('i32'),
-                        []
-                    )
-                ),
-                AstBuilder.exportation(
-                    AstBuilder.variableDeclaration(
-                        AstBuilder.identifier('val'),
-                        AstBuilder.binaryExpression(
-                            AstBuilder.intLiteral(1),
-                            OperatorKind.PLUS,
-                            AstBuilder.intLiteral(1)
-                        )
-                    )
-                )
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.functionDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'fun' }),
+                            args: [],
+                            type: AstBuilder.identifier({ value: 'i32' }),
+                            statements: []
+                        })
+                    }),
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.variableDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'val' }),
+                            expression: AstBuilder.binaryExpression({
+                                left: AstBuilder.intLiteral({ int: 1 }),
+                                operator: OperatorKind.PLUS,
+                                right: AstBuilder.intLiteral({ int: 1 })
+                            })
+                        })
+                    })
+                ]
+            })
         );
     });
 
@@ -54,22 +56,24 @@ describe('AstOptimizer', () => {
                 1 + 2
             }
         `).toEqual(
-            AstBuilder.source([
-                AstBuilder.exportation(
-                    AstBuilder.functionDeclaration(
-                        AstBuilder.identifier('fun'),
-                        [],
-                        AstBuilder.identifier('i32'),
-                        [
-                            AstBuilder.binaryExpression(
-                                AstBuilder.intLiteral(1),
-                                OperatorKind.PLUS,
-                                AstBuilder.intLiteral(2)
-                            )
-                        ]
-                    )
-                )
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.functionDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'fun' }),
+                            args: [],
+                            type: AstBuilder.identifier({ value: 'i32' }),
+                            statements: [
+                                AstBuilder.binaryExpression({
+                                    left: AstBuilder.intLiteral({ int: 1 }),
+                                    operator: OperatorKind.PLUS,
+                                    right: AstBuilder.intLiteral({ int: 2 })
+                                })
+                            ]
+                        })
+                    })
+                ]
+            })
         );
     });
 

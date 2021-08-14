@@ -33,11 +33,11 @@ export const createParser = (
     const EMPTY_TOKEN: Token = { kind: TokenKind.ARROW, lexeme: '', line: 0 };
 
     const EMPTY_IDENTIFIER_TOKEN: StringLiteralToken = { kind: TokenKind.IDENTIFIER, lexeme: '', line: 0, literal: '' };
-    const EMPTY_IDENTIFIER = AstBuilder.identifier('');
+    const EMPTY_IDENTIFIER = AstBuilder.identifier({ value: '' });
 
-    const EMPTY_EXPRESSION = AstBuilder.accessor(EMPTY_IDENTIFIER);
-    const EMPTY_VARIABLE_DECLARATION = AstBuilder.variableDeclaration(EMPTY_IDENTIFIER, EMPTY_EXPRESSION);
-    const EMPTY_EXPORT = AstBuilder.exportation(EMPTY_VARIABLE_DECLARATION);
+    const EMPTY_EXPRESSION = AstBuilder.accessor({ identifier: EMPTY_IDENTIFIER });
+    const EMPTY_VARIABLE_DECLARATION = AstBuilder.variableDeclaration({ identifier: EMPTY_IDENTIFIER, expression: EMPTY_EXPRESSION });
+    const EMPTY_EXPORT = AstBuilder.exportation({ declaration: EMPTY_VARIABLE_DECLARATION });
 
     const parse = (): Source => {
         const reader = createTokenReader();
@@ -60,7 +60,7 @@ export const createParser = (
             reader.consume(TokenKind.EXPORT);
 
             try {
-                return AstBuilder.exportation(declaration());
+                return AstBuilder.exportation({ declaration: declaration() });
             } catch(e: unknown) {
                 handleError(e);
                 return EMPTY_EXPORT;
@@ -136,7 +136,12 @@ export const createParser = (
             const body = functionBody();
             reader.consume(TokenKind.CLOSE_BRACKETS).ifEmpty(() => handleError(new ParsingError('Expected } after body in function declaration.')));
 
-            return AstBuilder.functionDeclaration(AstBuilder.identifier(identifier.literal), args, AstBuilder.identifier(type.lexeme), body);
+            return AstBuilder.functionDeclaration({
+                identifier: AstBuilder.identifier({ value: identifier.literal }),
+                args,
+                type: AstBuilder.identifier({ value: type.lexeme }),
+                statements: body
+            });
         };
 
         const functionArguments = () => {
@@ -163,7 +168,7 @@ export const createParser = (
                         return EMPTY_TOKEN;
                     });
 
-                args.push(AstBuilder.typedIdentifier(identifier.literal, type.lexeme));
+                args.push(AstBuilder.typedIdentifier({ value: identifier.literal, type: type.lexeme }));
             }
 
             return args;
@@ -189,7 +194,7 @@ export const createParser = (
                 expr = EMPTY_EXPRESSION;
             }
 
-            return AstBuilder.variableDeclaration(AstBuilder.identifier(identifier.literal), expr);
+            return AstBuilder.variableDeclaration({ identifier: AstBuilder.identifier({ value: identifier.literal}), expression: expr });
         };
 
         const expression = (): Expression => {
@@ -201,7 +206,7 @@ export const createParser = (
                     .orElseThrow(new ParsingError('Expected == or != operator at start of equality.'));
 
                 const right = comparison();
-                left = AstBuilder.binaryExpression(left, operator, right);
+                left = AstBuilder.binaryExpression({ left, operator, right });
             }
 
             return left;
@@ -216,7 +221,7 @@ export const createParser = (
                     .orElseThrow(new ParsingError('Expected <, <=, > or >= operator at start of comparison.'));
 
                 const right = addition();
-                left = AstBuilder.binaryExpression(left, operator, right);
+                left = AstBuilder.binaryExpression({ left, operator, right });
             }
 
             return left;
@@ -231,7 +236,7 @@ export const createParser = (
                     .orElseThrow(new ParsingError('Expected + or - operator at start of addition.'));
 
                 const right = multiplication();
-                left = AstBuilder.binaryExpression(left, operator, right);
+                left = AstBuilder.binaryExpression({ left, operator, right });
             }
 
             return left;
@@ -246,7 +251,7 @@ export const createParser = (
                     .orElseThrow(new ParsingError('Expected / or * operator at start of multiplication.'));
 
                 const right = unary();
-                left = AstBuilder.binaryExpression(left, operator, right);
+                left = AstBuilder.binaryExpression({ left, operator, right });
             }
 
             return left;
@@ -259,7 +264,7 @@ export const createParser = (
                     .orElseThrow(new ParsingError('Expected -, ! or + operator at start of unary.'));
 
                 const right = unary();
-                return AstBuilder.unaryExpression(operator, right);
+                return AstBuilder.unaryExpression({ operator, expression: right });
             }
 
             return primary();
@@ -271,7 +276,7 @@ export const createParser = (
                     .consume(TokenKind.INT).unguard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected int as int literal primary.'));
 
-                return AstBuilder.intLiteral(int.literal);
+                return AstBuilder.intLiteral({ int: int.literal });
             }
 
             if(reader.currentIs(TokenKind.FLOAT)) {
@@ -279,7 +284,7 @@ export const createParser = (
                     .consume(TokenKind.FLOAT).unguard(numberLiteralToken)
                     .orElseThrow(new ParsingError('Expected float as float literal primary.'));
 
-                return AstBuilder.floatLiteral(float.literal);
+                return AstBuilder.floatLiteral({ float: float.literal });
             }
 
             if(reader.currentIs(TokenKind.BOOLEAN)) {
@@ -287,7 +292,7 @@ export const createParser = (
                     .consume(TokenKind.BOOLEAN).unguard(booleanLiteralToken)
                     .orElseThrow(new ParsingError('Expected boolean as boolean literal primary.'));
 
-                return AstBuilder.booleanLiteral(boolean.literal);
+                return AstBuilder.booleanLiteral({ bool: boolean.literal });
             }
 
             if(reader.currentIs(TokenKind.IDENTIFIER)) {
@@ -295,7 +300,7 @@ export const createParser = (
                     .consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken)
                     .orElseThrow(new ParsingError('Expected identifier as accessor.'));
 
-                return AstBuilder.accessor(AstBuilder.identifier(identifier.literal));
+                return AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: identifier.literal }) });
             }
 
             throw new ParsingError('Expected a float, int, boolean or identifier as a primary.');
@@ -332,7 +337,7 @@ export const createParser = (
             throw new Error('Errors were encountered while parsing program.');
         }
 
-        return AstBuilder.source(nodes);
+        return AstBuilder.source({ declarations: nodes });
     };
 
     return {

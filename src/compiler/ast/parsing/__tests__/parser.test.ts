@@ -12,16 +12,17 @@ describe('Parser', () => {
         expectParse(`
             export let add = (a: i32, b: i32) -> i32 {}
         `).createsAst(
-            AstBuilder.source([
-                AstBuilder.exportation(
-                    AstBuilder.functionDeclaration(
-                        AstBuilder.identifier('add'),
-                        [ AstBuilder.typedIdentifier('a', 'i32'), AstBuilder.typedIdentifier('b', 'i32') ],
-                        AstBuilder.identifier('i32'),
-                        []
-                    )
-                )
-            ])
+            AstBuilder.source({
+                declarations: [
+                AstBuilder.exportation({
+                    declaration: AstBuilder.functionDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'add' }),
+                        args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32'}), AstBuilder.typedIdentifier({ value: 'b', type: 'i32'}) ],
+                        type: AstBuilder.identifier({ value: 'i32' }),
+                        statements: []
+                    })
+                })
+            ]})
         );
     });
 
@@ -31,25 +32,26 @@ describe('Parser', () => {
                 let x = a == b
             }
         `).createsAst(
-            AstBuilder.source([
-                AstBuilder.exportation(
-                    AstBuilder.functionDeclaration(
-                        AstBuilder.identifier('areEqual'),
-                        [ AstBuilder.typedIdentifier('a', 'i32'), AstBuilder.typedIdentifier('b', 'i32') ],
-                        AstBuilder.identifier('i32'),
-                        [
-                            AstBuilder.variableDeclaration(
-                                AstBuilder.identifier('x'),
-                                AstBuilder.binaryExpression(
-                                    AstBuilder.accessor(AstBuilder.identifier('a')),
-                                    OperatorKind.EQUAL_EQUAL,
-                                    AstBuilder.accessor(AstBuilder.identifier('b'))
-                                )
-                            )
-                        ]
-                    )
-                )
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.functionDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'areEqual' }),
+                            args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
+                            type: AstBuilder.identifier({ value: 'i32' }),
+                            statements: [
+                                AstBuilder.variableDeclaration({
+                                    identifier: AstBuilder.identifier({ value: 'x' }),
+                                    expression: AstBuilder.binaryExpression({
+                                        left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' })}),
+                                        operator: OperatorKind.EQUAL_EQUAL,
+                                        right: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'b' })}),
+                                    })
+                                })
+                            ]
+                        })
+                    })
+            ]})
         );
     });
 
@@ -59,25 +61,26 @@ describe('Parser', () => {
                 2 * -4
             }
         `).createsAst(
-            AstBuilder.source([
-                AstBuilder.exportation(
-                    AstBuilder.functionDeclaration(
-                        AstBuilder.identifier('math'),
-                        [ ],
-                        AstBuilder.identifier('i32'),
-                        [
-                            AstBuilder.binaryExpression(
-                                AstBuilder.intLiteral(2),
-                                OperatorKind.MULTIPLICATION,
-                                AstBuilder.unaryExpression(
-                                    OperatorKind.MINUS,
-                                    AstBuilder.intLiteral(4)
-                                )
-                            )
-                        ]
-                    )
-                )
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.functionDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'math' }),
+                            args: [],
+                            type: AstBuilder.identifier({ value: 'i32' }),
+                            statements: [
+                                AstBuilder.binaryExpression({
+                                    left: AstBuilder.intLiteral({ int: 2 }),
+                                    operator: OperatorKind.MULTIPLICATION,
+                                    right: AstBuilder.unaryExpression({
+                                        operator: OperatorKind.MINUS,
+                                        expression: AstBuilder.intLiteral({ int: 4 })
+                                    })
+                                })
+                            ]
+                        })
+                    })
+            ]})
         );
     });
 
@@ -85,9 +88,11 @@ describe('Parser', () => {
         expectParse(`
             2
         `).createsAst(
-            AstBuilder.source([
-                AstBuilder.intLiteral(2)
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.intLiteral({ int: 2 })
+                ]
+            })
         );
     });
 
@@ -95,9 +100,11 @@ describe('Parser', () => {
         expectParse(`
             2.0
         `).createsAst(
-            AstBuilder.source([
-                AstBuilder.floatLiteral(2)
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.floatLiteral({ float: 2 })
+                ]
+            })
         );
     });
 
@@ -105,16 +112,18 @@ describe('Parser', () => {
         expectParse(`
             !false == true
         `).createsAst(
-            AstBuilder.source([
-                AstBuilder.binaryExpression(
-                    AstBuilder.unaryExpression(
-                        OperatorKind.NOT,
-                        AstBuilder.booleanLiteral(false)
-                    ),
-                    OperatorKind.EQUAL_EQUAL,
-                    AstBuilder.booleanLiteral(true)
-                )
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.binaryExpression({
+                        left: AstBuilder.unaryExpression({
+                            operator: OperatorKind.NOT,
+                            expression: AstBuilder.booleanLiteral({ bool: false })
+                        }),
+                        operator: OperatorKind.EQUAL_EQUAL,
+                        right: AstBuilder.booleanLiteral({ bool: true })
+                    })
+                ]
+            })
         );
     });
 
@@ -123,13 +132,15 @@ describe('Parser', () => {
         expectParse(`
             1 * 2
         `).createsAst(
-            AstBuilder.source([
-                AstBuilder.binaryExpression(
-                    AstBuilder.intLiteral(1),
-                    OperatorKind.MULTIPLICATION,
-                    AstBuilder.intLiteral(2)
-                )
-            ])
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.binaryExpression({
+                        left: AstBuilder.intLiteral({ int: 1 }),
+                        operator: OperatorKind.MULTIPLICATION,
+                        right: AstBuilder.intLiteral({ int: 2 })
+                    })
+                ]
+            })
         );
     });
 
