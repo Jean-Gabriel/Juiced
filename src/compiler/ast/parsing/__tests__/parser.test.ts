@@ -84,6 +84,33 @@ describe('Parser', () => {
         );
     });
 
+    it('should parse grouped expression', () => {
+        expectParse(`
+            (2 + 2) + 2 / 2
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.binaryExpression({
+                        left: AstBuilder.grouping({
+                            expression: AstBuilder.binaryExpression({
+                                left: AstBuilder.intLiteral({ int: 2 }),
+                                operator: OperatorKind.PLUS,
+                                right: AstBuilder.intLiteral({ int: 2 })
+                            })
+                        }),
+                        operator: OperatorKind.PLUS,
+                        right: AstBuilder.binaryExpression({
+                            left: AstBuilder.intLiteral({ int: 2 }),
+                            operator: OperatorKind.DIVISION,
+                            right: AstBuilder.intLiteral({ int: 2 })
+                        })
+                    })
+                ]
+            })
+        );
+    });
+
+
     it('should parse int literal value', () => {
         expectParse(`
             2

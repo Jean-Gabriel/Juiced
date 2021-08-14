@@ -12,6 +12,7 @@ import type { Statement, StatementVisitor } from "./statements/statement";
 import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/literal";
 import { AstNodeKind } from "./node";
 import type { Export, ExportVisitor } from "./export";
+import type { GroupingExpression } from "./expressions/grouping";
 
 type SourceProps = { declarations: TopLevelDeclaration[] }
 const source = ({ declarations }: SourceProps): Source => {
@@ -49,6 +50,20 @@ const variableDeclaration = ({ identifier, expression }: VariableDeclarationProp
         },
         acceptStatementVisitor<T>(visitor: StatementVisitor<T>) {
             return visitor.visitVariableDeclaration(this);
+        }
+    };
+};
+
+type GroupingExpressionProps = { expression: Expression }
+const grouping = ({ expression }: GroupingExpressionProps): GroupingExpression => {
+    return {
+        kind: AstNodeKind.GROUPING,
+        expression,
+        acceptExpressionVisitor<T>(visitor: ExpressionVisitor<T>) {
+            return visitor.visitGroupingExpression(this);
+        },
+        acceptStatementVisitor<T>(vistor: StatementVisitor<T>) {
+            return vistor.visitExpression(this);
         }
     };
 };
@@ -164,6 +179,7 @@ const typedIdentifier = ({ value, type }: TypedIdentifierProps): TypedIdentifier
 const AstBuilder = {
     source,
     accessor,
+    grouping,
     identifier,
     intLiteral,
     exportation,

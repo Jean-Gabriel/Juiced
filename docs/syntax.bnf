@@ -35,9 +35,13 @@ addition ::= multiplication ( ( "-" | "+" ) multiplication )*
 multiplication ::= unary ( ( "/" | "*" ) unary )*
 unary ::= 
     | ( "!" | "-"  | "+" ) unary 
-    | expression
     | identifier
     | LITERAL
+
+primary =
+    | LITERAL
+    | identifier
+    | "(" expression ")"
 
 typed-identifier ::= identifier ':' type
 type ::= 

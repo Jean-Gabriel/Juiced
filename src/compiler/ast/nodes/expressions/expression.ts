@@ -1,6 +1,7 @@
 import type { AstNode } from "../node";
 import type { Accessor } from "./accessor";
 import type { BinaryExpression } from "./binary";
+import type { GroupingExpression } from "./grouping";
 import type { BooleanLiteral, FloatLiteral, IntLiteral, Literal } from "./literal";
 import type { UnaryExpression } from "./unary";
 
@@ -9,6 +10,7 @@ export interface ExpressionNode extends AstNode {
 }
 
 export interface ExpressionVisitor<T> {
+    visitGroupingExpression(expression: GroupingExpression): T
     visitBinaryExpression(expression: BinaryExpression): T
     visitUnaryExpression(expression: UnaryExpression): T
     visitAccessor(expression: Accessor): T
@@ -18,6 +20,7 @@ export interface ExpressionVisitor<T> {
 }
 
 export type Expression =
+    | GroupingExpression
     | BinaryExpression
     | UnaryExpression
     | Literal

@@ -303,6 +303,14 @@ export const createParser = (
                 return AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: identifier.literal }) });
             }
 
+            if(reader.currentIs(TokenKind.OPEN_PARENTHESIS)) {
+                reader.consume(TokenKind.OPEN_PARENTHESIS);
+                const expr = expression();
+                reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError('Expected ) after grouping expression.'));
+
+                return AstBuilder.grouping({ expression: expr });
+            }
+
             throw new ParsingError('Expected a float, int, boolean or identifier as a primary.');
         };
 

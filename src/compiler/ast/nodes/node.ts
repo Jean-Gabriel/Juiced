@@ -8,6 +8,7 @@ export enum AstNodeKind {
 
     ACCESSOR,
 
+    GROUPING,
     BINARY,
     UNARY,
 
