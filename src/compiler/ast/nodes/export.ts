@@ -1,10 +1,10 @@
-import type { DeclarationNode } from "./declarations/declaration";
+import type { Declaration } from "./declarations/declaration";
 import type { AstNode, AstNodeKind } from "./node";
 
 export interface Export extends AstNode {
     kind: AstNodeKind.EXPORT
 
-    declaration: DeclarationNode
+    declaration: Declaration
     acceptExport<T>(visitor: ExportVisitor<T>): T
 }
 
