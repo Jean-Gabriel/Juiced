@@ -27,8 +27,8 @@ export const createParser = (
     createDiagnosticReporter: () => DiagnosticReporter
 ): Parser => {
 
-    const EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.IDENTIFIER ];
-    const TOP_LEVEL_EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN ];
+    const EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.IDENTIFIER, TokenKind.OPEN_PARENTHESIS ];
+    const TOP_LEVEL_EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.OPEN_PARENTHESIS ];
 
     const EMPTY_TOKEN: Token = { kind: TokenKind.ARROW, lexeme: '', line: 0 };
 
@@ -46,6 +46,12 @@ export const createParser = (
         const topLevelDeclaration = (): TopLevelDeclaration => {
             if(reader.currentIs(TokenKind.EXPORT)) {
                 return exportDeclaration();
+            }
+
+            if(reader.currentIs(TokenKind.LET)) {
+                declaration(); //it will supported later so let's parse it for now and count it as an error
+                handleError(new ParsingError('Top level declaration must be exported.'));
+                return EMPTY_EXPRESSION;
             }
 
             try {
@@ -306,7 +312,9 @@ export const createParser = (
             if(reader.currentIs(TokenKind.OPEN_PARENTHESIS)) {
                 reader.consume(TokenKind.OPEN_PARENTHESIS);
                 const expr = expression();
-                reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError('Expected ) after grouping expression.'));
+                reader
+                    .consume(TokenKind.CLOSE_PARENTHESIS)
+                    .ifEmpty(() => handleError(new ParsingError('Expected ) after grouping expression.')));
 
                 return AstBuilder.grouping({ expression: expr });
             }
