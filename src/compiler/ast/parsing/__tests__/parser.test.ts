@@ -171,7 +171,7 @@ describe('Parser', () => {
         );
     });
 
-    it('it should recover when encountering error', () => {
+    it('should recover when encountering error', () => {
         expectParse(`
             let a = 1 + 1
             export let a = (a: i32 b: i32) -> i32 {
@@ -185,14 +185,15 @@ describe('Parser', () => {
         // Error: invalid syntax in function body
     });
 
-    it('it should recover from broken expression', () => {
+    it('should recover from broken expressions', () => {
         expectParse(`
+            (2 + 1 / 3
             export let a = (a: i32, b: i32) -> i32 {
                 1 + + 2 3
                 let x = 1
                 x
             }
-        `).errors(1);
+        `).errors(2);
         // Error: unexpected expression
     });
 
