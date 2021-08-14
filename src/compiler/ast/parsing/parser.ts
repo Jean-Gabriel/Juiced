@@ -253,10 +253,10 @@ export const createParser = (
         };
 
         const unary = (): Expression => {
-            if(reader.currentIs(TokenKind.MINUS, TokenKind.BANG)) {
-                const operator = reader.consume(TokenKind.MINUS, TokenKind.BANG)
+            if(reader.currentIs(TokenKind.MINUS, TokenKind.BANG, TokenKind.PLUS)) {
+                const operator = reader.consume(TokenKind.MINUS, TokenKind.BANG, TokenKind.PLUS)
                     .map((value) => unaryOperators.get(value.kind))
-                    .orElseThrow(new ParsingError('Expected - or + operator at start of unary.'));
+                    .orElseThrow(new ParsingError('Expected -, ! or + operator at start of unary.'));
 
                 const right = unary();
                 return AstBuilder.unaryExpression(operator, right);
@@ -314,7 +314,6 @@ export const createParser = (
                 throw error;
             }
 
-            reader.advance();
             reporter.emit({ category: DiagnosticCategory.ERROR, message: error.message });
 
             if(options && options.recoverTo) {
@@ -329,6 +328,7 @@ export const createParser = (
         }
 
         if(reporter.errored()) {
+            console.dir(nodes, { depth: null });
             reporter.report();
             throw new Error('Errors were encountered while parsing program.');
         }

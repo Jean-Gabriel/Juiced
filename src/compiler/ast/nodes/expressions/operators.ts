@@ -41,6 +41,7 @@ export const unaryOperators = new Map<TokenKind, UnaryOperator>([
 export type UnaryOperator =
     | OperatorKind.NOT
     | OperatorKind.MINUS
+    | OperatorKind.PLUS
 
 export type BinaryOperator = Exclude<OperatorKind, OperatorKind.NOT>
 

@@ -133,6 +133,32 @@ describe('Parser', () => {
         );
     });
 
+    it('it should recover when encountering error', () => {
+        expectParse(`
+            let a = 1 + 1
+            export let a = (a: i32 b: i32) -> i32 {
+                () => 1
+                let x = a + b
+                x
+            }
+        `).errors(3);
+        // Error: unexported top level declaration
+        // Error: no coma between arguments
+        // Error: invalid syntax in function body
+    });
+
+    it('it should recover from broken expression', () => {
+        expectParse(`
+            export let a = (a: i32 b: i32) -> i32 {
+                1 + + 2 3
+                let x = 1
+                x
+            }
+        `).errors(2);
+        // Error: unexpected expression
+        //      1 + + and + 2 3 
+    });
+
     it('should not parse not exported top level expression', () => {
         expectParse(`
             let a = () -> i32 {}

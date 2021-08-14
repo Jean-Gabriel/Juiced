@@ -34,7 +34,7 @@ comparison ::= addition ( ( ">" | ">=" | "<" | "<=" ) addition )*
 addition ::= multiplication ( ( "-" | "+" ) multiplication )*
 multiplication ::= unary ( ( "/" | "*" ) unary )*
 unary ::= 
-    | ( "!" | "-" ) unary 
+    | ( "!" | "-"  | "+" ) unary 
     | expression
     | identifier
     | LITERAL
