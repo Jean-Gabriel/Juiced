@@ -90,7 +90,7 @@ describe('TokenReader', () => {
             expect(consumed).toEqual(Optional.empty());
         });
 
-        it('should use last token as current token', () => {
+        it('should never match current', () => {
             const reader = createTokenReader({ tokens: [
                 TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
             ]});
@@ -98,7 +98,7 @@ describe('TokenReader', () => {
 
             const isTokenKind = reader.currentIs(TokenKind.ARROW);
 
-            expect(isTokenKind).toBeTruthy();
+            expect(isTokenKind).toBeFalsy();
         });
     });
 });
