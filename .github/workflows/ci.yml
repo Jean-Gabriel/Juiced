@@ -1,10 +1,6 @@
 name: Juiced CI
 
-on:
-  push:
-  pull_request:
-    branches:
-      - '**'
+on: [ push, pull_request ]
 
 jobs:
   typecheck_test_lint:
