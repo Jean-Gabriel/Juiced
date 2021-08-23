@@ -195,6 +195,7 @@ describe('Parser', () => {
             }
         `).errors(2);
         // Error: unexpected expression
+        // Error: invalid binary
     });
 
     it('should not parse not exported top level expression', () => {

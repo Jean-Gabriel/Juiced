@@ -130,7 +130,13 @@ export const createParser = (
             const args = functionArguments();
             reader.consume(TokenKind.CLOSE_PARENTHESIS).ifEmpty(() => handleError(new ParsingError('Expected ) after typed arguments in function declaration.')));
 
-            reader.consume(TokenKind.ARROW).ifEmpty(() => handleError(new ParsingError('Expected -> after arguments in function declaration.')));
+            reader.consume(TokenKind.ARROW)
+                .ifEmpty(() => {
+                        handleError(new ParsingError('Expected -> after arguments in function declaration.'));
+                        recover(TokenKind.OPEN_BRACKETS);
+                    }
+                );
+
             const type = reader
                 .consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE)
                 .orElseMap(() => {
