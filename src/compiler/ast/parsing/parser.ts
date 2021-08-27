@@ -356,7 +356,7 @@ export const createParser = (
 
         if(reporter.errored()) {
             reporter.report();
-            throw new Error('Errors were encountered while parsing program.');
+            throw new Error('Parsing error.');
         }
 
         return AstBuilder.source({ declarations: nodes });

@@ -1,4 +1,5 @@
 import type { DiagnosticReporter } from "../../diagnostic/reporter";
+import { DiagnosticCategory } from "../../diagnostic/reporter";
 import type { FunctionDeclaration } from "../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
 import type { BinaryExpression } from "../ast/nodes/expressions/binary";
@@ -8,6 +9,7 @@ import { OperatorKind } from "../ast/nodes/expressions/operators";
 import type { UnaryExpression } from "../ast/nodes/expressions/unary";
 import { AstNodeKind } from "../ast/nodes/node";
 import type { Source } from "../ast/nodes/source";
+import { isTypecheckingError, TypecheckingError } from "./error";
 import MemberBuilder from "./members/builder";
 import { Scope } from "./scope";
 
@@ -22,7 +24,6 @@ type TypecheckerProps = {
 
 type InferedType = string
 
-//TODO: Use diagnostic reporter
 export const createTypechecker = ({ source, createDiagnosticReporter }: TypecheckerProps): Typechecker => {
 
     const BOOLEAN_OPERATORS = [
@@ -55,13 +56,13 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
             const left = expression(binary.left);
 
             if(right != left) {
-                throw Error('Both sides of binary operation must have the same type.');
+                throw new TypecheckingError('Both sides of binary operation must have the same type.');
             }
 
             const type = right;
             if(type === 'bool') {
                 if(!BOOLEAN_OPERATORS.includes(binary.operator)) {
-                    throw Error('Invalid bool operator.');
+                    throw new TypecheckingError('Invalid bool operator.');
                 }
 
                 return type;
@@ -69,7 +70,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
 
             if(type === 'i32' || type === 'f32') {
                 if(!NUMBER_OPERATORS.includes(binary.operator)) {
-                    throw Error('Invalid i32 or f32 operator.');
+                    throw new TypecheckingError('Invalid i32 or f32 operator.');
                 }
 
                 if(BOOLEAN_OPERATORS.includes(binary.operator)) {
@@ -79,7 +80,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
                 return type;
             }
 
-            throw Error('Invalid binary expression.');
+            throw new TypecheckingError('Invalid binary expression.');
         };
 
         const unary = (unary: UnaryExpression): InferedType => {
@@ -87,7 +88,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
 
             if(unary.operator === OperatorKind.MINUS || unary.operator === OperatorKind.PLUS) {
                 if(type != 'i32' && type != 'f32') {
-                    throw new Error('Minus unary must affect an i32 or f32.');
+                    throw new TypecheckingError('Minus unary must affect an i32 or f32.');
                 }
 
                 return type;
@@ -95,13 +96,13 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
 
             if(unary.operator === OperatorKind.NOT) {
                 if(type != 'bool') {
-                    throw new Error('Minus unary must affect a bool.');
+                    throw new TypecheckingError('Minus unary must affect a bool.');
                 }
 
                 return type;
             }
 
-            throw new Error('Invalid unary expression.');
+            throw new TypecheckingError('Invalid unary expression.');
         };
 
         //TODO: pass types from token to ast to prevent duplicating type
@@ -121,7 +122,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
             if(expression.kind === AstNodeKind.ACCESSOR) {
                 const member = scope.lookup(expression.identifier.value);
                 if(!member) {
-                    throw Error('Trying to access not declared variable.');
+                    throw new TypecheckingError('Trying to access not declared variable.');
                 }
 
                 return member.type;
@@ -139,7 +140,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
                 return grouping(expression);
             }
 
-            throw new Error('Invalid binary operation');
+            throw new TypecheckingError('Invalid binary operation');
         };
 
         const variableDeclaration = (variable: VariableDeclaration)  => {
@@ -155,7 +156,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
             fun.body.forEach((statement, index) => {
                 if(statement.kind === AstNodeKind.VARIABLE_DECLARATION) {
                     if(index === fun.body.length - 1) {
-                        throw new Error('A function cannot return a variable declaration.');
+                        throw new TypecheckingError('A function cannot return a variable declaration.');
                     }
 
                     return variableDeclaration(statement);
@@ -163,7 +164,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
 
                 const infered = expression(statement);
                 if(infered != fun.type.value) {
-                    throw new Error('Function does not return expected type.');
+                    throw new TypecheckingError('Function does not return expected type.');
                 }
             });
 
@@ -191,7 +192,24 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
             functions.forEach(functionDeclaration);
         };
 
-        module(source);
+        const handleError = (error: unknown) => {
+            if(!isTypecheckingError(error)) {
+                throw error;
+            }
+
+            reporter.emit({ category: DiagnosticCategory.ERROR, message: error.message });
+        };
+
+        try {
+            module(source);
+        } catch(e) {
+            handleError(e);
+        }
+
+        if(reporter.errored()) {
+            reporter.report();
+            throw Error('Typechecking error.');
+        }
     };
 
     return {

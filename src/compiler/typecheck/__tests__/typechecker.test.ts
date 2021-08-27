@@ -1,4 +1,5 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
+import { createChalkDiagnosticReporter } from "../../../diagnostic/chalk/reporter";
 import { createAstOptimizer } from "../../ast/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
@@ -9,16 +10,16 @@ import { createTypechecker } from "../typechecker";
 describe('Typechecker', () => {
 
     it('test', () => {
-        expectTypechecks(`
+        expectTypechecking(`
             export let x = 1 + 1
-            export let z = 2
+            export let e = 2
             export let fun = (a: i32) -> bool {
                 x == z == true
             }
-        `).check();
+        `).doesNotError();
     });
 
-    const expectTypechecks = (sequence: string) => {
+    const expectTypechecking = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
         const tokenizer = createTokenizer(
@@ -38,13 +39,21 @@ describe('Typechecker', () => {
         const optimizer = createAstOptimizer({ source: ast });
         const optimized = optimizer.optimize();
 
+        const reporter = createChalkDiagnosticReporter();
         const typechecker = createTypechecker({
             source: optimized,
-            createDiagnosticReporter: () => createTestDiagnoticsReporter()
+            createDiagnosticReporter: () => reporter
         });
 
+        typechecker.check();
+
         return {
-            check: typechecker.check
+            doesNotError: () => {
+                expect(reporter.errored()).toBeFalsy();
+            },
+            errors: () => {
+                expect(reporter.errored()).toBeTruthy();
+            }
         };
     };
 });
