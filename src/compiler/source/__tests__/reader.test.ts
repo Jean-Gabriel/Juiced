@@ -58,11 +58,11 @@ describe('SourceReader', () => {
     });
 
     it('should increment line when reading new line', () => {
-        const reader = givenSourceReader('\n');
+        const reader = givenSourceReader('\n\n');
 
         reader.read();
 
-        expect(reader.lineIndex()).toEqual(2);
+        expect(reader.lineIndex()).toEqual(3);
     });
 
     it('should return read char', () => {

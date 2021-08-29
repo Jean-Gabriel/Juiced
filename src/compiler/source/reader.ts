@@ -30,13 +30,13 @@ export class SourceReader {
             return null;
         }
 
-        const current = this.source.charAt(this.index++);
-        if (current !== "\n") {
-            return current;
+        let current = this.source.charAt(this.index++);
+        while(current && current === '\n') {
+            this.line++;
+            current = this.source.charAt(this.index++);
         }
 
-        this.line++;
-        return this.source.charAt(this.index++);
+        return current || null;
     }
 
     match(expected: string): boolean {

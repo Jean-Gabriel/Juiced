@@ -13,7 +13,6 @@ class ChalkDiagnosticReporter implements DiagnosticReporter {
 
     emit(diagnostic: Diagnostic) {
         this.diagnostics.push(diagnostic);
-        console.log(`${colors[diagnostic.category]}: ${diagnostic.message}`);
     };
 
     report() {
