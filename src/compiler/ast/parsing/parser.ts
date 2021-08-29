@@ -94,7 +94,9 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             reader.consume(TokenKind.EQUAL).ifEmpty(() => handleError(new ParsingError('Expected = after identifier.')));
 
             if(reader.currentIs(TokenKind.OPEN_PARENTHESIS)) {
-                return functionDeclaration(identifier);
+                if(reader.containsUntil(TokenKind.ARROW, (token) => token.kind === TokenKind.OPEN_BRACKETS)) {
+                    return functionDeclaration(identifier);
+                }
             }
 
             try {

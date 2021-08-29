@@ -50,6 +50,20 @@ export default class TokenReader {
         return kinds.includes(token.kind);
     }
 
+    containsUntil(token: TokenKind, condistionIsMet: (current: Token) => boolean) {
+        let index = this.index;
+        let isAtEnd = index >= this.tokens.length;
+        let current = this.tokens[index];
+        while(current && !condistionIsMet(current) && !isAtEnd) {
+            if(current.kind === token) {
+                return true;
+            }
+            current = this.tokens[index++];
+        }
+
+        return false;
+    }
+
     isAtEnd(): boolean {
         return this.index >= this.tokens.length;
     }
