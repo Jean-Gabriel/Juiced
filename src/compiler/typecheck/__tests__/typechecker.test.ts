@@ -1,5 +1,4 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
-import { createChalkDiagnosticReporter } from "../../../diagnostic/chalk/reporter";
 import { createAstOptimizer } from "../../ast/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
@@ -77,36 +76,33 @@ describe('Typechecker', () => {
     const expectTypechecking = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
-        const tokenizer = createTokenizer(
-            () => createSourceReader({ content: withoutStartAndEndLineBreak }),
-            () => createTestDiagnoticsReporter()
-        );
+        const tokenizer = createTokenizer({
+            createSourceReader,
+            createDiagnosticReporter: createTestDiagnoticsReporter
+        });
 
-        const tokens = tokenizer.tokenize();
+        const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
 
-        const parser = createParser(
-            () => createTokenReader({ tokens }),
-            () => createChalkDiagnosticReporter()
-        );
+        const parser = createParser({
+            createTokenReader,
+            createDiagnosticReporter: createTestDiagnoticsReporter
+        });
 
-        const ast = parser.parse();
-
-        const optimizer = createAstOptimizer({ source: ast });
-        const optimized = optimizer.optimize();
+        const ast = parser.parse(tokens);
+        const optimizedAst = createAstOptimizer().optimize(ast);
 
         const reporter = createTestDiagnoticsReporter();
         const typechecker = createTypechecker({
-            source: optimized,
-            createDiagnosticReporter: () => reporter
+            createDiagnosticReporter: createTestDiagnoticsReporter
         });
 
         return {
             succeeds: () => {
-                typechecker.check();
+                typechecker.run(optimizedAst);
                 expect(reporter.errored()).toBeFalsy();
             },
             errors: () => {
-                expect(() => typechecker.check()).toThrowError();
+                expect(() => typechecker.run(optimizedAst)).toThrowError();
                 expect(reporter.errored()).toBeTruthy();
             }
         };

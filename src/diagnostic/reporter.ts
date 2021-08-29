@@ -7,6 +7,8 @@ export type Diagnostic = {
     category: DiagnosticCategory
 }
 
+export type DiagnosticReporterFactory = () => DiagnosticReporter
+
 export interface DiagnosticReporter {
     emit: (diagnostic: Diagnostic) => void
     report: () => void;

@@ -1,4 +1,4 @@
-import type { DiagnosticReporter } from "../../diagnostic/reporter";
+import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../diagnostic/reporter";
 import type { FunctionDeclaration } from "../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
@@ -14,17 +14,18 @@ import MemberBuilder from "./members/builder";
 import { Scope } from "./scope";
 
 interface Typechecker {
-    check: () => void
+    run: (source: Source) => void
 }
 
-type TypecheckerProps = {
-    source: Source,
-    createDiagnosticReporter: () => DiagnosticReporter
+type TypecheckerFactoryProps = {
+    createDiagnosticReporter: DiagnosticReporterFactory
 }
+
+type TypecheckerFactory = (factoryProps: TypecheckerFactoryProps) => Typechecker
 
 type InferedType = string
 
-export const createTypechecker = ({ source, createDiagnosticReporter }: TypecheckerProps): Typechecker => {
+export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter }) => {
 
     const BOOLEAN_OPERATORS = [
         OperatorKind.EQUAL_EQUAL,
@@ -43,7 +44,7 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
         OperatorKind.PLUS
     ];
 
-    const check = () => {
+    const run = (source: Source) => {
         const reporter = createDiagnosticReporter();
         let scope = Scope.empty();
 
@@ -213,6 +214,6 @@ export const createTypechecker = ({ source, createDiagnosticReporter }: Typechec
     };
 
     return {
-        check
+        run
     };
 };

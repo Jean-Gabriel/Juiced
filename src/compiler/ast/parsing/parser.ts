@@ -1,6 +1,5 @@
-import type { DiagnosticReporter } from "../../../diagnostic/reporter";
+import type { DiagnosticReporterFactory } from "../../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../../diagnostic/reporter";
-import type TokenReader from "../../token/reader";
 import type { Source, TopLevelDeclaration } from "../nodes/source";
 import AstBuilder from "../nodes/builder";
 import { TokenKind } from "../../token/kinds";
@@ -13,19 +12,24 @@ import { stringLiteralToken } from "../../token/token";
 import { binaryOperators, unaryOperators } from "../nodes/expressions/operators";
 import type { Expression } from "../nodes/expressions/expression";
 import { isParsingError, ParsingError } from "./error";
+import type { TokenReaderFactory } from "../../token/reader";
 
 interface Parser {
-    parse: () => Source
+    parse: (tokens: Token[]) => Source
 }
 
 interface ErrorHandlingOptions {
     recoverTo?: TokenKind[]
 }
 
-export const createParser = (
-    createTokenReader: () => TokenReader,
-    createDiagnosticReporter: () => DiagnosticReporter
-): Parser => {
+type ParserFactoryProps = {
+    createTokenReader: TokenReaderFactory,
+    createDiagnosticReporter: DiagnosticReporterFactory
+}
+
+type ParserFactory = (factoryProps: ParserFactoryProps) => Parser
+
+export const createParser: ParserFactory = ({ createTokenReader, createDiagnosticReporter }) => {
 
     const EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.IDENTIFIER, TokenKind.OPEN_PARENTHESIS ];
     const TOP_LEVEL_EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.OPEN_PARENTHESIS ];
@@ -39,8 +43,8 @@ export const createParser = (
     const EMPTY_VARIABLE_DECLARATION = AstBuilder.variableDeclaration({ identifier: EMPTY_IDENTIFIER, expression: EMPTY_EXPRESSION });
     const EMPTY_EXPORT = AstBuilder.exportation({ declaration: EMPTY_VARIABLE_DECLARATION });
 
-    const parse = (): Source => {
-        const reader = createTokenReader();
+    const parse = (tokens: Token[]): Source => {
+        const reader = createTokenReader({ tokens });
         const reporter = createDiagnosticReporter();
 
         const topLevelDeclaration = (): TopLevelDeclaration => {

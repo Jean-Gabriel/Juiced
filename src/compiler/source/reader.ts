@@ -1,18 +1,19 @@
 type Props = {
-    content: string
+    source: string
 }
 
-export const createSourceReader = ({content}: Props) => new SourceReader({ content });
+export type SourceReaderFactory = (props: Props) => SourceReader
+export const createSourceReader: SourceReaderFactory = ({ source }: Props) => new SourceReader({ source });
 
 export class SourceReader {
-    private readonly content: string;
+    private readonly source: string;
 
     private index = 0;
     private line = 1;
     private pinStart = 0;
 
-    constructor({ content }: Props) {
-        this.content = content;
+    constructor({ source }: Props) {
+        this.source = source;
     }
 
     advanceWhile(condition: (char: string) => boolean) {
@@ -29,10 +30,10 @@ export class SourceReader {
             return null;
         }
 
-        let current = this.content.charAt(this.index++);
+        let current = this.source.charAt(this.index++);
         while(current && current === '\n') {
             this.line++;
-            current = this.content.charAt(this.index++);
+            current = this.source.charAt(this.index++);
         }
 
         return current || null;
@@ -52,7 +53,7 @@ export class SourceReader {
     }
 
     pinned(): string {
-        return this.content.substring(this.pinStart, this.index);
+        return this.source.substring(this.pinStart, this.index);
     }
 
     lineIndex(): number {
@@ -60,7 +61,7 @@ export class SourceReader {
     }
 
     isAtEnd(): boolean {
-        return this.index >= this.content.length;
+        return this.index >= this.source.length;
     }
 
     current() {
@@ -68,16 +69,16 @@ export class SourceReader {
             return null;
         }
 
-        return this.content.charAt(this.index);
+        return this.source.charAt(this.index);
     }
 
     next() {
         const nextIndex = this.index + 1;
-        if (nextIndex >= this.content.length) {
+        if (nextIndex >= this.source.length) {
             return null;
         }
 
-        return this.content.charAt(nextIndex);
+        return this.source.charAt(nextIndex);
     }
 
     position() {

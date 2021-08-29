@@ -80,22 +80,22 @@ describe('AstOptimizer', () => {
     const expectOptimizedAst = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
-        const tokenizer = createTokenizer(
-            () => createSourceReader({ content: withoutStartAndEndLineBreak }),
-            () => createTestDiagnoticsReporter()
-        );
+        const tokenizer = createTokenizer({
+            createSourceReader,
+            createDiagnosticReporter: createTestDiagnoticsReporter
+        });
 
-        const tokens = tokenizer.tokenize();
+        const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
 
-        const parser = createParser(
-            () => createTokenReader({ tokens }),
-            () => createTestDiagnoticsReporter()
-        );
+        const parser = createParser({
+            createTokenReader,
+            createDiagnosticReporter: createTestDiagnoticsReporter
+        });
 
-        const source= parser.parse();
-        const optimizer = createAstOptimizer({ source });
+        const source= parser.parse(tokens);
+        const optimizer = createAstOptimizer();
 
-        const optimized = optimizer.optimize();
+        const optimized = optimizer.optimize(source);
 
         return {
             toEqual: (expected: Source) => {
