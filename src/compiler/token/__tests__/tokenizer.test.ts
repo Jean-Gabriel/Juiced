@@ -26,7 +26,8 @@ describe('Tokenizer', () => {
         [':', TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON))],
         [',', TokenFixture.create(_ => _.atLine(1).withLexeme(',').nonLiteral(TokenKind.COMA))],
         ['->', TokenFixture.create(_ => _.atLine(1).withLexeme('->').nonLiteral(TokenKind.ARROW))],
-        ['let', TokenFixture.create(_ => _.atLine(1).withLexeme('let').nonLiteral(TokenKind.LET))],
+        ['const', TokenFixture.create(_ => _.atLine(1).withLexeme('const').nonLiteral(TokenKind.CONST))],
+        ['fun', TokenFixture.create(_ => _.atLine(1).withLexeme('fun').nonLiteral(TokenKind.FUN))],
         ['i32', TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE))],
         ['f32', TokenFixture.create(_ => _.atLine(1).withLexeme('f32').nonLiteral(TokenKind.FLOAT_TYPE))],
         ['bool', TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE))],
@@ -36,18 +37,17 @@ describe('Tokenizer', () => {
     });
 
     it('should throw error at the end of tokenizing if it reported errors', () => {
-        expectTokenize(`let $main $`).reportsError(2);
+        expectTokenize(`$main = $ fun`).reportsError(2);
     });
 
     it('should tokenize a function declaration', () => {
         expectTokenize(`
-            let square = (a: i32) -> bool {
-                a * a
-            } 
+            square = fun (a: i32) -> bool
+                a * a;
         `).createsTokens(
-            TokenFixture.create(_ => _.atLine(1).withLexeme('let').nonLiteral(TokenKind.LET)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('square').withLiteral('square').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('=').nonLiteral(TokenKind.EQUAL)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme('fun').nonLiteral(TokenKind.FUN)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('(').nonLiteral(TokenKind.OPEN_PARENTHESIS)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
@@ -55,22 +55,23 @@ describe('Tokenizer', () => {
             TokenFixture.create(_ => _.atLine(1).withLexeme(')').nonLiteral(TokenKind.CLOSE_PARENTHESIS)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('->').nonLiteral(TokenKind.ARROW)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme('{').nonLiteral(TokenKind.OPEN_BRACKETS)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('*').nonLiteral(TokenKind.STAR)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
-            TokenFixture.create(_ => _.atLine(3).withLexeme('}').nonLiteral(TokenKind.CLOSE_BRACKETS)),
+            TokenFixture.create(_ => _.atLine(2).withLexeme(';').nonLiteral(TokenKind.SEMICOLON)),
         );
     });
 
     it('should tokenize a varaible declaration', () => {
         expectTokenize(`
-            let count = 1
+            export count = const 1;
         `).createsTokens(
-            TokenFixture.create(_ => _.atLine(1).withLexeme('let').nonLiteral(TokenKind.LET)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme('export').nonLiteral(TokenKind.EXPORT)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('count').withLiteral('count').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('=').nonLiteral(TokenKind.EQUAL)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme('1').withLiteral(1).number(TokenKind.INT))
+            TokenFixture.create(_ => _.atLine(1).withLexeme('const').nonLiteral(TokenKind.CONST)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme('1').withLiteral(1).number(TokenKind.INT)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme(';').nonLiteral(TokenKind.SEMICOLON))
         );
     });
 

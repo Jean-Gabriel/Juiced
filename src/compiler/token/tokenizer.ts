@@ -93,6 +93,9 @@ export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDi
                 case ':': {
                     return createNonLiteralToken(TokenKind.COLON);
                 }
+                case ';': {
+                    return createNonLiteralToken(TokenKind.SEMICOLON);
+                }
                 case ',': {
                     return createNonLiteralToken(TokenKind.COMA);
                 }
