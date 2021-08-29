@@ -87,18 +87,18 @@ describe('Tokenizer', () => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
         const reporter = createTestDiagnoticsReporter();
-        const tokenizer = createTokenizer(
-            () => createSourceReader({ content: withoutStartAndEndLineBreak }),
-            () => reporter
-        );
+        const tokenizer = createTokenizer({
+            createSourceReader,
+            createDiagnosticReporter: () => reporter
+        });
 
         return {
             createsTokens: (...expected: Token[]) => {
-                const tokens = tokenizer.tokenize();
+                const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
                 expected.forEach(token => expect(tokens).toContainEqual(token));
             },
             reportsError: (numberOfErrors: number) => {
-                expect(() => tokenizer.tokenize()).toThrowError();
+                expect(() => tokenizer.tokenize(withoutStartAndEndLineBreak)).toThrowError();
                 expect(reporter.emit).toHaveBeenCalledTimes(numberOfErrors);
                 expect(reporter.report).toHaveBeenCalledTimes(1);
             }

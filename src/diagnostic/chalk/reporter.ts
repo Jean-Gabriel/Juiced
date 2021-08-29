@@ -1,8 +1,8 @@
 import chalk from "chalk";
-import type { Diagnostic as Diagnostic, DiagnosticReporter } from '../reporter';
+import type { Diagnostic as Diagnostic, DiagnosticReporter, DiagnosticReporterFactory } from '../reporter';
 import { DiagnosticCategory } from '../reporter';
 
-export const createChalkDiagnosticReporter = (): DiagnosticReporter => new ChalkDiagnosticReporter();
+export const createChalkDiagnosticReporter: DiagnosticReporterFactory = (): DiagnosticReporter => new ChalkDiagnosticReporter();
 
 const colors: { [key in DiagnosticCategory]: string } = {
     [DiagnosticCategory.ERROR]: chalk.redBright('[ERROR]')

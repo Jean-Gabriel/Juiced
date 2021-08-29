@@ -1,25 +1,29 @@
-import type { DiagnosticReporter } from "../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../diagnostic/reporter";
-import type { SourceReader } from "../source/reader";
 import { isBoolean, parseBoolean } from "../utils/boolean";
 import { isAlpha, isAlphaNumeric, isDigit } from "../utils/char";
 import { keywords } from "./keywords";
 import { TokenKind } from "./kinds";
 import type { BooleanLiteralTokenKind, NonLiteralTokenKind, NumberLiteralTokenKind, StringLiteralTokenKind, Token } from "./token";
+import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
+import type { SourceReaderFactory } from "../source/reader";
 
 interface Tokenizer {
-    tokenize: () => Token[]
+    tokenize: (source: string) => Token[]
 }
 
-export const createTokenizer = (
-    createSourceReader: () => SourceReader,
-    createDiagnosticReporter: () => DiagnosticReporter
-): Tokenizer => {
+type TokenizerFactoryProps = {
+    createSourceReader: SourceReaderFactory,
+    createDiagnosticReporter: DiagnosticReporterFactory
+}
+
+type TokenizerFactory = (factoryProps: TokenizerFactoryProps) => Tokenizer
+
+export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDiagnosticReporter }): Tokenizer => {
     const IGNORED = ['', ' ', ' \r', '\t'];
 
-    const tokenize = (): Token[] => {
+    const tokenize = (source: string): Token[] => {
         const tokens: Token[] = [];
-        const reader = createSourceReader();
+        const reader = createSourceReader({ source });
         const reporter = createDiagnosticReporter();
 
         const createToken = () => {

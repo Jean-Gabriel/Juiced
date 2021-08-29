@@ -1,10 +1,12 @@
+import type { DiagnosticReporterFactory } from "../../src/diagnostic/reporter";
+
 let errored = false;
 
 const reset = () => {
     errored = false;
 };
 
-export const createTestDiagnoticsReporter = () => {
+export const createTestDiagnoticsReporter: DiagnosticReporterFactory = () => {
     reset();
 
     return {

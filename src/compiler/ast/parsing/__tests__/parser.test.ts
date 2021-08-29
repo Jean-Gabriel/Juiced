@@ -213,12 +213,12 @@ describe('Parser', () => {
     const expectParse = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
-        const tokenizer = createTokenizer(
-            () => createSourceReader({ content: withoutStartAndEndLineBreak }),
-            () => createTestDiagnoticsReporter()
-        );
+        const tokenizer = createTokenizer({
+            createSourceReader,
+            createDiagnosticReporter: createTestDiagnoticsReporter
+        });
 
-        const tokens = tokenizer.tokenize();
+        const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
 
         const reporter = createTestDiagnoticsReporter();
         const parser = createParser(
