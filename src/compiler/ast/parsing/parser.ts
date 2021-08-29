@@ -29,7 +29,7 @@ type ParserFactoryProps = {
 
 type ParserFactory = (factoryProps: ParserFactoryProps) => Parser
 
-export const createParser: ParserFactory = ({ createTokenReader, createDiagnosticReporter }): Parser => {
+export const createParser: ParserFactory = ({ createTokenReader, createDiagnosticReporter }) => {
 
     const EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.IDENTIFIER, TokenKind.OPEN_PARENTHESIS ];
     const TOP_LEVEL_EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.OPEN_PARENTHESIS ];

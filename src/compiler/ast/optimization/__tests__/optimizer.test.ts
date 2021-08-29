@@ -93,9 +93,9 @@ describe('AstOptimizer', () => {
         });
 
         const source= parser.parse(tokens);
-        const optimizer = createAstOptimizer({ source });
+        const optimizer = createAstOptimizer();
 
-        const optimized = optimizer.optimize();
+        const optimized = optimizer.optimize(source);
 
         return {
             toEqual: (expected: Source) => {

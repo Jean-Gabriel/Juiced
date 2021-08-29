@@ -4,17 +4,16 @@ import type { Source, TopLevelDeclaration } from "../nodes/source";
 import type { Statement } from "../nodes/statements/statement";
 
 interface AstOptimizer {
-    optimize: () => Source
+    optimize: (source: Source) => Source
 }
 
-type Props = {
-    source: Source
-}
+type AstOptimizerFactory = () => AstOptimizer
+
 
 // This will remove nodes that are supported by the parser but can never be used such as:
 //      source top-level expressions
 //      function non-returning expressions
-export const createAstOptimizer = ({ source }: Props): AstOptimizer => {
+export const createAstOptimizer: AstOptimizerFactory = () => {
 
     const EXPRESSIONS = [
         AstNodeKind.BINARY,
@@ -58,7 +57,7 @@ export const createAstOptimizer = ({ source }: Props): AstOptimizer => {
     };
 
 
-    const optimize = () => {
+    const optimize = (source: Source) => {
         const toOptimized = AstBuilder.source({ declarations: [...source.declarations] });
 
         const possiblyUsed = possiblyUsedTopLevelDeclarations(toOptimized.declarations);

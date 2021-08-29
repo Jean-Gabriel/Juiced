@@ -18,7 +18,7 @@ type TokenizerFactoryProps = {
 
 type TokenizerFactory = (factoryProps: TokenizerFactoryProps) => Tokenizer
 
-export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDiagnosticReporter }): Tokenizer => {
+export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDiagnosticReporter }) => {
     const IGNORED = ['', ' ', ' \r', '\t'];
 
     const tokenize = (source: string): Token[] => {

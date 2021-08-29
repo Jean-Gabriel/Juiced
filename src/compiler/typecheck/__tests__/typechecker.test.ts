@@ -89,23 +89,20 @@ describe('Typechecker', () => {
         });
 
         const ast = parser.parse(tokens);
-
-        const optimizer = createAstOptimizer({ source: ast });
-        const optimized = optimizer.optimize();
+        const optimizedAst = createAstOptimizer().optimize(ast);
 
         const reporter = createTestDiagnoticsReporter();
         const typechecker = createTypechecker({
-            source: optimized,
-            createDiagnosticReporter: () => reporter
+            createDiagnosticReporter: createTestDiagnoticsReporter
         });
 
         return {
             succeeds: () => {
-                typechecker.check();
+                typechecker.run(optimizedAst);
                 expect(reporter.errored()).toBeFalsy();
             },
             errors: () => {
-                expect(() => typechecker.check()).toThrowError();
+                expect(() => typechecker.run(optimizedAst)).toThrowError();
                 expect(reporter.errored()).toBeTruthy();
             }
         };
