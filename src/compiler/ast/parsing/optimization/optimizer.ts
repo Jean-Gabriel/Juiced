@@ -1,14 +1,13 @@
-import AstBuilder from "../nodes/builder";
-import { AstNodeKind } from "../nodes/node";
-import type { Source, TopLevelDeclaration } from "../nodes/source";
-import type { Statement } from "../nodes/statements/statement";
+import AstBuilder from "../../nodes/builder";
+import { AstNodeKind } from "../../nodes/node";
+import type { Source, TopLevelDeclaration } from "../../nodes/source";
+import type { Statement } from "../../nodes/statements/statement";
 
 interface AstOptimizer {
     optimize: (source: Source) => Source
 }
 
-type AstOptimizerFactory = () => AstOptimizer
-
+export type AstOptimizerFactory = () => AstOptimizer
 
 // This will remove nodes that are supported by the parser but can never be used such as:
 //      source top-level expressions

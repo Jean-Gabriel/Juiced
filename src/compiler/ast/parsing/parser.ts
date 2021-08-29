@@ -13,6 +13,7 @@ import { binaryOperators, unaryOperators } from "../nodes/expressions/operators"
 import type { Expression } from "../nodes/expressions/expression";
 import { isParsingError, ParsingError } from "./error";
 import type { TokenReaderFactory } from "../../token/reader";
+import type { AstOptimizerFactory } from "./optimization/optimizer";
 
 interface Parser {
     parse: (tokens: Token[]) => Source
@@ -24,12 +25,13 @@ interface ErrorHandlingOptions {
 
 type ParserFactoryProps = {
     createTokenReader: TokenReaderFactory,
-    createDiagnosticReporter: DiagnosticReporterFactory
+    createDiagnosticReporter: DiagnosticReporterFactory,
+    createAstOptimizer: AstOptimizerFactory
 }
 
 type ParserFactory = (factoryProps: ParserFactoryProps) => Parser
 
-export const createParser: ParserFactory = ({ createTokenReader, createDiagnosticReporter }) => {
+export const createParser: ParserFactory = ({ createTokenReader, createDiagnosticReporter, createAstOptimizer }) => {
 
     const EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.IDENTIFIER, TokenKind.OPEN_PARENTHESIS ];
     const TOP_LEVEL_EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.OPEN_PARENTHESIS ];
@@ -46,6 +48,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
     const parse = (tokens: Token[]): Source => {
         const reader = createTokenReader({ tokens });
         const reporter = createDiagnosticReporter();
+        const optimizer = createAstOptimizer();
 
         const topLevelDeclaration = (): TopLevelDeclaration => {
             if(reader.currentIs(TokenKind.EXPORT)) {
@@ -81,7 +84,8 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             reader.consume(TokenKind.LET).ifEmpty(() => handleError(new ParsingError('Expected let keyword at start of declaration.')));
 
             const identifier = reader
-                .consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken)
+                .consume(TokenKind.IDENTIFIER)
+                .unguard(stringLiteralToken)
                 .orElseMap(() => {
                     handleError(new ParsingError('Expected identifier after let keyword.'));
                     return EMPTY_IDENTIFIER_TOKEN;
@@ -363,7 +367,8 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             throw new Error('Parsing error.');
         }
 
-        return AstBuilder.source({ declarations: nodes });
+        const source = AstBuilder.source({ declarations: nodes });
+        return optimizer.optimize(source);
     };
 
     return {
