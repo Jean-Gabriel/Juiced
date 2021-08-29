@@ -87,12 +87,12 @@ describe('AstOptimizer', () => {
 
         const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
 
-        const parser = createParser(
-            () => createTokenReader({ tokens }),
-            () => createTestDiagnoticsReporter()
-        );
+        const parser = createParser({
+            createTokenReader,
+            createDiagnosticReporter: createTestDiagnoticsReporter
+        });
 
-        const source= parser.parse();
+        const source= parser.parse(tokens);
         const optimizer = createAstOptimizer({ source });
 
         const optimized = optimizer.optimize();

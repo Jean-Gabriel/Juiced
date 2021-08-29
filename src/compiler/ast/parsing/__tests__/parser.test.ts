@@ -222,18 +222,19 @@ describe('Parser', () => {
         const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
 
         const reporter = createTestDiagnoticsReporter();
-        const parser = createParser(
-            () => createTokenReader({ tokens }),
-            () => reporter
-        );
+        const parser = createParser({
+            createTokenReader,
+            createDiagnosticReporter: () => reporter
+        });
 
         return {
             createsAst: (expected: Source) => {
-                const ast = parser.parse();
+                const ast = parser.parse(tokens);
+
                 expect(JSON.stringify(ast)).toStrictEqual(JSON.stringify(expected));
             },
             errors: (numberOfError: number) => {
-                expect(() => parser.parse()).toThrowError();
+                expect(() => parser.parse(tokens)).toThrowError();
                 expect(reporter.emit).toHaveBeenCalledTimes(numberOfError);
                 expect(reporter.report).toHaveBeenCalledTimes(1);
             }

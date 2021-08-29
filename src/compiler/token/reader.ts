@@ -6,7 +6,8 @@ interface Props {
     tokens: Token[]
 }
 
-export const createTokenReader = ({ tokens }: Props) => new TokenReader({ tokens });
+export type TokenReaderFactory = (props: Props) => TokenReader
+export const createTokenReader: TokenReaderFactory = ({ tokens }: Props) => new TokenReader({ tokens });
 
 export default class TokenReader {
 

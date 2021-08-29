@@ -1,5 +1,4 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
-import { createChalkDiagnosticReporter } from "../../../diagnostic/chalk/reporter";
 import { createAstOptimizer } from "../../ast/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
@@ -84,12 +83,12 @@ describe('Typechecker', () => {
 
         const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
 
-        const parser = createParser(
-            () => createTokenReader({ tokens }),
-            () => createChalkDiagnosticReporter()
-        );
+        const parser = createParser({
+            createTokenReader,
+            createDiagnosticReporter: createTestDiagnoticsReporter
+        });
 
-        const ast = parser.parse();
+        const ast = parser.parse(tokens);
 
         const optimizer = createAstOptimizer({ source: ast });
         const optimized = optimizer.optimize();
