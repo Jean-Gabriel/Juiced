@@ -1,5 +1,5 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
-import { createAstOptimizer } from "../../ast/optimization/optimizer";
+import { createAstOptimizer } from "../../ast/parsing/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
 import { createTokenReader } from "../../token/reader";
@@ -85,11 +85,11 @@ describe('Typechecker', () => {
 
         const parser = createParser({
             createTokenReader,
-            createDiagnosticReporter: createTestDiagnoticsReporter
+            createDiagnosticReporter: createTestDiagnoticsReporter,
+            createAstOptimizer
         });
 
         const ast = parser.parse(tokens);
-        const optimizedAst = createAstOptimizer().optimize(ast);
 
         const reporter = createTestDiagnoticsReporter();
         const typechecker = createTypechecker({
@@ -98,11 +98,11 @@ describe('Typechecker', () => {
 
         return {
             succeeds: () => {
-                typechecker.run(optimizedAst);
+                typechecker.run(ast);
                 expect(reporter.errored()).toBeFalsy();
             },
             errors: () => {
-                expect(() => typechecker.run(optimizedAst)).toThrowError();
+                expect(() => typechecker.run(ast)).toThrowError();
                 expect(reporter.errored()).toBeTruthy();
             }
         };

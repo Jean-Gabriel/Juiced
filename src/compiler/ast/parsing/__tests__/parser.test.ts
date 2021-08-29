@@ -5,6 +5,7 @@ import { createTokenizer } from "../../../token/tokenizer";
 import AstBuilder from "../../nodes/builder";
 import { OperatorKind } from "../../nodes/expressions/operators";
 import type { Source } from "../../nodes/source";
+import { createAstOptimizer } from "../optimization/optimizer";
 import { createParser } from "../parser";
 
 describe('Parser', () => {
@@ -86,23 +87,28 @@ describe('Parser', () => {
 
     it('should parse grouped expression', () => {
         expectParse(`
-            (2 + 2) + 2 / 2
+            export let x = (2 + 2) + 2 / 2
         `).createsAst(
             AstBuilder.source({
                 declarations: [
-                    AstBuilder.binaryExpression({
-                        left: AstBuilder.grouping({
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.variableDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'x' }),
                             expression: AstBuilder.binaryExpression({
-                                left: AstBuilder.intLiteral({ int: 2 }),
+                                left: AstBuilder.grouping({
+                                    expression: AstBuilder.binaryExpression({
+                                        left: AstBuilder.intLiteral({ int: 2 }),
+                                        operator: OperatorKind.PLUS,
+                                        right: AstBuilder.intLiteral({ int: 2 })
+                                    })
+                                }),
                                 operator: OperatorKind.PLUS,
-                                right: AstBuilder.intLiteral({ int: 2 })
+                                right: AstBuilder.binaryExpression({
+                                    left: AstBuilder.intLiteral({ int: 2 }),
+                                    operator: OperatorKind.DIVISION,
+                                    right: AstBuilder.intLiteral({ int: 2 })
+                                })
                             })
-                        }),
-                        operator: OperatorKind.PLUS,
-                        right: AstBuilder.binaryExpression({
-                            left: AstBuilder.intLiteral({ int: 2 }),
-                            operator: OperatorKind.DIVISION,
-                            right: AstBuilder.intLiteral({ int: 2 })
                         })
                     })
                 ]
@@ -113,11 +119,16 @@ describe('Parser', () => {
 
     it('should parse int literal value', () => {
         expectParse(`
-            2
+            export let x = 2
         `).createsAst(
             AstBuilder.source({
                 declarations: [
-                    AstBuilder.intLiteral({ int: 2 })
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.variableDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'x' }),
+                            expression: AstBuilder.intLiteral({ int: 2 })
+                        })
+                    })
                 ]
             })
         );
@@ -125,11 +136,16 @@ describe('Parser', () => {
 
     it('should parse float literal value', () => {
         expectParse(`
-            2.0
+            export let x = 2.0
         `).createsAst(
             AstBuilder.source({
                 declarations: [
-                    AstBuilder.floatLiteral({ float: 2 })
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.variableDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'x' }),
+                            expression: AstBuilder.floatLiteral({ float: 2 })
+                        })
+                    })
                 ]
             })
         );
@@ -137,75 +153,70 @@ describe('Parser', () => {
 
     it('should parse boolean literal value', () => {
         expectParse(`
-            !false == true
+            export let x = !false == true
         `).createsAst(
             AstBuilder.source({
                 declarations: [
-                    AstBuilder.binaryExpression({
-                        left: AstBuilder.unaryExpression({
-                            operator: OperatorKind.NOT,
-                            expression: AstBuilder.booleanLiteral({ bool: false })
-                        }),
-                        operator: OperatorKind.EQUAL_EQUAL,
-                        right: AstBuilder.booleanLiteral({ bool: true })
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.variableDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'x' }),
+                            expression: AstBuilder.binaryExpression({
+                                left: AstBuilder.unaryExpression({
+                                    operator: OperatorKind.NOT,
+                                    expression: AstBuilder.booleanLiteral({ bool: false })
+                                }),
+                                operator: OperatorKind.EQUAL_EQUAL,
+                                right: AstBuilder.booleanLiteral({ bool: true })
+                            })
+                        })
                     })
                 ]
             })
         );
     });
 
+    it('should ignore not exported expressions in functions', () => {
+        expectParse(`
+            export let fun = () -> i32 {
+                1 + 1
+                1
+            }
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.exportation({
+                        declaration: AstBuilder.functionDeclaration({
+                            identifier: AstBuilder.identifier({ value: 'fun' }),
+                            args: [],
+                            type: AstBuilder.identifier({ value: 'i32' }),
+                            statements: [
+                                AstBuilder.intLiteral({ int: 1})
+                            ]
+                        })
+                    })
+                ]
+            })
+        );
+    });
 
-    it('should parse top level expression', () => {
+    it('should ignore top level expressions', () => {
         expectParse(`
             1 * 2
         `).createsAst(
             AstBuilder.source({
-                declarations: [
-                    AstBuilder.binaryExpression({
-                        left: AstBuilder.intLiteral({ int: 1 }),
-                        operator: OperatorKind.MULTIPLICATION,
-                        right: AstBuilder.intLiteral({ int: 2 })
-                    })
-                ]
+                declarations: []
             })
         );
     });
 
-    it('should recover when encountering error', () => {
-        expectParse(`
-            let a = 1 + 1
-            export let a = (a: i32 b: i32) -> i32 {
-                () -> 1
-                let x = a + b
-                x
-            }
-        `).errors(3);
-        // Error: unexported top level declaration
-        // Error: no coma between arguments
-        // Error: invalid syntax in function body
-    });
-
-    it('should recover from broken expressions', () => {
-        expectParse(`
-            (2 + 1 / 3
-            export let a = (a: i32, b: i32) -> i32 {
-                1 + + 2 3
-                let x = 1
-                x
-            }
-        `).errors(2);
-        // Error: unexpected expression
-        // Error: invalid binary
-    });
-
-    it('should not parse not exported top level expression', () => {
+    it('should not parse not exported top level function declaration', () => {
         expectParse(`
             let a = () -> i32 {}
             export let a = () -> i32 {}
         `).errors(1);
     });
 
-    it('should not parse top level variable declaration', () => {
+    it('should not parse not exported top level variable declaration', () => {
         expectParse(`
             let a = 1
         `).errors(1);
@@ -224,7 +235,8 @@ describe('Parser', () => {
         const reporter = createTestDiagnoticsReporter();
         const parser = createParser({
             createTokenReader,
-            createDiagnosticReporter: () => reporter
+            createDiagnosticReporter: () => reporter,
+            createAstOptimizer
         });
 
         return {
