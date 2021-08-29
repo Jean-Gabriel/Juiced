@@ -149,7 +149,7 @@ export const createTokenizer = (
 
         if(reporter.errored()) {
             reporter.report();
-            throw new Error('Encountered illegal characters while creating tokens.');
+            throw new Error('Tokenizing error.');
         }
 
         return tokens;
