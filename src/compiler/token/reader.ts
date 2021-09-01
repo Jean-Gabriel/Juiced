@@ -1,5 +1,5 @@
 import { Optional } from "../../common/optional";
-import type { TokenKind } from "./kinds";
+import { TokenKind } from "./kinds";
 import type { Token } from "./token";
 
 interface Props {
@@ -32,6 +32,10 @@ export default class TokenReader {
             return Optional.empty();
         }
 
+        if(this.currentIs(TokenKind.FRESH_LINE) && !kinds.includes(TokenKind.FRESH_LINE)) {
+            this.advance();
+        }
+
         const current = this.tokens[this.index];
         if(!kinds.includes(current.kind)) {
             return Optional.empty();
@@ -47,14 +51,19 @@ export default class TokenReader {
         }
 
         const token = this.tokens[this.index];
+        if(this.tokens[this.index].kind === TokenKind.FRESH_LINE && !kinds.includes(TokenKind.FRESH_LINE)) {
+            this.advance();
+        }
+
         return kinds.includes(token.kind);
     }
 
-    containsUntil(token: TokenKind, condistionIsMet: (current: Token) => boolean) {
+    lookupForUntil(token: TokenKind, condistionIsMet: (current: Token) => boolean) {
         let index = this.index;
-        let isAtEnd = index >= this.tokens.length;
+        let isAtEnd = () => index >= this.tokens.length;
+
         let current = this.tokens[index];
-        while(current && !condistionIsMet(current) && !isAtEnd) {
+        while(current && !condistionIsMet(current) && !isAtEnd()) {
             if(current.kind === token) {
                 return true;
             }

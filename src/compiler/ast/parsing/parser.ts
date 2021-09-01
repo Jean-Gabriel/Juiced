@@ -20,7 +20,7 @@ interface Parser {
 }
 
 interface ErrorHandlingOptions {
-    recoverTo?: TokenKind[]
+    recoverAfter?: TokenKind[]
 }
 
 type ParserFactoryProps = {
@@ -32,9 +32,6 @@ type ParserFactoryProps = {
 type ParserFactory = (factoryProps: ParserFactoryProps) => Parser
 
 export const createParser: ParserFactory = ({ createTokenReader, createDiagnosticReporter, createAstOptimizer }) => {
-
-    const EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.IDENTIFIER, TokenKind.OPEN_PARENTHESIS ];
-    const TOP_LEVEL_EXPRESSION_TOKENS = [ TokenKind.INT, TokenKind.FLOAT, TokenKind.BOOLEAN, TokenKind.OPEN_PARENTHESIS ];
 
     const EMPTY_TOKEN: Token = { kind: TokenKind.ARROW, lexeme: '', line: 0 };
 
@@ -56,15 +53,13 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             }
 
             if(reader.currentIs(TokenKind.IDENTIFIER)) {
-                declaration(); //it will supported later so let's parse it for now and count it as an error
-                handleError(new ParsingError('Top level declaration must be exported.'));
-                return EMPTY_EXPRESSION;
+                return declaration();
             }
 
             try {
                 return expression();
             } catch(e: unknown) {
-                handleError(e, { recoverTo: [ TokenKind.EXPORT, ...TOP_LEVEL_EXPRESSION_TOKENS ] });
+                handleError(e, { recoverAfter: [ TokenKind.FRESH_LINE, TokenKind.SEMICOLON ] });
                 return EMPTY_EXPRESSION;
             }
         };
@@ -75,28 +70,21 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             try {
                 return AstBuilder.exportation({ declaration: declaration() });
             } catch(e: unknown) {
-                handleError(e);
+                handleError(e, { recoverAfter: [TokenKind.FRESH_LINE, TokenKind.SEMICOLON] });
                 return EMPTY_EXPORT;
             }
         };
 
         const declaration = () => {
-            reader.consume(TokenKind.LET).ifEmpty(() => handleError(new ParsingError('Expected let keyword at start of declaration.')));
-
             const identifier = reader
                 .consume(TokenKind.IDENTIFIER)
                 .unguard(stringLiteralToken)
-                .orElseMap(() => {
-                    handleError(new ParsingError('Expected identifier after let keyword.'));
-                    return EMPTY_IDENTIFIER_TOKEN;
-                });
+                .orElseThrow(new ParsingError('Expected identifier at the start of a declaration.'));
 
             reader.consume(TokenKind.EQUAL).ifEmpty(() => handleError(new ParsingError('Expected = after identifier.')));
 
-            if(reader.currentIs(TokenKind.OPEN_PARENTHESIS)) {
-                if(reader.containsUntil(TokenKind.ARROW, (token) => token.kind === TokenKind.OPEN_BRACKETS)) {
-                    return functionDeclaration(identifier);
-                }
+            if(reader.currentIs(TokenKind.FUN)) {
+                return functionDeclaration(identifier);
             }
 
             try {
@@ -108,34 +96,36 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         };
 
         const statement = () => {
-            if(reader.currentIs(TokenKind.LET)) {
-                return variableDeclarationStatement();
+            if(reader.currentIs(TokenKind.IDENTIFIER)) {
+                if(reader.lookupForUntil(TokenKind.CONST, (token) => token.kind === TokenKind.FRESH_LINE)) {
+                    return variableDeclarationStatement();
+                }
             }
 
             try {
                 return expression();
             } catch(e: unknown) {
-                handleError(e, { recoverTo: [ TokenKind.LET, TokenKind.CLOSE_BRACKETS, ...EXPRESSION_TOKENS ] });
+                handleError(e, { recoverAfter: [ TokenKind.FRESH_LINE, TokenKind.SEMICOLON ] });
                 return EMPTY_EXPRESSION;
             }
         };
 
         const variableDeclarationStatement = () => {
-            reader.consume(TokenKind.LET);
-
             const identifier = reader
                 .consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken)
                 .orElseMap(() => {
-                    handleError(new ParsingError('Expected identifier after let keyword.'));
+                    handleError(new Error('Tried to create a variable declaration without an identifier.'));
                     return EMPTY_IDENTIFIER_TOKEN;
                 });
 
             reader.consume(TokenKind.EQUAL).ifEmpty(() => handleError(new ParsingError('Expected = after identifier.')));
+            reader.consume(TokenKind.CONST).ifEmpty(() => handleError(new ParsingError('Expected variable declaration to be a constant.')));
 
             return variableDeclaration(identifier);
         };
 
         const functionDeclaration = (identifier: StringLiteralToken) => {
+            reader.consume(TokenKind.FUN).orElseThrow(new Error('Tried to create a function declaration without a fun keyword.'));
             reader.consume(TokenKind.OPEN_PARENTHESIS).ifEmpty(() => handleError(new ParsingError('Expected ( after = keyword in function declaration.')));
             const args = functionArguments();
             reader.consume(TokenKind.CLOSE_PARENTHESIS).ifEmpty(() => handleError(new ParsingError('Expected ) after typed arguments in function declaration.')));
@@ -143,7 +133,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             reader.consume(TokenKind.ARROW)
                 .ifEmpty(() => {
                         handleError(new ParsingError('Expected -> after arguments in function declaration.'));
-                        recover(TokenKind.OPEN_BRACKETS);
+                        recover(TokenKind.FRESH_LINE);
                     }
                 );
 
@@ -154,9 +144,10 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                     return EMPTY_TOKEN;
                 });
 
-            reader.consume(TokenKind.OPEN_BRACKETS).ifEmpty(() => handleError(new ParsingError('Expected { after type in function declaration.')));
+            reader.consume(TokenKind.FRESH_LINE).ifEmpty(() => handleError(new ParsingError('Expected fresh line at start of function body.')));
             const body = functionBody();
-            reader.consume(TokenKind.CLOSE_BRACKETS).ifEmpty(() => handleError(new ParsingError('Expected } after body in function declaration.')));
+            reader.consume(TokenKind.SEMICOLON).ifEmpty(() => handleError(new ParsingError('Expected semicolon at end of function body.')));
+
 
             return AstBuilder.functionDeclaration({
                 identifier: AstBuilder.identifier({ value: identifier.literal }),
@@ -169,7 +160,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         const functionArguments = () => {
             const args: TypedIdentifier[] = [];
 
-            while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS)) {
+            while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS) && !reader.isAtEnd()) {
                 if(args.length) {
                     reader.consume(TokenKind.COMA).ifEmpty(() => handleError(new ParsingError('Arguments needs to be separated by a coma.')));
                 }
@@ -199,7 +190,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         const functionBody = () => {
             const statements: Statement[] = [];
 
-            while(!reader.currentIs(TokenKind.CLOSE_BRACKETS)) {
+            while(!reader.currentIs(TokenKind.SEMICOLON) && !reader.isAtEnd()) {
                 statements.push(statement());
             }
 
@@ -207,6 +198,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         };
 
         const variableDeclaration = (identifier: StringLiteralToken) => {
+            reader.consume(TokenKind.CONST).orElseThrow(new Error('Expected variable declaration to be a constant.'));
             let expr: Expression;
 
             try {
@@ -216,6 +208,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 expr = EMPTY_EXPRESSION;
             }
 
+            reader.consume(TokenKind.SEMICOLON).ifEmpty(() => handleError(new ParsingError('Expected semicolon at end of variable declaration.')));
             return AstBuilder.variableDeclaration({ identifier: AstBuilder.identifier({ value: identifier.literal}), expression: expr });
         };
 
@@ -344,6 +337,8 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             while(!reader.currentIs(...kinds) && !reader.isAtEnd()) {
                 reader.advance();
             }
+
+            reader.advance();
         };
 
         const handleError = (error: unknown, options?: ErrorHandlingOptions) => {
@@ -353,8 +348,8 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
 
             reporter.emit({ category: DiagnosticCategory.ERROR, message: error.message });
 
-            if(options && options.recoverTo) {
-                recover(...options.recoverTo);
+            if(options && options.recoverAfter) {
+                recover(...options.recoverAfter);
             }
         };
 

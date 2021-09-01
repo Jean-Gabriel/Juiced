@@ -1,8 +1,9 @@
+import type { Declaration } from "./declarations/declaration";
 import type { Export } from "./export";
 import type { Expression } from "./expressions/expression";
 import type { AstNode, AstNodeKind } from "./node";
 
-export type TopLevelDeclaration = Export | Expression
+export type TopLevelDeclaration = Export | Declaration | Expression
 
 export interface Source extends AstNode {
     kind: AstNodeKind.SOURCE
