@@ -1,3 +1,5 @@
+import { isAlphaNumeric } from "../utils/char";
+
 type Props = {
     source: string
 }
@@ -25,18 +27,29 @@ export class SourceReader {
         }
     }
 
+    atFreshLine(): boolean {
+        let index = this.index;
+        let conditionIsMet = false;
+
+        let current = this.source.charAt(index++);
+        while(current != '\n' && index < this.source.length) {
+            if(isAlphaNumeric(current)) {
+                conditionIsMet = true;
+                break;
+            }
+
+            current = this.source.charAt(index++);
+        }
+
+        return conditionIsMet;
+    }
+
     read(): string | null {
         if (this.isAtEnd()) {
             return null;
         }
 
-        let current = this.source.charAt(this.index++);
-        while(current && current === '\n') {
-            this.line++;
-            current = this.source.charAt(this.index++);
-        }
-
-        return current || null;
+        return this.source.charAt(this.index++);
     }
 
     match(expected: string): boolean {
@@ -79,6 +92,10 @@ export class SourceReader {
         }
 
         return this.source.charAt(nextIndex);
+    }
+
+    nextLine() {
+        this.line++;
     }
 
     position() {

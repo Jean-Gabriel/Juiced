@@ -57,12 +57,27 @@ describe('SourceReader', () => {
         expect(reader.read()).toBeNull();
     });
 
-    it('should increment line when reading new line', () => {
-        const reader = givenSourceReader('\n\n');
+    it('should increment line', () => {
+        const reader = givenSourceReader('');
 
+        reader.nextLine();
+
+        expect(reader.lineIndex()).toEqual(2);
+    });
+
+    it('should be on a fresh line when reader is on a line with at least one alphanumeric character', () => {
+        const reader = givenSourceReader(`
+            this is a new line
+        `);
         reader.read();
 
-        expect(reader.lineIndex()).toEqual(3);
+        expect(reader.atFreshLine()).toBeTruthy();
+    });
+
+    it('it should not be on a fresh line when the reader is on a line with no alphanumeric character', () => {
+        const reader = givenSourceReader(``);
+
+        expect(reader.atFreshLine()).toBeFalsy();
     });
 
     it('should return read char', () => {

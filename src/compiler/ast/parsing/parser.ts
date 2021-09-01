@@ -55,7 +55,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 return exportDeclaration();
             }
 
-            if(reader.currentIs(TokenKind.LET)) {
+            if(reader.currentIs(TokenKind.IDENTIFIER)) {
                 declaration(); //it will supported later so let's parse it for now and count it as an error
                 handleError(new ParsingError('Top level declaration must be exported.'));
                 return EMPTY_EXPRESSION;
