@@ -53,7 +53,11 @@ export default class TokenReader {
         const token = this.tokens[this.index];
         if(this.tokens[this.index].kind === TokenKind.FRESH_LINE && !kinds.includes(TokenKind.FRESH_LINE)) {
             this.advance();
+
+            const nextToken = this.tokens[this.index];
+            return kinds.includes(nextToken.kind);
         }
+
 
         return kinds.includes(token.kind);
     }
