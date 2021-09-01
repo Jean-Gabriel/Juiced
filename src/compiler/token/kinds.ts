@@ -1,6 +1,4 @@
 export enum TokenKind {
-    LET,
-
     FRESH_LINE,
 
     CONST,
