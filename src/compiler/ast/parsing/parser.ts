@@ -88,7 +88,9 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             }
 
             try {
-                return variableDeclaration(identifier);
+                const variable = variableDeclaration(identifier);
+                reader.consume(TokenKind.SEMICOLON).ifEmpty(() => handleError(new ParsingError('Expected semicolon at end of variable declaration.')));
+                return variable;
             } catch(e: unknown) {
                 handleError(e);
                 return EMPTY_VARIABLE_DECLARATION;
@@ -119,7 +121,6 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 });
 
             reader.consume(TokenKind.EQUAL).ifEmpty(() => handleError(new ParsingError('Expected = after identifier.')));
-            reader.consume(TokenKind.CONST).ifEmpty(() => handleError(new ParsingError('Expected variable declaration to be a constant.')));
 
             return variableDeclaration(identifier);
         };
@@ -147,7 +148,6 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             reader.consume(TokenKind.FRESH_LINE).ifEmpty(() => handleError(new ParsingError('Expected fresh line at start of function body.')));
             const body = functionBody();
             reader.consume(TokenKind.SEMICOLON).ifEmpty(() => handleError(new ParsingError('Expected semicolon at end of function body.')));
-
 
             return AstBuilder.functionDeclaration({
                 identifier: AstBuilder.identifier({ value: identifier.literal }),
@@ -198,7 +198,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         };
 
         const variableDeclaration = (identifier: StringLiteralToken) => {
-            reader.consume(TokenKind.CONST).orElseThrow(new Error('Expected variable declaration to be a constant.'));
+            reader.consume(TokenKind.CONST).ifEmpty(() => handleError(new ParsingError('Expected variable declaration to be a constant.')));
             let expr: Expression;
 
             try {
@@ -208,7 +208,6 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 expr = EMPTY_EXPRESSION;
             }
 
-            reader.consume(TokenKind.SEMICOLON).ifEmpty(() => handleError(new ParsingError('Expected semicolon at end of variable declaration.')));
             return AstBuilder.variableDeclaration({ identifier: AstBuilder.identifier({ value: identifier.literal}), expression: expr });
         };
 

@@ -1,4 +1,5 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
+import { createChalkDiagnosticReporter } from "../../../diagnostic/chalk/reporter";
 import { createAstOptimizer } from "../../ast/parsing/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
@@ -30,10 +31,10 @@ describe('Typechecker', () => {
     it('variable declarations in a lower scope cannot be accessed in a higher scope', () => {
         expectTypechecking(`
             function = fun () -> f32
-                let lower_scope_val = 1.0
+                lower_scope_val = const 1.0
                 1.0;
 
-            let error = const lower_scope_val; 
+            error = const lower_scope_val; 
         `).errors();
     });
 
@@ -44,7 +45,7 @@ describe('Typechecker', () => {
 
         expectTypechecking(`
             references_undeclared_variable = fun () -> f32
-                let errors = does_not_exists
+                errors = const does_not_exists
                 1.0;
         `).errors();
     });
@@ -52,15 +53,15 @@ describe('Typechecker', () => {
     it('expressions should use values or other expressions of same type', () => {
         expectTypechecking(`
             function = fun (float_val: f32) -> f32
-                let other_float_val = 1.0
+                other_float_val = const 1.0
 
                 float_val + other_float_val;
         `).succeeds();
 
         expectTypechecking(`
             function = fun (float_val: f32) -> f32
-                let int_val = 1
-                let bool_val = false
+                int_val = const 1
+                bool_val = const false
 
                 float_val + bool_val + int_val;
         `).errors();
@@ -78,7 +79,7 @@ describe('Typechecker', () => {
 
         const parser = createParser({
             createTokenReader,
-            createDiagnosticReporter: createTestDiagnoticsReporter,
+            createDiagnosticReporter: createChalkDiagnosticReporter,
             createAstOptimizer
         });
 
