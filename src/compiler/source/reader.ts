@@ -27,21 +27,22 @@ export class SourceReader {
         }
     }
 
-    atFreshLine(): boolean {
+    // A fresh line is a new line followed by an alphanumeric character
+    isAtFreshLine(): boolean {
         let index = this.index;
-        let conditionIsMet = false;
+        let isFreshLine = false;
 
         let current = this.source.charAt(index++);
-        while(current != '\n' && index < this.source.length) {
+        while(current != '\n' && !this.isPositionAtEnd(index)) {
             if(isAlphaNumeric(current)) {
-                conditionIsMet = true;
+                isFreshLine = true;
                 break;
             }
 
             current = this.source.charAt(index++);
         }
 
-        return conditionIsMet;
+        return isFreshLine;
     }
 
     read(): string | null {
@@ -74,7 +75,7 @@ export class SourceReader {
     }
 
     isAtEnd(): boolean {
-        return this.index >= this.source.length;
+        return this.isPositionAtEnd(this.index);
     }
 
     current() {
@@ -100,5 +101,9 @@ export class SourceReader {
 
     position() {
         return this.index;
+    }
+
+    private isPositionAtEnd(position: number) {
+        return position >= this.source.length;
     }
 }

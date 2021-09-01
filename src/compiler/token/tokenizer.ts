@@ -130,7 +130,7 @@ export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDi
                 case '\n': {
                     let token = null;
 
-                    if(reader.atFreshLine()) {
+                    if(reader.isAtFreshLine()) {
                         token = createNonLiteralToken(TokenKind.FRESH_LINE);
                     }
 

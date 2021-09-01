@@ -21,10 +21,10 @@ export default class TokenReader {
 
     advance() {
         if(this.isAtEnd()) {
-            return;
+            return null;
         }
 
-        return this.index++;
+        return this.tokens[++this.index];
     }
 
     consume(...kinds: TokenKind[]): Optional<Token> {
@@ -32,7 +32,9 @@ export default class TokenReader {
             return Optional.empty();
         }
 
-        if(this.currentIs(TokenKind.FRESH_LINE) && !kinds.includes(TokenKind.FRESH_LINE)) {
+        const isLookingForFreshLine = kinds.includes(TokenKind.FRESH_LINE);
+        // This is a design choice so that the parser is looser on fresh lines
+        if(this.currentIs(TokenKind.FRESH_LINE) && !isLookingForFreshLine) {
             this.advance();
         }
 
@@ -51,10 +53,15 @@ export default class TokenReader {
         }
 
         const token = this.tokens[this.index];
-        if(this.tokens[this.index].kind === TokenKind.FRESH_LINE && !kinds.includes(TokenKind.FRESH_LINE)) {
-            this.advance();
+        const isLookingForFreshLine = kinds.includes(TokenKind.FRESH_LINE);
+        // This is a design choice so that the parser is looser on fresh lines
+        if(token.kind === TokenKind.FRESH_LINE && !isLookingForFreshLine) {
+            const nextToken = this.advance();
 
-            const nextToken = this.tokens[this.index];
+            if(!nextToken) {
+                return false;
+            }
+
             return kinds.includes(nextToken.kind);
         }
 
@@ -62,15 +69,15 @@ export default class TokenReader {
         return kinds.includes(token.kind);
     }
 
-    lookupForUntil(token: TokenKind, condistionIsMet: (current: Token) => boolean) {
+    lookupForUntil(kind: TokenKind, condistionIsMet: (current: Token) => boolean) {
         let index = this.index;
-        let isAtEnd = () => index >= this.tokens.length;
 
         let current = this.tokens[index];
-        while(current && !condistionIsMet(current) && !isAtEnd()) {
-            if(current.kind === token) {
+        while(current && !condistionIsMet(current) && !this.isPositionAtEnd(index)) {
+            if(current.kind === kind) {
                 return true;
             }
+
             current = this.tokens[index++];
         }
 
@@ -78,6 +85,10 @@ export default class TokenReader {
     }
 
     isAtEnd(): boolean {
-        return this.index >= this.tokens.length;
+        return this.isPositionAtEnd(this.index);
+    }
+
+    private isPositionAtEnd(position: number) {
+        return position >= this.tokens.length;
     }
 }

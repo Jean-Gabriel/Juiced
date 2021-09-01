@@ -67,17 +67,17 @@ describe('SourceReader', () => {
 
     it('should be on a fresh line when reader is on a line with at least one alphanumeric character', () => {
         const reader = givenSourceReader(`
-            this is a new line
+            this is a fresh line
         `);
         reader.read();
 
-        expect(reader.atFreshLine()).toBeTruthy();
+        expect(reader.isAtFreshLine()).toBeTruthy();
     });
 
     it('it should not be on a fresh line when the reader is on a line with no alphanumeric character', () => {
         const reader = givenSourceReader(``);
 
-        expect(reader.atFreshLine()).toBeFalsy();
+        expect(reader.isAtFreshLine()).toBeFalsy();
     });
 
     it('should return read char', () => {
