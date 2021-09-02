@@ -4,6 +4,7 @@ juice-file ::=
 
 top-level-declaration ::= 
     | export-declaration
+    | declaration
     | expression
 
 export-declaration ::=
@@ -13,12 +14,11 @@ declaration ::=
     | function-declaration
     | variable-declaration
 
-function-declaration ::= 'let' identifier '=' function-arguments (':' type) '->' function-body
+function-declaration ::= identifier '=' 'fun' function-arguments (':' type) '->' type function-body
 function-arguments ::= '(' ((typed-identifier) (',' typed-identifier)* ))? ')'
 function-body ::= block
 
-variable-declaration ::= 
-    | 'let' identifier '=' expression
+variable-declaration ::= identifier '=' 'const' expression
 
 block ::=  '{' statements* '}'
 
@@ -26,27 +26,31 @@ statements ::=
     | variable-declaration
     | expression
 
-expression ::= 
-    | equality
-
+expression ::= equality
 equality ::= comparison ( ( "!=" | "==" ) comparison )*
 comparison ::= addition ( ( ">" | ">=" | "<" | "<=" ) addition )*
 addition ::= multiplication ( ( "-" | "+" ) multiplication )*
 multiplication ::= unary ( ( "/" | "*" ) unary )*
+
 unary ::= 
     | ( "!" | "-"  | "+" ) unary 
-    | identifier
-    | LITERAL
+    | primary
 
-primary =
-    | LITERAL
+primary ::=
+    | literal
     | identifier
     | "(" expression ")"
 
 typed-identifier ::= identifier ':' type
+
 type ::= 
     | BOOLEAN_TYPE
     | INT_TYPE
     | FLOAT_TYPE
+
+literal ::=
+    | FLOAT_LITERAL
+    | INT_LITERAL
+    | BOOLEAN_LITERAL
 
 identifier ::= IDENTIFIER

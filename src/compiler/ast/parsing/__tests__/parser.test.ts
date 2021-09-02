@@ -1,5 +1,4 @@
 import { createTestDiagnoticsReporter } from "../../../../../test/diagnostic/reporter";
-import { createChalkDiagnosticReporter } from "../../../../diagnostic/chalk/reporter";
 import { createSourceReader } from "../../../source/reader";
 import { createTokenReader } from "../../../token/reader";
 import { createTokenizer } from "../../../token/tokenizer";
@@ -210,6 +209,44 @@ describe('Parser', () => {
         );
     });
 
+    it('should recover from broken variable declaration to semicolon', () => {
+        expectParse(`
+            error = const 2 + + * 2;
+            y = const 2 + 2;
+        `).errors(1);
+    });
+
+    it('should recover from broken function declaration to semicolon', () => {
+        expectParse(`
+            export error = fun () -> not_supported_return_type;
+            y = const 2 + 2;
+        `).errors(1);
+    });
+
+    it('should recover from broken function body to semicolon', () => {
+        expectParse(`
+            export error = fun () -> i32
+                1 * * 1
+                1;
+            y = const 2 + 2;
+        `).errors(1);
+    });
+
+    it('should recover to semi colon everytime it encounters an error', () => {
+        expectParse(`
+            error_1 = const 2 + + * 2;
+            y = const 2 + 2;
+            error_2 = fun 2 + 2;
+        `).errors(2);
+    });
+
+    it('it should not be able to recover when it cannot find a semi colon', () => {
+        expectParse(`
+            error = const 2 + + * 2
+            y = const 2 + 2
+        `).errors(1); // there is only one error because it could not recover
+    });
+
     const expectParse = (sequence: string) => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
@@ -220,7 +257,7 @@ describe('Parser', () => {
 
         const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
 
-        const reporter = createChalkDiagnosticReporter();
+        const reporter = createTestDiagnoticsReporter();
         const parser = createParser({
             createTokenReader,
             createDiagnosticReporter: () => reporter,

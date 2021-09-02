@@ -58,4 +58,8 @@ export class Optional<T> {
             return f();
         }
     }
+
+    isPresent() {
+        return this.value !== null;
+    }
 }
