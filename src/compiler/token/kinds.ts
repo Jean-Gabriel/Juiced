@@ -1,5 +1,6 @@
 export enum TokenKind {
-    LET,
+    CONST,
+    FUN,
     EXPORT,
 
     EQUAL,
@@ -21,6 +22,7 @@ export enum TokenKind {
     CLOSE_BRACKETS,
 
     COLON,
+    SEMICOLON,
     COMA,
 
     ARROW,

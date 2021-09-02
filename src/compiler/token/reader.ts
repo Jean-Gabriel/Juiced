@@ -21,10 +21,10 @@ export default class TokenReader {
 
     advance() {
         if(this.isAtEnd()) {
-            return;
+            return null;
         }
 
-        return this.index++;
+        return this.tokens[++this.index];
     }
 
     consume(...kinds: TokenKind[]): Optional<Token> {
@@ -50,14 +50,15 @@ export default class TokenReader {
         return kinds.includes(token.kind);
     }
 
-    containsUntil(token: TokenKind, condistionIsMet: (current: Token) => boolean) {
+    lookupForUntil(kind: TokenKind, condistionIsMet: (current: Token) => boolean) {
         let index = this.index;
-        let isAtEnd = index >= this.tokens.length;
+
         let current = this.tokens[index];
-        while(current && !condistionIsMet(current) && !isAtEnd) {
-            if(current.kind === token) {
+        while(current && !condistionIsMet(current) && !this.isPositionAtEnd(index)) {
+            if(current.kind === kind) {
                 return true;
             }
+
             current = this.tokens[index++];
         }
 
@@ -65,6 +66,10 @@ export default class TokenReader {
     }
 
     isAtEnd(): boolean {
-        return this.index >= this.tokens.length;
+        return this.isPositionAtEnd(this.index);
+    }
+
+    private isPositionAtEnd(position: number) {
+        return position >= this.tokens.length;
     }
 }

@@ -39,37 +39,15 @@ describe('Optional', () => {
         expect(() => empty.orElseThrow(error)).toThrow(error);
     });
 
-    it('should not execute function if present', () => {
+    it('should be present when value is not empty', () => {
         const present = Optional.of(1);
-        const fn = jest.fn();
 
-        present.ifEmpty(fn);
-
-        expect(fn).toHaveBeenCalledTimes(0);
+        expect(present.isPresent()).toBeTruthy();
     });
 
-    it('should execute function if empty', () => {
-        const empty = Optional.empty();
-        const fn = jest.fn();
-
-        empty.ifEmpty(fn);
-
-        expect(fn).toHaveBeenCalledTimes(1);
-    });
-
-    it('should map if empty', () => {
+    it('should not be present when value is empty', () => {
         const empty = Optional.empty();
 
-        const mapped = empty.orElseMap(() => 1);
-
-        expect(mapped).toEqual(1);
-    });
-
-    it('should not map if present', () => {
-        const empty = Optional.of('not-mapped');
-
-        const notMapped = empty.orElseMap(() => 'mapped');
-
-        expect(notMapped).toEqual('not-mapped');
+        expect(empty.isPresent()).toBeFalsy();
     });
 });

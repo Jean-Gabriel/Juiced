@@ -74,6 +74,39 @@ describe('TokenReader', () => {
         expect(isTokenKind).toBeFalsy();
     });
 
+    it('should find token until condition is met', () => {
+        const reader = createTokenReader({ tokens: [
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW)),
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.FUN)),
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.CONST))
+        ]});
+
+        const found = reader.lookupForUntil(TokenKind.FUN, (token) => token.kind === TokenKind.CONST);
+
+        expect(found).toBeTruthy();
+    });
+
+    it('should not find missing token token until condition is met', () => {
+        const reader = createTokenReader({ tokens: [
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW)),
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.FUN)),
+        ]});
+
+        const found = reader.lookupForUntil(TokenKind.CONST, (token) => token.kind === TokenKind.FUN);
+
+        expect(found).toBeFalsy();
+    });
+
+    it('given condition is never met, it should not find token', () => {
+        const reader = createTokenReader({ tokens: [
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+        ]});
+
+        const found = reader.lookupForUntil(TokenKind.CONST, (token) => token.kind === TokenKind.FUN);
+
+        expect(found).toBeFalsy();
+    });
+
     describe('given reader is at end', () => {
 
         it('should be at end', () => {

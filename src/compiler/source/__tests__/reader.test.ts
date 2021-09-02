@@ -57,7 +57,7 @@ describe('SourceReader', () => {
         expect(reader.read()).toBeNull();
     });
 
-    it('should increment line when reading new line', () => {
+    it('should increment line when encoutering a new line', () => {
         const reader = givenSourceReader('\n\n');
 
         reader.read();

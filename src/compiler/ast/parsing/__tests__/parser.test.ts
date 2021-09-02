@@ -11,7 +11,8 @@ import { createParser } from "../parser";
 describe('Parser', () => {
     it('should parse top level exported function declaration', () => {
         expectParse(`
-            export let add = (a: i32, b: i32) -> i32 {}
+            export add = fun (a: i32, b: i32) -> i32
+                0;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -20,7 +21,9 @@ describe('Parser', () => {
                         identifier: AstBuilder.identifier({ value: 'add' }),
                         args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32'}), AstBuilder.typedIdentifier({ value: 'b', type: 'i32'}) ],
                         type: AstBuilder.identifier({ value: 'i32' }),
-                        statements: []
+                        statements: [
+                            AstBuilder.intLiteral({ int: 0 })
+                        ]
                     })
                 })
             ]})
@@ -29,9 +32,8 @@ describe('Parser', () => {
 
     it('should parse variable declaration in function', () => {
         expectParse(`
-            export let areEqual = (a: i32, b: i32) -> i32 {
-                let x = a == b
-            }
+            export areEqual = fun (a: i32, b: i32) -> i32
+                x = const a == b;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -58,9 +60,8 @@ describe('Parser', () => {
 
     it('should parse return expression in function', () => {
         expectParse(`
-            export let math = () -> i32 {
-                2 * -4
-            }
+            export math = fun () -> i32
+                2 * -4;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -87,7 +88,7 @@ describe('Parser', () => {
 
     it('should parse grouped expression', () => {
         expectParse(`
-            export let x = (2 + 2) + 2 / 2
+            export x = const (2 + 2) + 2 / 2;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -119,7 +120,7 @@ describe('Parser', () => {
 
     it('should parse int literal value', () => {
         expectParse(`
-            export let x = 2
+            export x = const 2;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -136,7 +137,7 @@ describe('Parser', () => {
 
     it('should parse float literal value', () => {
         expectParse(`
-            export let x = 2.0
+            export x = const 2.0;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -153,7 +154,7 @@ describe('Parser', () => {
 
     it('should parse boolean literal value', () => {
         expectParse(`
-            export let x = !false == true
+            export x = const !false == true;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -175,23 +176,56 @@ describe('Parser', () => {
         );
     });
 
-    it('should ignore not exported expressions in functions', () => {
+    it('should ignore not returning expressions in functions', () => {
         expectParse(`
-            export let fun = () -> i32 {
+            export return_one = fun () -> i32
                 1 + 1
-                1
-            }
+                1;
         `).createsAst(
             AstBuilder.source({
                 declarations: [
                     AstBuilder.exportation({
                         declaration: AstBuilder.functionDeclaration({
-                            identifier: AstBuilder.identifier({ value: 'fun' }),
+                            identifier: AstBuilder.identifier({ value: 'return_one' }),
                             args: [],
                             type: AstBuilder.identifier({ value: 'i32' }),
                             statements: [
-                                AstBuilder.intLiteral({ int: 1})
+                                AstBuilder.intLiteral({ int: 1 })
                             ]
+                        })
+                    })
+                ]
+            })
+        );
+    });
+
+    it('should be able to parse a weirdly formated program', () => {
+        expectParse(`
+            weird_expression
+                = 
+                    const 1 +
+                        (1 + 2)
+                            * 2
+                            ;
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.variableDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'weird_expression' }),
+                        expression: AstBuilder.binaryExpression({
+                            left: AstBuilder.intLiteral({ int: 1 }),
+                            operator: OperatorKind.PLUS,
+                            right: AstBuilder.binaryExpression({
+                                left: AstBuilder.grouping({
+                                    expression: AstBuilder.binaryExpression({
+                                        left: AstBuilder.intLiteral({ int: 1 }),
+                                        operator: OperatorKind.PLUS,
+                                        right: AstBuilder.intLiteral({ int: 2 })
+                                    })
+                                }),
+                                operator: OperatorKind.MULTIPLICATION,
+                                right: AstBuilder.intLiteral({ int: 2, })
+                            })
                         })
                     })
                 ]
@@ -209,17 +243,42 @@ describe('Parser', () => {
         );
     });
 
-    it('should not parse not exported top level function declaration', () => {
+    it('should recover from broken variable declaration to semicolon', () => {
         expectParse(`
-            let a = () -> i32 {}
-            export let a = () -> i32 {}
+            error = const 2 + + * 2;
+            y = const 2 + 2;
         `).errors(1);
     });
 
-    it('should not parse not exported top level variable declaration', () => {
+    it('should recover from broken function declaration to semicolon', () => {
         expectParse(`
-            let a = 1
+            export error = fun () -> not_supported_return_type;
+            y = const 2 + 2;
         `).errors(1);
+    });
+
+    it('should recover from broken function body to semicolon', () => {
+        expectParse(`
+            export error = fun () -> i32
+                1 * * 1
+                1;
+            y = const 2 + 2;
+        `).errors(1);
+    });
+
+    it('should recover to semi colon everytime it encounters an error', () => {
+        expectParse(`
+            error_1 = const 2 + + * 2;
+            y = const 2 + 2;
+            error_2 = fun 2 + 2;
+        `).errors(2);
+    });
+
+    it('should not be able to recover when it cannot find a semi colon', () => {
+        expectParse(`
+            error = const 2 + + * 2
+            y = const 2 + 2
+        `).errors(1); // there is only one error because it could not recover
     });
 
     const expectParse = (sequence: string) => {

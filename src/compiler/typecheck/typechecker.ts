@@ -1,5 +1,6 @@
 import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../diagnostic/reporter";
+import type { Declaration } from "../ast/nodes/declarations/declaration";
 import type { FunctionDeclaration } from "../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
 import type { BinaryExpression } from "../ast/nodes/expressions/binary";
@@ -175,18 +176,24 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         const module = (source: Source) => {
             const functions: FunctionDeclaration[] = [];
 
+            const declaration = (declaration: Declaration) => {
+                if(declaration.kind === AstNodeKind.FUNCTION_DECLARATION) {
+                    functions.push(declaration);
+                    scope.add(MemberBuilder.functionMember(declaration));
+                }
+
+                if(declaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
+                    variableDeclaration(declaration);
+                }
+            };
+
             source.declarations.forEach(topLevelDeclaration => {
                 if(topLevelDeclaration.kind === AstNodeKind.EXPORT) {
-                    const exported = topLevelDeclaration.declaration;
+                    return declaration(topLevelDeclaration.declaration);
+                }
 
-                    if(exported.kind === AstNodeKind.FUNCTION_DECLARATION) {
-                        functions.push(exported);
-                        scope.add(MemberBuilder.functionMember(exported));
-                    }
-
-                    if(exported.kind === AstNodeKind.VARIABLE_DECLARATION) {
-                        variableDeclaration(exported);
-                    }
+                if(topLevelDeclaration.kind === AstNodeKind.FUNCTION_DECLARATION || topLevelDeclaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
+                    return declaration(topLevelDeclaration);
                 }
             });
 
