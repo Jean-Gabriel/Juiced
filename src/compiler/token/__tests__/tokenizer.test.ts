@@ -32,7 +32,7 @@ describe('Tokenizer', () => {
         ['f32', TokenFixture.create(_ => _.atLine(1).withLexeme('f32').nonLiteral(TokenKind.FLOAT_TYPE))],
         ['bool', TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE))],
         ['export', TokenFixture.create(_ => _.atLine(1).withLexeme('export').nonLiteral(TokenKind.EXPORT))]
-    ])('it should create token for %s', (char: string, expected: Token) => {
+    ])('should create token for %s', (char: string, expected: Token) => {
         expectTokenize(char).createsTokens(expected);
     });
 
@@ -49,7 +49,6 @@ describe('Tokenizer', () => {
             TokenFixture.create(_ => _.atLine(1).withLexeme('=').nonLiteral(TokenKind.EQUAL)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('fun').nonLiteral(TokenKind.FUN)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('(').nonLiteral(TokenKind.OPEN_PARENTHESIS)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme('\n').nonLiteral(TokenKind.FRESH_LINE)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE)),
@@ -81,23 +80,8 @@ describe('Tokenizer', () => {
         ['1.0', TokenFixture.create(_ => _.atLine(1).withLexeme('1.0').withLiteral(1).number(TokenKind.FLOAT))],
         ['true', TokenFixture.create(_ => _.atLine(1).withLexeme('true').withLiteral(true).boolean())],
         ['false', TokenFixture.create(_ => _.atLine(1).withLexeme('false').withLiteral(false).boolean())],
-    ])('it should tokenize primitive %s', (primitive: string, expected) => {
+    ])('should tokenize primitive %s', (primitive: string, expected) => {
         expectTokenize(primitive).createsTokens(expected);
-    });
-
-    it('should create a fresh line token when encoutering a new line with alphanumeric characters', () => {
-        expectTokenize(`
-
-            export variable_on_fresh_line = const 1;
-        `).createsTokens(
-            TokenFixture.create(_ => _.atLine(1).withLexeme('\n').nonLiteral(TokenKind.FRESH_LINE)),
-            TokenFixture.create(_ => _.atLine(2).withLexeme('export').nonLiteral(TokenKind.EXPORT)),
-            TokenFixture.create(_ => _.atLine(2).withLexeme('variable_on_fresh_line').withLiteral('variable_on_fresh_line').string(TokenKind.IDENTIFIER)),
-            TokenFixture.create(_ => _.atLine(2).withLexeme('=').nonLiteral(TokenKind.EQUAL)),
-            TokenFixture.create(_ => _.atLine(2).withLexeme('const').nonLiteral(TokenKind.CONST)),
-            TokenFixture.create(_ => _.atLine(2).withLexeme('1').withLiteral(1).number(TokenKind.INT)),
-            TokenFixture.create(_ => _.atLine(2).withLexeme(';').nonLiteral(TokenKind.SEMICOLON))
-        );
     });
 
     const expectTokenize = (sequence: string) => {

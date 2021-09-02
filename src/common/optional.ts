@@ -45,20 +45,6 @@ export class Optional<T> {
         return this.value;
     }
 
-    orElseMap(f: () => T): T {
-        if(this.value === null) {
-            return f();
-        }
-
-        return this.value;
-    }
-
-    ifEmpty(f: () => void) {
-        if(this.value === null) {
-            return f();
-        }
-    }
-
     isPresent() {
         return this.value !== null;
     }

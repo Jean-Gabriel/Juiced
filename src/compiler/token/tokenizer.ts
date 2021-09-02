@@ -127,16 +127,6 @@ export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDi
                     if (reader.match('=')) { return createNonLiteralToken(TokenKind.LESS_EQUAL); }
                     else { return createNonLiteralToken(TokenKind.LESS_THAN); }
                 }
-                case '\n': {
-                    let token = null;
-
-                    if(reader.isAtFreshLine()) {
-                        token = createNonLiteralToken(TokenKind.FRESH_LINE);
-                    }
-
-                    reader.nextLine();
-                    return token;
-                }
                 default: {
                     if (char === null || IGNORED.includes(char)) {
                         return null;

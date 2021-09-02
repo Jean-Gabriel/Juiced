@@ -1,5 +1,5 @@
 import { Optional } from "../../common/optional";
-import { TokenKind } from "./kinds";
+import type { TokenKind } from "./kinds";
 import type { Token } from "./token";
 
 interface Props {
@@ -32,12 +32,6 @@ export default class TokenReader {
             return Optional.empty();
         }
 
-        const isLookingForFreshLine = kinds.includes(TokenKind.FRESH_LINE);
-        // This is a design choice so that the parser is looser on fresh lines
-        if(this.currentIs(TokenKind.FRESH_LINE) && !isLookingForFreshLine) {
-            this.advance();
-        }
-
         const current = this.tokens[this.index];
         if(!kinds.includes(current.kind)) {
             return Optional.empty();
@@ -53,19 +47,6 @@ export default class TokenReader {
         }
 
         const token = this.tokens[this.index];
-        const isLookingForFreshLine = kinds.includes(TokenKind.FRESH_LINE);
-        // This is a design choice so that the parser is looser on fresh lines
-        if(token.kind === TokenKind.FRESH_LINE && !isLookingForFreshLine) {
-            const nextToken = this.advance();
-
-            if(!nextToken) {
-                return false;
-            }
-
-            return kinds.includes(nextToken.kind);
-        }
-
-
         return kinds.includes(token.kind);
     }
 

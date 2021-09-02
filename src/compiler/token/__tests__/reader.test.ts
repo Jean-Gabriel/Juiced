@@ -22,16 +22,6 @@ describe('TokenReader', () => {
         expect(consumed).toEqual(Optional.of(token));
     });
 
-    it('should ignore fresh line when consuming token', () => {
-        const freshLine = TokenFixture.create(_ => _.nonLiteral(TokenKind.FRESH_LINE));
-        const token = TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW));
-        const reader = createTokenReader({ tokens: [ freshLine, token ] });
-
-        const consumed = reader.consume(TokenKind.ARROW);
-
-        expect(consumed).toEqual(Optional.of(token));
-    });
-
     it('should advance after consuming', () => {
         const token = TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW));
         const otherToken = TokenFixture.create(_ => _.nonLiteral(TokenKind.BANG_EQUAL));
@@ -62,17 +52,6 @@ describe('TokenReader', () => {
         const consumed = reader.consume(TokenKind.BANG, TokenKind.BOOLEAN_TYPE);
 
         expect(consumed).toEqual(Optional.empty());
-    });
-
-    it('should step over fresh line when checking current token', () => {
-        const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.FRESH_LINE)),
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
-        ]});
-
-        const isTokenKind = reader.currentIs(TokenKind.ARROW);
-
-        expect(isTokenKind).toBeTruthy();
     });
 
     it('should be current kind', () => {

@@ -240,7 +240,7 @@ describe('Parser', () => {
         `).errors(2);
     });
 
-    it('it should not be able to recover when it cannot find a semi colon', () => {
+    it('should not be able to recover when it cannot find a semi colon', () => {
         expectParse(`
             error = const 2 + + * 2
             y = const 2 + 2

@@ -1,5 +1,3 @@
-import { isAlphaNumeric } from "../utils/char";
-
 type Props = {
     source: string
 }
@@ -27,30 +25,18 @@ export class SourceReader {
         }
     }
 
-    // A fresh line is a new line followed by an alphanumeric character
-    isAtFreshLine(): boolean {
-        let index = this.index;
-        let isFreshLine = false;
-
-        let current = this.source.charAt(index++);
-        while(current != '\n' && !this.isPositionAtEnd(index)) {
-            if(isAlphaNumeric(current)) {
-                isFreshLine = true;
-                break;
-            }
-
-            current = this.source.charAt(index++);
-        }
-
-        return isFreshLine;
-    }
-
     read(): string | null {
         if (this.isAtEnd()) {
             return null;
         }
 
-        return this.source.charAt(this.index++);
+        let current = this.source.charAt(this.index++);
+        while(current && current === '\n') {
+            this.line++;
+            current = this.source.charAt(this.index++);
+        }
+
+        return current || null;
     }
 
     match(expected: string): boolean {
@@ -75,7 +61,7 @@ export class SourceReader {
     }
 
     isAtEnd(): boolean {
-        return this.isPositionAtEnd(this.index);
+        return this.index >= this.source.length;
     }
 
     current() {
@@ -95,15 +81,7 @@ export class SourceReader {
         return this.source.charAt(nextIndex);
     }
 
-    nextLine() {
-        this.line++;
-    }
-
     position() {
         return this.index;
-    }
-
-    private isPositionAtEnd(position: number) {
-        return position >= this.source.length;
     }
 }
