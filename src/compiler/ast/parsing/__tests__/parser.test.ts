@@ -176,7 +176,7 @@ describe('Parser', () => {
         );
     });
 
-    it('should ignore not returnin expressions in functions', () => {
+    it('should ignore not returning expressions in functions', () => {
         expectParse(`
             export return_one = fun () -> i32
                 1 + 1
@@ -192,6 +192,40 @@ describe('Parser', () => {
                             statements: [
                                 AstBuilder.intLiteral({ int: 1 })
                             ]
+                        })
+                    })
+                ]
+            })
+        );
+    });
+
+    it('should be able to parse a weirdly formated program', () => {
+        expectParse(`
+            weird_expression
+                = 
+                    const 1 +
+                        (1 + 2)
+                            * 2
+                            ;
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.variableDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'weird_expression' }),
+                        expression: AstBuilder.binaryExpression({
+                            left: AstBuilder.intLiteral({ int: 1 }),
+                            operator: OperatorKind.PLUS,
+                            right: AstBuilder.binaryExpression({
+                                left: AstBuilder.grouping({
+                                    expression: AstBuilder.binaryExpression({
+                                        left: AstBuilder.intLiteral({ int: 1 }),
+                                        operator: OperatorKind.PLUS,
+                                        right: AstBuilder.intLiteral({ int: 2 })
+                                    })
+                                }),
+                                operator: OperatorKind.MULTIPLICATION,
+                                right: AstBuilder.intLiteral({ int: 2, })
+                            })
                         })
                     })
                 ]
