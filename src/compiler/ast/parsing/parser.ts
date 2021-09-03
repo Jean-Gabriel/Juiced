@@ -45,15 +45,18 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
 
         const topLevelDeclaration = (): TopLevelDeclaration => {
             try {
+                let topLevel: TopLevelDeclaration;
+
                 if(reader.consume(TokenKind.EXPORT).isPresent()) {
-                    return AstBuilder.exportation({ declaration: declaration() });
+                    topLevel = AstBuilder.exportation({ declaration: declaration() });
+                } else if(reader.currentIs(TokenKind.IDENTIFIER)) {
+                    topLevel = declaration();
+                } else {
+                    topLevel = expression();
+                    reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of top level expression.'));
                 }
 
-                if(reader.currentIs(TokenKind.IDENTIFIER)) {
-                    return declaration();
-                }
-
-                return expression();
+                return topLevel;
             } catch(e: unknown) {
                 handleError(e, { recoverAfter: [ TokenKind.SEMICOLON ] });
                 return EMPTY_EXPRESSION;
@@ -74,23 +77,30 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 declaration = functionDeclaration(identifier);
             } else if(reader.currentIs(TokenKind.CONST)) {
                 declaration = variableDeclaration(identifier);
+                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of top level varaible declaration.'));
             }
 
-            reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of variable declaration.'));
             return declaration;
         };
 
         const statement = () => {
             try {
+                let statement: Statement;
+
                 if(reader.currentIs(TokenKind.IDENTIFIER)) {
                     if(reader.lookupForUntil(TokenKind.EQUAL, (token) => token.kind === TokenKind.CONST)) {
-                        return variableDeclarationStatement();
+                        statement = variableDeclarationStatement();
+                    } else {
+                        statement = expression();
                     }
+                } else {
+                    statement = expression();
                 }
 
-                return expression();
+                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of top level expression.'));
+                return statement;
             } catch(e: unknown) {
-                handleError(e, { recoverAfter: [ TokenKind.SEMICOLON ] });
+                handleError(e, { recoverAfter: [ TokenKind.SEMICOLON, TokenKind.CLOSE_BRACKETS ] });
                 return EMPTY_EXPRESSION;
             }
         };
@@ -113,7 +123,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             const args = functionArguments();
             reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError('Expected ) after typed arguments in function declaration.'));
 
-            reader.consume(TokenKind.ARROW).orElseThrow(new ParsingError('Expected -> after arguments in function declaration.'));
+            reader.consume(TokenKind.COLON).orElseThrow(new ParsingError('Expected : after arguments in function declaration.'));
             const type = reader
                 .consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE)
                 .orElseThrow(new ParsingError('Expected type after arrow in function declaration.'));
@@ -155,9 +165,13 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         const functionBody = () => {
             const statements: Statement[] = [];
 
-            while(!reader.currentIs(TokenKind.SEMICOLON) && !reader.isAtEnd()) {
+            reader.consume(TokenKind.OPEN_BRACKETS).orElseThrow(new ParsingError('Expected { at start of function body.'));
+
+            while(!reader.currentIs(TokenKind.CLOSE_BRACKETS) && !reader.isAtEnd()) {
                 statements.push(statement());
             }
+
+            reader.consume(TokenKind.CLOSE_BRACKETS).orElseThrow(new ParsingError('Expected } at end of function body.'));
 
             return statements;
         };
