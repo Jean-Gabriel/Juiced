@@ -1,9 +1,11 @@
 export pi = const 3.1416;
 identity = const (1.0 + 1.0) / 2.0;
 
-identity_function = fun () -> f32
+identity_function = fun (): f32 {
     1.0;
+}
 
-export circumference_of_circle = fun (radius: f32) -> f32
-    even_more_identity = const 1.0
+export circumference_of_circle = fun (radius: f32): f32 {
+    even_more_identity = const 1.0;
     (radius / (two * pi)) * identity * even_more_identity * identity_function(); 
+}

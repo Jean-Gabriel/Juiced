@@ -14,13 +14,13 @@ declaration ::=
     | function-declaration
     | variable-declaration
 
-function-declaration ::= identifier '=' 'fun' function-arguments (':' type) '->' type function-body
+function-declaration ::= identifier '=' 'fun' function-arguments (':' type) ':' type function-body
 function-arguments ::= '(' ((typed-identifier) (',' typed-identifier)* ))? ')'
-function-body ::= block
+function-body ::= '{' block '}'
 
 variable-declaration ::= identifier '=' 'const' expression
 
-block ::=  '{' statements* '}'
+block ::=  '{' (statements ';')* '}'
 
 statements ::= 
     | variable-declaration

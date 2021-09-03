@@ -109,8 +109,7 @@ export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDi
                     return createNonLiteralToken(TokenKind.PLUS);
                 }
                 case '-': {
-                    if (reader.match('>')) { return createNonLiteralToken(TokenKind.ARROW); }
-                    else { return createNonLiteralToken(TokenKind.MINUS); }
+                    return createNonLiteralToken(TokenKind.MINUS);
                 } case '!': {
                     if (reader.match('=')) { return createNonLiteralToken(TokenKind.BANG_EQUAL); }
                     else { return createNonLiteralToken(TokenKind.BANG); }
