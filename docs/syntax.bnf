@@ -39,9 +39,12 @@ unary ::=
 primary ::=
     | literal
     | identifier
+    | invocation
     | "(" expression ")"
 
 typed-identifier ::= identifier ':' type
+
+invocation ::= identifier '(' ((expression) (',' expression)* )? ')'
 
 type ::= 
     | BOOLEAN_TYPE
