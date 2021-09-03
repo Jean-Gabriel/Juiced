@@ -297,6 +297,12 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                     .consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken)
                     .orElseThrow(new ParsingError('Expected identifier as accessor.'));
 
+                if(reader.consume(TokenKind.OPEN_PARENTHESIS).isPresent()) {
+                    const parameters = invocationParameters();
+                    reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError('Expected ) at the end of invocation.'));
+
+                    return AstBuilder.invocation({ invoked: AstBuilder.identifier({ value: identifier.literal }), parameters });
+                }
                 return AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: identifier.literal }) });
             }
 
@@ -313,6 +319,19 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             throw new ParsingError('Expected a float, int, boolean or identifier as a primary.');
         };
 
+        const invocationParameters = () => {
+            const parameters: Expression[] = [];
+
+            while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS) && !reader.isAtEnd()) {
+                if(!reader.consume(TokenKind.COMA).isPresent() && parameters.length) {
+                    throw new ParsingError('Expected invocation parameters to be seperated by a coma.');
+                }
+
+                parameters.push(expression());
+            }
+
+            return parameters;
+        };
         const recover = (...kinds: TokenKind[]) => {
             reader.advance();
 

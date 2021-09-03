@@ -178,6 +178,58 @@ describe('Parser', () => {
         );
     });
 
+    it('should parse invocation without parameters', () => {
+        expectParse(`
+            result = const invoked();
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.variableDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'result' }),
+                        expression: AstBuilder.invocation({
+                            invoked: AstBuilder.identifier({ value: 'invoked' }),
+                            parameters: []
+                        })
+                    })
+                ]
+            })
+        );
+    });
+
+    it('should parse invocation with parameters', () => {
+        expectParse(`
+            result = const invoked(-2 + 2, pi, other_invocation());
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.variableDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'result' }),
+                        expression: AstBuilder.invocation({
+                            invoked: AstBuilder.identifier({ value: 'invoked' }),
+                            parameters: [
+                                AstBuilder.binaryExpression({
+                                    left: AstBuilder.unaryExpression({
+                                        operator: OperatorKind.MINUS,
+                                        expression: AstBuilder.intLiteral({ int: 2 })
+                                    }),
+                                    operator: OperatorKind.PLUS,
+                                    right: AstBuilder.intLiteral({ int: 2 })
+                                }),
+                                AstBuilder.accessor({
+                                    identifier: AstBuilder.identifier({ value: 'pi' })
+                                }),
+                                AstBuilder.invocation({
+                                    invoked: AstBuilder.identifier({ value: 'other_invocation'}),
+                                    parameters: []
+                                })
+                            ]
+                        })
+                    })
+                ]
+            })
+        );
+    });
+
     it('should ignore not returning expressions in functions', () => {
         expectParse(`
             export return_one = fun (): i32 {

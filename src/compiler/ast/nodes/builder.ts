@@ -196,6 +196,7 @@ const AstBuilder = {
     source,
     accessor,
     grouping,
+    invocation,
     identifier,
     intLiteral,
     exportation,
