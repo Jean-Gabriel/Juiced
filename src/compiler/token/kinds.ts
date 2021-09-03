@@ -25,8 +25,6 @@ export enum TokenKind {
     SEMICOLON,
     COMA,
 
-    ARROW,
-
     IDENTIFIER,
 
     INT,

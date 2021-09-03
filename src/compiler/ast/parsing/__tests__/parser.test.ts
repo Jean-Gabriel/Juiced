@@ -33,30 +33,29 @@ describe('Parser', () => {
 
     it('should parse variable declaration in function', () => {
         expectParse(`
-            export areEqual = fun (a: i32, b: i32): i32 {
+            areEqual = fun (a: i32, b: i32): i32 {
                 x = const a == b;
             }
         `).createsAst(
             AstBuilder.source({
                 declarations: [
-                    AstBuilder.exportation({
-                        declaration: AstBuilder.functionDeclaration({
-                            identifier: AstBuilder.identifier({ value: 'areEqual' }),
-                            args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
-                            type: AstBuilder.identifier({ value: 'i32' }),
-                            statements: [
-                                AstBuilder.variableDeclaration({
-                                    identifier: AstBuilder.identifier({ value: 'x' }),
-                                    expression: AstBuilder.binaryExpression({
-                                        left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' })}),
-                                        operator: OperatorKind.EQUAL_EQUAL,
-                                        right: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'b' })}),
-                                    })
+                    AstBuilder.functionDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'areEqual' }),
+                        args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
+                        type: AstBuilder.identifier({ value: 'i32' }),
+                        statements: [
+                            AstBuilder.variableDeclaration({
+                                identifier: AstBuilder.identifier({ value: 'x' }),
+                                expression: AstBuilder.binaryExpression({
+                                    left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' })}),
+                                    operator: OperatorKind.EQUAL_EQUAL,
+                                    right: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'b' })}),
                                 })
-                            ]
-                        })
+                            })
+                        ]
                     })
-            ]})
+                ]
+            })
         );
     });
 

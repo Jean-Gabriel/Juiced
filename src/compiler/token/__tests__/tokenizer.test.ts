@@ -25,7 +25,6 @@ describe('Tokenizer', () => {
         ['<=', TokenFixture.create(_ => _.atLine(1).withLexeme('<=').nonLiteral(TokenKind.LESS_EQUAL))],
         [':', TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON))],
         [',', TokenFixture.create(_ => _.atLine(1).withLexeme(',').nonLiteral(TokenKind.COMA))],
-        ['->', TokenFixture.create(_ => _.atLine(1).withLexeme('->').nonLiteral(TokenKind.ARROW))],
         ['const', TokenFixture.create(_ => _.atLine(1).withLexeme('const').nonLiteral(TokenKind.CONST))],
         ['fun', TokenFixture.create(_ => _.atLine(1).withLexeme('fun').nonLiteral(TokenKind.FUN))],
         ['i32', TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE))],
@@ -42,8 +41,9 @@ describe('Tokenizer', () => {
 
     it('should tokenize a function declaration', () => {
         expectTokenize(`
-            square = fun (a: i32) -> bool
+            square = fun (a: i32): bool {
                 a * a;
+            }
         `).createsTokens(
             TokenFixture.create(_ => _.atLine(1).withLexeme('square').withLiteral('square').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('=').nonLiteral(TokenKind.EQUAL)),
@@ -53,12 +53,14 @@ describe('Tokenizer', () => {
             TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(')').nonLiteral(TokenKind.CLOSE_PARENTHESIS)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme('->').nonLiteral(TokenKind.ARROW)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme('{').nonLiteral(TokenKind.OPEN_BRACKETS)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('*').nonLiteral(TokenKind.STAR)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(2).withLexeme(';').nonLiteral(TokenKind.SEMICOLON)),
+            TokenFixture.create(_ => _.atLine(3).withLexeme('}').nonLiteral(TokenKind.CLOSE_BRACKETS)),
         );
     });
 
