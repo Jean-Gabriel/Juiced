@@ -10,29 +10,33 @@ import { createTypechecker } from "../typechecker";
 describe('Typechecker', () => {
     it('functions returns expression type must match their specified type', () => {
         expectTypechecking(`
-            returns_bool = fun () -> bool
+            returns_bool = fun (): bool {
                 true;
+            }
         `).succeeds();
 
         expectTypechecking(`
-            returns_bool = fun () -> bool
+            returns_bool = fun (): bool {
                 1.0;
+            }
         `).errors();
     });
 
     it('variable declarations in functions can refer to a variable of a higher scope', () => {
         expectTypechecking(`
             in_a_higher_scope = const 1.0;
-            returns_higher_scope_val = fun () -> f32
+            returns_higher_scope_val = fun (): f32 {
                 in_a_higher_scope;
+            }
         `).succeeds();
     });
 
     it('variable declarations in a lower scope cannot be accessed in a higher scope', () => {
         expectTypechecking(`
-            function = fun () -> f32
-                lower_scope_val = const 1.0
+            function = fun (): f32 {
+                lower_scope_val = const 1.0;
                 1.0;
+            }
 
             error = const lower_scope_val; 
         `).errors();
@@ -44,26 +48,29 @@ describe('Typechecker', () => {
         `).errors();
 
         expectTypechecking(`
-            references_undeclared_variable = fun () -> f32
-                errors = const does_not_exists
+            references_undeclared_variable = fun (): f32 {
+                errors = const does_not_exists;
                 1.0;
+            }
         `).errors();
     });
 
     it('expressions should use values or other expressions of same type', () => {
         expectTypechecking(`
-            function = fun (float_val: f32) -> f32
-                other_float_val = const 1.0
+            function = fun (float_val: f32): f32 {
+                other_float_val = const 1.0;
 
                 float_val + other_float_val;
+            }
         `).succeeds();
 
         expectTypechecking(`
-            function = fun (float_val: f32) -> f32
-                int_val = const 1
-                bool_val = const false
+            function = fun (float_val: f32): f32 {
+                int_val = const 1;
+                bool_val = const false;
 
                 float_val + bool_val + int_val;
+            }
         `).errors();
     });
 

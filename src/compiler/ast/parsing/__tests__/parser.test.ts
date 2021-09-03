@@ -11,8 +11,9 @@ import { createParser } from "../parser";
 describe('Parser', () => {
     it('should parse top level exported function declaration', () => {
         expectParse(`
-            export add = fun (a: i32, b: i32) -> i32
+            export add = fun (a: i32, b: i32): i32 {
                 0;
+            }
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -32,36 +33,37 @@ describe('Parser', () => {
 
     it('should parse variable declaration in function', () => {
         expectParse(`
-            export areEqual = fun (a: i32, b: i32) -> i32
+            areEqual = fun (a: i32, b: i32): i32 {
                 x = const a == b;
+            }
         `).createsAst(
             AstBuilder.source({
                 declarations: [
-                    AstBuilder.exportation({
-                        declaration: AstBuilder.functionDeclaration({
-                            identifier: AstBuilder.identifier({ value: 'areEqual' }),
-                            args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
-                            type: AstBuilder.identifier({ value: 'i32' }),
-                            statements: [
-                                AstBuilder.variableDeclaration({
-                                    identifier: AstBuilder.identifier({ value: 'x' }),
-                                    expression: AstBuilder.binaryExpression({
-                                        left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' })}),
-                                        operator: OperatorKind.EQUAL_EQUAL,
-                                        right: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'b' })}),
-                                    })
+                    AstBuilder.functionDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'areEqual' }),
+                        args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
+                        type: AstBuilder.identifier({ value: 'i32' }),
+                        statements: [
+                            AstBuilder.variableDeclaration({
+                                identifier: AstBuilder.identifier({ value: 'x' }),
+                                expression: AstBuilder.binaryExpression({
+                                    left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' })}),
+                                    operator: OperatorKind.EQUAL_EQUAL,
+                                    right: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'b' })}),
                                 })
-                            ]
-                        })
+                            })
+                        ]
                     })
-            ]})
+                ]
+            })
         );
     });
 
     it('should parse return expression in function', () => {
         expectParse(`
-            export math = fun () -> i32
+            export math = fun (): i32 {
                 2 * -4;
+            }
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -178,9 +180,10 @@ describe('Parser', () => {
 
     it('should ignore not returning expressions in functions', () => {
         expectParse(`
-            export return_one = fun () -> i32
-                1 + 1
+            export return_one = fun (): i32 {
+                1 + 1;
                 1;
+            }
         `).createsAst(
             AstBuilder.source({
                 declarations: [
@@ -235,7 +238,7 @@ describe('Parser', () => {
 
     it('should ignore top level expressions', () => {
         expectParse(`
-            1 * 2
+            1 * 2;
         `).createsAst(
             AstBuilder.source({
                 declarations: []
@@ -252,18 +255,38 @@ describe('Parser', () => {
 
     it('should recover from broken function declaration to semicolon', () => {
         expectParse(`
-            export error = fun () -> not_supported_return_type;
+            export error = fun (): not_supported_return_type {}
             y = const 2 + 2;
         `).errors(1);
     });
 
-    it('should recover from broken function body to semicolon', () => {
+    it('should recover from broken function body expression to semicolon', () => {
         expectParse(`
-            export error = fun () -> i32
-                1 * * 1
+            export error = fun (): i32 {
+                1 * * 1;
                 1;
+            }
             y = const 2 + 2;
         `).errors(1);
+    });
+
+    it('should recover from broken function body expression to close bracket if semicolon is missing', () => {
+        expectParse(`
+            export error = fun (): i32 {
+                1 * * 1
+                1;
+            }
+            y = const 2 + 2;
+        `).errors(1);
+    });
+
+    it('should not be able to recover from broken function body if semicolon and close bracket are missing', () => {
+        expectParse(`
+            export error = fun (): i32 {
+                1 * * 1
+                1
+            y = const 2 + 2;
+        `).errors(2); // broken expression + no close brackets found for function
     });
 
     it('should recover to semi colon everytime it encounters an error', () => {

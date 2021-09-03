@@ -15,6 +15,7 @@ import { isParsingError, ParsingError } from "./error";
 import type { TokenReaderFactory } from "../../token/reader";
 import type { AstOptimizerFactory } from "./optimization/optimizer";
 import type { Declaration } from "../nodes/declarations/declaration";
+import { AstNodeKind } from "../nodes/node";
 
 interface Parser {
     parse: (tokens: Token[]) => Source
@@ -36,7 +37,6 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
 
     const EMPTY_IDENTIFIER = AstBuilder.identifier({ value: '' });
     const EMPTY_EXPRESSION = AstBuilder.accessor({ identifier: EMPTY_IDENTIFIER });
-    const EMPTY_DECLARATION = AstBuilder.variableDeclaration({ identifier: EMPTY_IDENTIFIER, expression: EMPTY_EXPRESSION });
 
     const parse = (tokens: Token[]): Source => {
         const reader = createTokenReader({ tokens });
@@ -45,15 +45,26 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
 
         const topLevelDeclaration = (): TopLevelDeclaration => {
             try {
+                let topLevel: TopLevelDeclaration;
+
                 if(reader.consume(TokenKind.EXPORT).isPresent()) {
-                    return AstBuilder.exportation({ declaration: declaration() });
+                    topLevel = AstBuilder.exportation({ declaration: declaration() });
+
+                    if(topLevel.declaration.kind === AstNodeKind.FUNCTION_DECLARATION) {
+                        return topLevel; // no semicolon required at the end of a function declaration
+                    }
+                } else if(reader.currentIs(TokenKind.IDENTIFIER)) {
+                    topLevel = declaration();
+
+                    if(topLevel.kind === AstNodeKind.FUNCTION_DECLARATION) {
+                        return topLevel; // no semicolon required at the end of a function declaration
+                    }
+                } else {
+                    topLevel = expression();
                 }
 
-                if(reader.currentIs(TokenKind.IDENTIFIER)) {
-                    return declaration();
-                }
-
-                return expression();
+                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of top level expression.'));
+                return topLevel;
             } catch(e: unknown) {
                 handleError(e, { recoverAfter: [ TokenKind.SEMICOLON ] });
                 return EMPTY_EXPRESSION;
@@ -68,29 +79,37 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
 
             reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError('Expected = after identifier.'));
 
-            let declaration: Declaration = EMPTY_DECLARATION;
+            let declaration: Declaration;
 
             if(reader.currentIs(TokenKind.FUN)) {
                 declaration = functionDeclaration(identifier);
             } else if(reader.currentIs(TokenKind.CONST)) {
                 declaration = variableDeclaration(identifier);
+            } else {
+                throw new  ParsingError('Expected declaration to be either a function or a variable.');
             }
 
-            reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of variable declaration.'));
             return declaration;
         };
 
         const statement = () => {
             try {
+                let statement: Statement;
+
                 if(reader.currentIs(TokenKind.IDENTIFIER)) {
                     if(reader.lookupForUntil(TokenKind.EQUAL, (token) => token.kind === TokenKind.CONST)) {
-                        return variableDeclarationStatement();
+                        statement = variableDeclarationStatement();
+                    } else {
+                        statement = expression();
                     }
+                } else {
+                    statement = expression();
                 }
 
-                return expression();
+                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of top level expression.'));
+                return statement;
             } catch(e: unknown) {
-                handleError(e, { recoverAfter: [ TokenKind.SEMICOLON ] });
+                handleError(e, { recoverAfter: [ TokenKind.SEMICOLON, TokenKind.CLOSE_BRACKETS ] });
                 return EMPTY_EXPRESSION;
             }
         };
@@ -113,7 +132,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             const args = functionArguments();
             reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError('Expected ) after typed arguments in function declaration.'));
 
-            reader.consume(TokenKind.ARROW).orElseThrow(new ParsingError('Expected -> after arguments in function declaration.'));
+            reader.consume(TokenKind.COLON).orElseThrow(new ParsingError('Expected : after arguments in function declaration.'));
             const type = reader
                 .consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE)
                 .orElseThrow(new ParsingError('Expected type after arrow in function declaration.'));
@@ -155,9 +174,13 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         const functionBody = () => {
             const statements: Statement[] = [];
 
-            while(!reader.currentIs(TokenKind.SEMICOLON) && !reader.isAtEnd()) {
+            reader.consume(TokenKind.OPEN_BRACKETS).orElseThrow(new ParsingError('Expected { at start of function body.'));
+
+            while(!reader.currentIs(TokenKind.CLOSE_BRACKETS) && !reader.isAtEnd()) {
                 statements.push(statement());
             }
+
+            reader.consume(TokenKind.CLOSE_BRACKETS).orElseThrow(new ParsingError('Expected } at end of function body.'));
 
             return statements;
         };

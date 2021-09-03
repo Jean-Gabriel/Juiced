@@ -7,26 +7,26 @@ describe('TokenReader', () => {
 
     it('should not be at end', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON))
         ]});
 
         expect(reader.isAtEnd()).toBeFalsy();
     });
 
     it('should consume current token', () => {
-        const token = TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW));
+        const token = TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON));
         const reader = createTokenReader({ tokens: [ token ] });
 
-        const consumed = reader.consume(TokenKind.ARROW);
+        const consumed = reader.consume(TokenKind.SEMICOLON);
 
         expect(consumed).toEqual(Optional.of(token));
     });
 
     it('should advance after consuming', () => {
-        const token = TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW));
+        const token = TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON));
         const otherToken = TokenFixture.create(_ => _.nonLiteral(TokenKind.BANG_EQUAL));
         const reader = createTokenReader({ tokens: [ token, otherToken ] });
-        reader.consume(TokenKind.ARROW);
+        reader.consume(TokenKind.SEMICOLON);
 
         const advanced = reader.currentIs(TokenKind.BANG_EQUAL);
 
@@ -36,7 +36,7 @@ describe('TokenReader', () => {
 
     it('should not consume token not matching kinds', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON))
         ]});
 
         const consumed = reader.consume(TokenKind.BANG, TokenKind.BOOLEAN_TYPE);
@@ -46,7 +46,7 @@ describe('TokenReader', () => {
 
     it('should not consume token not matching kinds', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON))
         ]});
 
         const consumed = reader.consume(TokenKind.BANG, TokenKind.BOOLEAN_TYPE);
@@ -56,17 +56,17 @@ describe('TokenReader', () => {
 
     it('should be current kind', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON))
         ]});
 
-        const isTokenKind = reader.currentIs(TokenKind.ARROW);
+        const isTokenKind = reader.currentIs(TokenKind.SEMICOLON);
 
         expect(isTokenKind).toBeTruthy();
     });
 
     it('should not be current kind', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON))
         ]});
 
         const isTokenKind = reader.currentIs(TokenKind.STAR);
@@ -76,7 +76,7 @@ describe('TokenReader', () => {
 
     it('should find token until condition is met', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW)),
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON)),
             TokenFixture.create(_ => _.nonLiteral(TokenKind.FUN)),
             TokenFixture.create(_ => _.nonLiteral(TokenKind.CONST))
         ]});
@@ -88,7 +88,7 @@ describe('TokenReader', () => {
 
     it('should not find missing token token until condition is met', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW)),
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON)),
             TokenFixture.create(_ => _.nonLiteral(TokenKind.FUN)),
         ]});
 
@@ -99,7 +99,7 @@ describe('TokenReader', () => {
 
     it('given condition is never met, it should not find token', () => {
         const reader = createTokenReader({ tokens: [
-            TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+            TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON))
         ]});
 
         const found = reader.lookupForUntil(TokenKind.CONST, (token) => token.kind === TokenKind.FUN);
@@ -118,18 +118,18 @@ describe('TokenReader', () => {
         it('should return empty optional when consuming', () => {
             const reader = createTokenReader({ tokens: [] });
 
-            const consumed = reader.consume(TokenKind.ARROW);
+            const consumed = reader.consume(TokenKind.SEMICOLON);
 
             expect(consumed).toEqual(Optional.empty());
         });
 
         it('should never match current', () => {
             const reader = createTokenReader({ tokens: [
-                TokenFixture.create(_ => _.nonLiteral(TokenKind.ARROW))
+                TokenFixture.create(_ => _.nonLiteral(TokenKind.SEMICOLON))
             ]});
-            reader.consume(TokenKind.ARROW);
+            reader.consume(TokenKind.SEMICOLON);
 
-            const isTokenKind = reader.currentIs(TokenKind.ARROW);
+            const isTokenKind = reader.currentIs(TokenKind.SEMICOLON);
 
             expect(isTokenKind).toBeFalsy();
         });
