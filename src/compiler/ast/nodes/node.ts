@@ -7,6 +7,7 @@ export enum AstNodeKind {
     VARIABLE_DECLARATION,
 
     ACCESSOR,
+    INVOCATION,
 
     GROUPING,
     BINARY,
