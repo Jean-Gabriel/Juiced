@@ -6,12 +6,14 @@ import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
 import type { BinaryExpression } from "../ast/nodes/expressions/binary";
 import type { Expression } from "../ast/nodes/expressions/expression";
 import type { GroupingExpression } from "../ast/nodes/expressions/grouping";
+import type { Invocation } from "../ast/nodes/expressions/invocation";
 import { OperatorKind } from "../ast/nodes/expressions/operators";
 import type { UnaryExpression } from "../ast/nodes/expressions/unary";
 import { AstNodeKind } from "../ast/nodes/node";
 import type { Source } from "../ast/nodes/source";
 import { isTypecheckingError, TypecheckingError } from "./error";
 import MemberBuilder from "./members/builder";
+import { MemberKind } from "./members/member";
 import { Scope } from "./scope";
 
 interface Typechecker {
@@ -48,6 +50,33 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
     const run = (source: Source) => {
         const reporter = createDiagnosticReporter();
         let scope = Scope.empty();
+
+        const invocation = (invocation: Invocation): InferedType => {
+            const found = scope.lookup(invocation.invoked.value);
+
+            if(!found) {
+                throw new TypecheckingError('Trying to access not declared function.');
+            }
+
+            if(found.kind !== MemberKind.FUNCTION) {
+                throw new TypecheckingError('Only functions can be invoked.');
+            }
+
+            if(found.args.length !== invocation.parameters.length) {
+                throw new TypecheckingError('Function was invoked with more parameters than it has arguments.');
+            }
+
+            invocation.parameters.forEach((param, index) => {
+                const type = expression(param);
+                const argument = found.args[index];
+
+                if(argument.type !== type) {
+                    throw new TypecheckingError('Function argument was invoked with expression of the wrong type.');
+                }
+            });
+
+            return found.type;
+        };
 
         const grouping = (grouping: GroupingExpression): InferedType => {
             return expression(grouping.expression);
@@ -130,6 +159,10 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
                 return member.type;
             }
 
+            if(expression.kind === AstNodeKind.INVOCATION) {
+                return invocation(expression);
+            }
+
             if(expression.kind === AstNodeKind.UNARY) {
                 return unary(expression);
             }
@@ -152,8 +185,6 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
 
         const functionDeclaration = (fun: FunctionDeclaration) => {
             scope = scope.push();
-
-            fun.arguments.forEach(arg => scope.add(MemberBuilder.typedIdentifier(arg)));
 
             fun.body.forEach((statement, index) => {
                 if(statement.kind === AstNodeKind.VARIABLE_DECLARATION) {

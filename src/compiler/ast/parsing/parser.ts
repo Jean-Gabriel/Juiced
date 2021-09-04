@@ -97,7 +97,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 let statement: Statement;
 
                 if(reader.currentIs(TokenKind.IDENTIFIER)) {
-                    if(reader.lookupForUntil(TokenKind.EQUAL, (token) => token.kind === TokenKind.CONST)) {
+                    if(reader.lookupForUntil(TokenKind.EQUAL, (token) => token.kind === TokenKind.SEMICOLON)) {
                         statement = variableDeclarationStatement();
                     } else {
                         statement = expression();

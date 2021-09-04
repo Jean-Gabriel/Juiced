@@ -3,8 +3,19 @@ export enum MemberKind {
     FUNCTION
 }
 
-export interface Member {
+export type FunctionMember = {
     name: string,
     type: string,
-    kind: MemberKind,
+    args: VariableMember[]
+    kind: MemberKind.FUNCTION
 }
+
+export type VariableMember = {
+    name: string,
+    type: string,
+    kind: MemberKind.VARIABLE,
+}
+
+export type Member =
+    | FunctionMember
+    | VariableMember

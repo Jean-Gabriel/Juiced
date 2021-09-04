@@ -1,4 +1,5 @@
-import type { Member } from "./members/member";
+import type { Member} from "./members/member";
+import { MemberKind } from "./members/member";
 
 type Props = {
     parent: Scope | null
@@ -25,7 +26,7 @@ export class Scope {
     }
 
     lookup(identifier: string): Member | null {
-        const found = this.members.find(member => member.name === identifier);
+        const found = this.listMembers().find(member => member.name === identifier);
 
         if(found) {
             return found;
@@ -46,4 +47,18 @@ export class Scope {
         return this.parent;
     }
 
+    private listMembers(): Member[] {
+        return this.members.flatMap(member => {
+            if(member.kind === MemberKind.VARIABLE) {
+                return [member];
+            }
+
+            if(member.kind === MemberKind.FUNCTION) {
+                const args = member.args;
+                return [member, ...args];
+            }
+
+            return [];
+        });
+    }
 }

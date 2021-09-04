@@ -12,7 +12,7 @@ describe('Parser', () => {
     it('should parse top level exported function declaration', () => {
         expectParse(`
             export add = fun (a: i32, b: i32): i32 {
-                0;
+                a + b;
             }
         `).createsAst(
             AstBuilder.source({
@@ -23,7 +23,11 @@ describe('Parser', () => {
                         args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32'}), AstBuilder.typedIdentifier({ value: 'b', type: 'i32'}) ],
                         type: AstBuilder.identifier({ value: 'i32' }),
                         statements: [
-                            AstBuilder.intLiteral({ int: 0 })
+                            AstBuilder.binaryExpression({
+                                left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' }) }),
+                                operator: OperatorKind.PLUS,
+                                right: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'b' }) })
+                            })
                         ]
                     })
                 })
