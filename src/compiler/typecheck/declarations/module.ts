@@ -2,15 +2,15 @@ import type { Declaration } from "../../ast/nodes/declarations/declaration";
 import type { FunctionDeclaration } from "../../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../../ast/nodes/declarations/variable";
 import { AstNodeKind } from "../../ast/nodes/node";
-import type { Source } from "../../ast/nodes/source";
+import type { Module } from "../../ast/nodes/module";
 
 export type ModuleDeclarations = {
     functions: FunctionDeclaration[],
     variables: VariableDeclaration[]
 }
 
-export const moduleDeclarationsOf = (source: Source): ModuleDeclarations => {
-    return source.declarations.reduce((acc, decl) => {
+export const moduleDeclarationsOf = (module: Module): ModuleDeclarations => {
+    return module.declarations.reduce((acc, decl) => {
         const declaration = (declaration: Declaration) => {
             if(declaration.kind === AstNodeKind.FUNCTION_DECLARATION) {
                 acc.functions = [...acc.functions, declaration];

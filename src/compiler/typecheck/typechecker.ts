@@ -9,7 +9,7 @@ import type { Invocation } from "../ast/nodes/expressions/invocation";
 import { OperatorKind } from "../ast/nodes/expressions/operators";
 import type { UnaryExpression } from "../ast/nodes/expressions/unary";
 import { AstNodeKind } from "../ast/nodes/node";
-import type { Source } from "../ast/nodes/source";
+import type { Module } from "../ast/nodes/module";
 import { moduleDeclarationsOf } from "./declarations/module";
 import { isTypecheckingError, TypecheckingError } from "./error";
 import MemberBuilder from "./members/builder";
@@ -17,7 +17,7 @@ import { MemberKind } from "./members/member";
 import { Scope } from "./scope";
 
 interface Typechecker {
-    run: (source: Source) => void
+    run: (module: Module) => void
 }
 
 type TypecheckerFactoryProps = {
@@ -47,7 +47,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         OperatorKind.PLUS
     ];
 
-    const run = (source: Source) => {
+    const run = (module: Module) => {
         const reporter = createDiagnosticReporter();
         let scope = Scope.empty();
 
@@ -204,8 +204,8 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
             scope = scope.pop();
         };
 
-        const module = (source: Source) => {
-            const declarations = moduleDeclarationsOf(source);
+        const check = (module: Module) => {
+            const declarations = moduleDeclarationsOf(module);
 
             declarations.functions.forEach(func => {
                 scope.add(MemberBuilder.functionMember(func));
@@ -227,7 +227,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         };
 
         try {
-            module(source);
+            check(module);
         } catch(e) {
             handleError(e);
         }

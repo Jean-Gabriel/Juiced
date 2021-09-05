@@ -11,7 +11,7 @@ describe('ModuleDeclarations', () => {
         const function3 = FunctionDeclarationFixture.create();
         const variable = VariableDeclarationFixture.create();
         const exported = AstBuilder.exportation({ declaration: function3 });
-        const module = AstBuilder.source({
+        const module = AstBuilder.module({
             declarations: [
                 function1, function2, variable, exported
             ]

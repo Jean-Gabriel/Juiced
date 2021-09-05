@@ -1,6 +1,6 @@
 import type { DiagnosticReporterFactory } from "../../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../../diagnostic/reporter";
-import type { Source, TopLevelDeclaration } from "../nodes/source";
+import type { Module, TopLevelDeclaration } from "../nodes/module";
 import AstBuilder from "../nodes/builder";
 import { TokenKind } from "../../token/kinds";
 import type { TypedIdentifier } from "../nodes/identifier";
@@ -18,7 +18,7 @@ import type { Declaration } from "../nodes/declarations/declaration";
 import { AstNodeKind } from "../nodes/node";
 
 interface Parser {
-    parse: (tokens: Token[]) => Source
+    parse: (tokens: Token[]) => Module
 }
 
 interface ErrorHandlingOptions {
@@ -38,7 +38,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
     const EMPTY_IDENTIFIER = AstBuilder.identifier({ value: '' });
     const EMPTY_EXPRESSION = AstBuilder.accessor({ identifier: EMPTY_IDENTIFIER });
 
-    const parse = (tokens: Token[]): Source => {
+    const parse = (tokens: Token[]): Module => {
         const reader = createTokenReader({ tokens });
         const reporter = createDiagnosticReporter();
         const optimizer = createAstOptimizer();
@@ -365,8 +365,8 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             throw new Error('Parsing error.');
         }
 
-        const source = AstBuilder.source({ declarations: nodes });
-        return optimizer.optimize(source);
+        const module = AstBuilder.module({ declarations: nodes });
+        return optimizer.optimize(module);
     };
 
     return {

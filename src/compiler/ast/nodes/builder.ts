@@ -7,7 +7,7 @@ import type { Expression, ExpressionVisitor } from "./expressions/expression";
 import type { BinaryOperator, UnaryOperator } from "./expressions/operators";
 import type { UnaryExpression } from "./expressions/unary";
 import type { Identifier, TypedIdentifier } from "./identifier";
-import type { Source, SourceVisitor, TopLevelDeclaration } from "./source";
+import type { Module, ModuleVisitor, TopLevelDeclaration } from "./module";
 import type { Statement, StatementVisitor } from "./statements/statement";
 import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/literal";
 import { AstNodeKind } from "./node";
@@ -15,13 +15,13 @@ import type { Export, ExportVisitor } from "./export";
 import type { GroupingExpression } from "./expressions/grouping";
 import type { Invocation } from "./expressions/invocation";
 
-type SourceProps = { declarations: TopLevelDeclaration[] }
-const source = ({ declarations }: SourceProps): Source => {
+type ModuleProps = { declarations: TopLevelDeclaration[] }
+const buildModule = ({ declarations }: ModuleProps): Module => {
     return {
-        kind: AstNodeKind.SOURCE,
+        kind: AstNodeKind.MODULE,
         declarations,
-        acceptSourceVisitor<T>(visitor: SourceVisitor<T>) {
-            return visitor.visitSource(this);
+        acceptModuleVisitor<T>(visitor: ModuleVisitor<T>) {
+            return visitor.visitModule(this);
         }
     };
 };
@@ -193,7 +193,7 @@ const typedIdentifier = ({ value, type }: TypedIdentifierProps): TypedIdentifier
 };
 
 const AstBuilder = {
-    source,
+    module: buildModule,
     accessor,
     grouping,
     invocation,
