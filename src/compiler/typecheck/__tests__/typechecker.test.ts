@@ -136,8 +136,8 @@ describe('Typechecker', () => {
         `).errors();
     });
 
-    const expectTypechecking = (sequence: string) => {
-        const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
+    const expectTypechecking = (module: string) => {
+        const withoutStartAndEndLineBreak = module.replace(/^\n|\n$/g, '');
 
         const tokenizer = createTokenizer({
             createSourceReader,

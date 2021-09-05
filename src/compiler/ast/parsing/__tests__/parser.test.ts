@@ -4,7 +4,7 @@ import { createTokenReader } from "../../../token/reader";
 import { createTokenizer } from "../../../token/tokenizer";
 import AstBuilder from "../../nodes/builder";
 import { OperatorKind } from "../../nodes/expressions/operators";
-import type { Source } from "../../nodes/source";
+import type { Module } from "../../nodes/module";
 import { createAstOptimizer } from "../optimization/optimizer";
 import { createParser } from "../parser";
 
@@ -15,7 +15,7 @@ describe('Parser', () => {
                 a + b;
             }
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                 AstBuilder.exportation({
                     declaration: AstBuilder.functionDeclaration({
@@ -41,7 +41,7 @@ describe('Parser', () => {
                 x = const a == b;
             }
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.functionDeclaration({
                         identifier: AstBuilder.identifier({ value: 'areEqual' }),
@@ -69,7 +69,7 @@ describe('Parser', () => {
                 2 * -4;
             }
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.exportation({
                         declaration: AstBuilder.functionDeclaration({
@@ -96,7 +96,7 @@ describe('Parser', () => {
         expectParse(`
             export x = const (2 + 2) + 2 / 2;
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.exportation({
                         declaration: AstBuilder.variableDeclaration({
@@ -128,7 +128,7 @@ describe('Parser', () => {
         expectParse(`
             export x = const 2;
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.exportation({
                         declaration: AstBuilder.variableDeclaration({
@@ -145,7 +145,7 @@ describe('Parser', () => {
         expectParse(`
             export x = const 2.0;
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.exportation({
                         declaration: AstBuilder.variableDeclaration({
@@ -162,7 +162,7 @@ describe('Parser', () => {
         expectParse(`
             export x = const !false == true;
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.exportation({
                         declaration: AstBuilder.variableDeclaration({
@@ -186,7 +186,7 @@ describe('Parser', () => {
         expectParse(`
             result = const invoked();
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.variableDeclaration({
                         identifier: AstBuilder.identifier({ value: 'result' }),
@@ -204,7 +204,7 @@ describe('Parser', () => {
         expectParse(`
             result = const invoked(-2 + 2, pi, other_invocation());
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.variableDeclaration({
                         identifier: AstBuilder.identifier({ value: 'result' }),
@@ -241,7 +241,7 @@ describe('Parser', () => {
                 1;
             }
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.exportation({
                         declaration: AstBuilder.functionDeclaration({
@@ -267,7 +267,7 @@ describe('Parser', () => {
                             * 2
                             ;
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: [
                     AstBuilder.variableDeclaration({
                         identifier: AstBuilder.identifier({ value: 'weird_expression' }),
@@ -296,7 +296,7 @@ describe('Parser', () => {
         expectParse(`
             1 * 2;
         `).createsAst(
-            AstBuilder.source({
+            AstBuilder.module({
                 declarations: []
             })
         );
@@ -360,8 +360,8 @@ describe('Parser', () => {
         `).errors(1); // there is only one error because it could not recover
     });
 
-    const expectParse = (sequence: string) => {
-        const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
+    const expectParse = (module: string) => {
+        const withoutStartAndEndLineBreak = module.replace(/^\n|\n$/g, '');
 
         const tokenizer = createTokenizer({
             createSourceReader,
@@ -378,7 +378,7 @@ describe('Parser', () => {
         });
 
         return {
-            createsAst: (expected: Source) => {
+            createsAst: (expected: Module) => {
                 const ast = parser.parse(tokens);
 
                 expect(JSON.stringify(ast)).toStrictEqual(JSON.stringify(expected));

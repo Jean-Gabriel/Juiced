@@ -1,16 +1,16 @@
 import AstBuilder from "../../nodes/builder";
 import { AstNodeKind } from "../../nodes/node";
-import type { Source, TopLevelDeclaration } from "../../nodes/source";
+import type { Module, TopLevelDeclaration } from "../../nodes/module";
 import type { Statement } from "../../nodes/statements/statement";
 
 interface AstOptimizer {
-    optimize: (source: Source) => Source
+    optimize: (module: Module) => Module
 }
 
 export type AstOptimizerFactory = () => AstOptimizer
 
 // This will remove nodes that are supported by the parser but can never be used such as:
-//      source top-level expressions
+//      module top-level expressions
 //      function non-returning expressions
 export const createAstOptimizer: AstOptimizerFactory = () => {
 
@@ -56,8 +56,8 @@ export const createAstOptimizer: AstOptimizerFactory = () => {
     };
 
 
-    const optimize = (source: Source) => {
-        const toOptimized = AstBuilder.source({ declarations: [...source.declarations] });
+    const optimize = (module: Module) => {
+        const toOptimized = AstBuilder.module({ declarations: [...module.declarations] });
 
         const possiblyUsed = possiblyUsedTopLevelDeclarations(toOptimized.declarations);
 
@@ -74,7 +74,7 @@ export const createAstOptimizer: AstOptimizerFactory = () => {
             declaration.body = [...possiblyUsedStatements(declaration.body)];
         }
 
-        return AstBuilder.source({ declarations: possiblyUsed });
+        return AstBuilder.module({ declarations: possiblyUsed });
     };
 
     return {

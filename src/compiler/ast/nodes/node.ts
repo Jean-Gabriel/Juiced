@@ -1,5 +1,5 @@
 export enum AstNodeKind {
-    SOURCE,
+    MODULE,
 
     EXPORT,
 
