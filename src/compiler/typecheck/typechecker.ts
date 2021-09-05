@@ -1,17 +1,19 @@
 import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../diagnostic/reporter";
-import type { Declaration } from "../ast/nodes/declarations/declaration";
 import type { FunctionDeclaration } from "../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
 import type { BinaryExpression } from "../ast/nodes/expressions/binary";
 import type { Expression } from "../ast/nodes/expressions/expression";
 import type { GroupingExpression } from "../ast/nodes/expressions/grouping";
+import type { Invocation } from "../ast/nodes/expressions/invocation";
 import { OperatorKind } from "../ast/nodes/expressions/operators";
 import type { UnaryExpression } from "../ast/nodes/expressions/unary";
 import { AstNodeKind } from "../ast/nodes/node";
 import type { Source } from "../ast/nodes/source";
+import { moduleDeclarationsOf } from "./declarations/module";
 import { isTypecheckingError, TypecheckingError } from "./error";
 import MemberBuilder from "./members/builder";
+import { MemberKind } from "./members/member";
 import { Scope } from "./scope";
 
 interface Typechecker {
@@ -48,6 +50,33 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
     const run = (source: Source) => {
         const reporter = createDiagnosticReporter();
         let scope = Scope.empty();
+
+        const invocation = (invocation: Invocation): InferedType => {
+            const found = scope.lookup(invocation.invoked.value);
+
+            if(!found) {
+                throw new TypecheckingError('Trying to access not declared function.');
+            }
+
+            if(found.kind !== MemberKind.FUNCTION) {
+                throw new TypecheckingError('Only functions can be invoked.');
+            }
+
+            if(found.args.length !== invocation.parameters.length) {
+                throw new TypecheckingError('Function was invoked with more parameters than it has arguments.');
+            }
+
+            invocation.parameters.forEach((param, index) => {
+                const type = expression(param);
+                const argument = found.args[index];
+
+                if(argument.type !== type) {
+                    throw new TypecheckingError('Function argument was invoked with expression of the wrong type.');
+                }
+            });
+
+            return found.type;
+        };
 
         const grouping = (grouping: GroupingExpression): InferedType => {
             return expression(grouping.expression);
@@ -130,6 +159,10 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
                 return member.type;
             }
 
+            if(expression.kind === AstNodeKind.INVOCATION) {
+                return invocation(expression);
+            }
+
             if(expression.kind === AstNodeKind.UNARY) {
                 return unary(expression);
             }
@@ -153,8 +186,6 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         const functionDeclaration = (fun: FunctionDeclaration) => {
             scope = scope.push();
 
-            fun.arguments.forEach(arg => scope.add(MemberBuilder.typedIdentifier(arg)));
-
             fun.body.forEach((statement, index) => {
                 if(statement.kind === AstNodeKind.VARIABLE_DECLARATION) {
                     if(index === fun.body.length - 1) {
@@ -174,30 +205,17 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         };
 
         const module = (source: Source) => {
-            const functions: FunctionDeclaration[] = [];
+            const declarations = moduleDeclarationsOf(source);
 
-            const declaration = (declaration: Declaration) => {
-                if(declaration.kind === AstNodeKind.FUNCTION_DECLARATION) {
-                    functions.push(declaration);
-                    scope.add(MemberBuilder.functionMember(declaration));
-                }
-
-                if(declaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
-                    variableDeclaration(declaration);
-                }
-            };
-
-            source.declarations.forEach(topLevelDeclaration => {
-                if(topLevelDeclaration.kind === AstNodeKind.EXPORT) {
-                    return declaration(topLevelDeclaration.declaration);
-                }
-
-                if(topLevelDeclaration.kind === AstNodeKind.FUNCTION_DECLARATION || topLevelDeclaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
-                    return declaration(topLevelDeclaration);
-                }
+            declarations.functions.forEach(func => {
+                scope.add(MemberBuilder.functionMember(func));
             });
 
-            functions.forEach(functionDeclaration);
+            declarations.variables.forEach(variable => {
+                variableDeclaration(variable);
+            });
+
+            declarations.functions.forEach(functionDeclaration);
         };
 
         const handleError = (error: unknown) => {

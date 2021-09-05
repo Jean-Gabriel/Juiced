@@ -12,7 +12,7 @@ describe('Parser', () => {
     it('should parse top level exported function declaration', () => {
         expectParse(`
             export add = fun (a: i32, b: i32): i32 {
-                0;
+                a + b;
             }
         `).createsAst(
             AstBuilder.source({
@@ -22,8 +22,12 @@ describe('Parser', () => {
                         identifier: AstBuilder.identifier({ value: 'add' }),
                         args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32'}), AstBuilder.typedIdentifier({ value: 'b', type: 'i32'}) ],
                         type: AstBuilder.identifier({ value: 'i32' }),
-                        statements: [
-                            AstBuilder.intLiteral({ int: 0 })
+                        body: [
+                            AstBuilder.binaryExpression({
+                                left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' }) }),
+                                operator: OperatorKind.PLUS,
+                                right: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'b' }) })
+                            })
                         ]
                     })
                 })
@@ -43,7 +47,7 @@ describe('Parser', () => {
                         identifier: AstBuilder.identifier({ value: 'areEqual' }),
                         args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
                         type: AstBuilder.identifier({ value: 'i32' }),
-                        statements: [
+                        body: [
                             AstBuilder.variableDeclaration({
                                 identifier: AstBuilder.identifier({ value: 'x' }),
                                 expression: AstBuilder.binaryExpression({
@@ -72,7 +76,7 @@ describe('Parser', () => {
                             identifier: AstBuilder.identifier({ value: 'math' }),
                             args: [],
                             type: AstBuilder.identifier({ value: 'i32' }),
-                            statements: [
+                            body: [
                                 AstBuilder.binaryExpression({
                                     left: AstBuilder.intLiteral({ int: 2 }),
                                     operator: OperatorKind.MULTIPLICATION,
@@ -178,6 +182,58 @@ describe('Parser', () => {
         );
     });
 
+    it('should parse invocation without parameters', () => {
+        expectParse(`
+            result = const invoked();
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.variableDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'result' }),
+                        expression: AstBuilder.invocation({
+                            invoked: AstBuilder.identifier({ value: 'invoked' }),
+                            parameters: []
+                        })
+                    })
+                ]
+            })
+        );
+    });
+
+    it('should parse invocation with parameters', () => {
+        expectParse(`
+            result = const invoked(-2 + 2, pi, other_invocation());
+        `).createsAst(
+            AstBuilder.source({
+                declarations: [
+                    AstBuilder.variableDeclaration({
+                        identifier: AstBuilder.identifier({ value: 'result' }),
+                        expression: AstBuilder.invocation({
+                            invoked: AstBuilder.identifier({ value: 'invoked' }),
+                            parameters: [
+                                AstBuilder.binaryExpression({
+                                    left: AstBuilder.unaryExpression({
+                                        operator: OperatorKind.MINUS,
+                                        expression: AstBuilder.intLiteral({ int: 2 })
+                                    }),
+                                    operator: OperatorKind.PLUS,
+                                    right: AstBuilder.intLiteral({ int: 2 })
+                                }),
+                                AstBuilder.accessor({
+                                    identifier: AstBuilder.identifier({ value: 'pi' })
+                                }),
+                                AstBuilder.invocation({
+                                    invoked: AstBuilder.identifier({ value: 'other_invocation'}),
+                                    parameters: []
+                                })
+                            ]
+                        })
+                    })
+                ]
+            })
+        );
+    });
+
     it('should ignore not returning expressions in functions', () => {
         expectParse(`
             export return_one = fun (): i32 {
@@ -192,7 +248,7 @@ describe('Parser', () => {
                             identifier: AstBuilder.identifier({ value: 'return_one' }),
                             args: [],
                             type: AstBuilder.identifier({ value: 'i32' }),
-                            statements: [
+                            body: [
                                 AstBuilder.intLiteral({ int: 1 })
                             ]
                         })

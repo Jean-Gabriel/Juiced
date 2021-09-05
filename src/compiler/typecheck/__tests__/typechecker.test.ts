@@ -1,5 +1,4 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
-import { createChalkDiagnosticReporter } from "../../../diagnostic/chalk/reporter";
 import { createAstOptimizer } from "../../ast/parsing/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
@@ -8,6 +7,69 @@ import { createTokenizer } from "../../token/tokenizer";
 import { createTypechecker } from "../typechecker";
 
 describe('Typechecker', () => {
+
+    it('can invoke a function declared before and after invocator', () => {
+        expectTypechecking(`
+            returns_bool = fun (): bool {
+                true;
+            }
+
+            a_bool = const returns_bool();
+        `).succeeds();
+
+        expectTypechecking(`
+            a_bool = const returns_bool();
+
+            returns_bool = fun (): bool {
+                true;
+            }
+        `).succeeds();
+    });
+
+    it('can invoke a function with parameters', () => {
+        expectTypechecking(`
+            add = fun (a: i32, b: i32): i32 {
+                a + b;
+            }
+
+            sum = const add(1, 2);
+        `).succeeds();
+    });
+
+    it('cannot invoke a function with invalid number of parameters', () => {
+        expectTypechecking(`
+            add = fun (a: i32, b: i32): i32 {
+                a + b;
+            }
+
+            sum = const add(1);
+        `).errors();
+
+        expectTypechecking(`
+            add = fun (a: i32, b: i32): i32 {
+                a + b;
+            }
+
+            sum = const add(1, 2, 3);
+        `).errors();
+    });
+
+    it('cannot invoke a function with invalid parameters type', () => {
+        expectTypechecking(`
+            add = fun (a: i32, b: i32): i32 {
+                a + b;
+            }
+
+            sum = const add(false, 1.0);
+        `).errors();
+    });
+
+    it('cannot invoke a non-existent function ', () => {
+        expectTypechecking(`
+            var = const nonexistent();
+        `).errors();
+    });
+
     it('functions returns expression type must match their specified type', () => {
         expectTypechecking(`
             returns_bool = fun (): bool {
@@ -86,7 +148,7 @@ describe('Typechecker', () => {
 
         const parser = createParser({
             createTokenReader,
-            createDiagnosticReporter: createChalkDiagnosticReporter,
+            createDiagnosticReporter: createTestDiagnoticsReporter,
             createAstOptimizer
         });
 

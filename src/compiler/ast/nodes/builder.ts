@@ -13,6 +13,7 @@ import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/lit
 import { AstNodeKind } from "./node";
 import type { Export, ExportVisitor } from "./export";
 import type { GroupingExpression } from "./expressions/grouping";
+import type { Invocation } from "./expressions/invocation";
 
 type SourceProps = { declarations: TopLevelDeclaration[] }
 const source = ({ declarations }: SourceProps): Source => {
@@ -25,8 +26,8 @@ const source = ({ declarations }: SourceProps): Source => {
     };
 };
 
-type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Identifier, statements: Statement[] }
-const functionDeclaration = ({ identifier, args, type, statements }: FunctionDeclarationProps): FunctionDeclaration => {
+type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Identifier, body: Statement[] }
+const functionDeclaration = ({ identifier, args, type, body: statements }: FunctionDeclarationProps): FunctionDeclaration => {
     return {
         kind: AstNodeKind.FUNCTION_DECLARATION,
         identifier,
@@ -113,8 +114,23 @@ const accessor = ({ identifier }: AccessorProps): Accessor => {
     };
 };
 
+type InvocationProps = { invoked: Identifier, parameters: Expression[] }
+const invocation = ({ invoked, parameters }: InvocationProps): Invocation => {
+    return {
+        kind: AstNodeKind.INVOCATION,
+        invoked,
+        parameters,
+        acceptExpressionVisitor<T>(visitor: ExpressionVisitor<T>) {
+            return visitor.visitInvocation(this);
+        },
+        acceptStatementVisitor<T>(vistor: StatementVisitor<T>) {
+            return vistor.visitExpression(this);
+        }
+    };
+};
+
 type IntLiteralProps = { int: number }
-const intLiteral = ({ int }: IntLiteralProps ): IntLiteral => {
+const intLiteral = ({ int }: IntLiteralProps): IntLiteral => {
     return {
         kind: AstNodeKind.INT_LITERAL,
         value: int,
@@ -180,6 +196,7 @@ const AstBuilder = {
     source,
     accessor,
     grouping,
+    invocation,
     identifier,
     intLiteral,
     exportation,
