@@ -1,11 +1,11 @@
 import FunctionDeclarationFixture from "../../../../../test/compiler/ast/nodes/declaration/function";
 import VariableDeclarationFixture from "../../../../../test/compiler/ast/nodes/declaration/variable";
 import AstBuilder from "../../../ast/nodes/builder";
-import type { ModuleDefinition} from "../module";
-import { moduleDefinitionOf } from "../module";
+import type { ModuleDeclarations} from "../module";
+import { moduleDeclarationsOf } from "../module";
 
-describe('ModuleDefinition', () => {
-    it('should create module definition', () => {
+describe('ModuleDeclarations', () => {
+    it('should create module declarations', () => {
         const function1 = FunctionDeclarationFixture.create();
         const function2 = FunctionDeclarationFixture.create();
         const function3 = FunctionDeclarationFixture.create();
@@ -17,12 +17,12 @@ describe('ModuleDefinition', () => {
             ]
         });
 
-        const definition = moduleDefinitionOf(module);
+        const declarations = moduleDeclarationsOf(module);
 
-        const expected: ModuleDefinition = {
+        const expected: ModuleDeclarations = {
             functions: [function1, function2, function3],
             variables: [variable]
         };
-        expect(definition).toEqual(expected);
+        expect(declarations).toEqual(expected);
     });
 });

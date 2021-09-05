@@ -4,12 +4,12 @@ import type { VariableDeclaration } from "../../ast/nodes/declarations/variable"
 import { AstNodeKind } from "../../ast/nodes/node";
 import type { Source } from "../../ast/nodes/source";
 
-export type ModuleDefinition = {
+export type ModuleDeclarations = {
     functions: FunctionDeclaration[],
     variables: VariableDeclaration[]
 }
 
-export const moduleDefinitionOf = (source: Source): ModuleDefinition => {
+export const moduleDeclarationsOf = (source: Source): ModuleDeclarations => {
     return source.declarations.reduce((acc, decl) => {
         const declaration = (declaration: Declaration) => {
             if(declaration.kind === AstNodeKind.FUNCTION_DECLARATION) {

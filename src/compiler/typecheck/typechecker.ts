@@ -10,7 +10,7 @@ import { OperatorKind } from "../ast/nodes/expressions/operators";
 import type { UnaryExpression } from "../ast/nodes/expressions/unary";
 import { AstNodeKind } from "../ast/nodes/node";
 import type { Source } from "../ast/nodes/source";
-import { moduleDefinitionOf } from "./definitions/module";
+import { moduleDeclarationsOf } from "./declarations/module";
 import { isTypecheckingError, TypecheckingError } from "./error";
 import MemberBuilder from "./members/builder";
 import { MemberKind } from "./members/member";
@@ -205,17 +205,17 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         };
 
         const module = (source: Source) => {
-            const definition = moduleDefinitionOf(source);
+            const declarations = moduleDeclarationsOf(source);
 
-            definition.functions.forEach(func => {
+            declarations.functions.forEach(func => {
                 scope.add(MemberBuilder.functionMember(func));
             });
 
-            definition.variables.forEach(variable => {
+            declarations.variables.forEach(variable => {
                 variableDeclaration(variable);
             });
 
-            definition.functions.forEach(functionDeclaration);
+            declarations.functions.forEach(functionDeclaration);
         };
 
         const handleError = (error: unknown) => {
