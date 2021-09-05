@@ -4,7 +4,8 @@ import type { TypedIdentifier } from "../../ast/nodes/identifier";
 import type { FunctionMember, VariableMember } from "./member";
 import { MemberKind } from "./member";
 
-const functionMember = (fun: FunctionDeclaration): FunctionMember => {
+type FunctionMemberProps = { fun: FunctionDeclaration }
+const functionMember = ({ fun }: FunctionMemberProps): FunctionMember => {
     return {
         name: fun.identifier.value,
         type: fun.type.value,
@@ -21,7 +22,8 @@ const functionArgument = (arg: TypedIdentifier): VariableMember => {
     };
 };
 
-const variable = (variable: VariableDeclaration, inferedType: string): VariableMember => {
+type VariableProps = { variable: VariableDeclaration, inferedType: string }
+const variable = ({ variable, inferedType }: VariableProps): VariableMember => {
     return {
         name: variable.identifier.value,
         type: inferedType,

@@ -180,7 +180,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
 
         const variableDeclaration = (variable: VariableDeclaration)  => {
             const inferedType = expression(variable.expression);
-            scope.add(MemberBuilder.variable(variable, inferedType));
+            scope.add(MemberBuilder.variable({ variable, inferedType }));
         };
 
         const functionDeclaration = (fun: FunctionDeclaration) => {
@@ -207,8 +207,8 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         const check = (module: Module) => {
             const declarations = moduleDeclarationsOf(module);
 
-            declarations.functions.forEach(func => {
-                scope.add(MemberBuilder.functionMember(func));
+            declarations.functions.forEach(fun => {
+                scope.add(MemberBuilder.functionMember({ fun }));
             });
 
             declarations.variables.forEach(variable => {
