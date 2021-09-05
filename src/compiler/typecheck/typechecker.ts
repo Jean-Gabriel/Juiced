@@ -1,6 +1,5 @@
 import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../diagnostic/reporter";
-import type { Declaration } from "../ast/nodes/declarations/declaration";
 import type { FunctionDeclaration } from "../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
 import type { BinaryExpression } from "../ast/nodes/expressions/binary";
@@ -11,6 +10,7 @@ import { OperatorKind } from "../ast/nodes/expressions/operators";
 import type { UnaryExpression } from "../ast/nodes/expressions/unary";
 import { AstNodeKind } from "../ast/nodes/node";
 import type { Source } from "../ast/nodes/source";
+import { moduleDefinitionOf } from "./definitions/module";
 import { isTypecheckingError, TypecheckingError } from "./error";
 import MemberBuilder from "./members/builder";
 import { MemberKind } from "./members/member";
@@ -205,30 +205,17 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         };
 
         const module = (source: Source) => {
-            const functions: FunctionDeclaration[] = [];
+            const definition = moduleDefinitionOf(source);
 
-            const declaration = (declaration: Declaration) => {
-                if(declaration.kind === AstNodeKind.FUNCTION_DECLARATION) {
-                    functions.push(declaration);
-                    scope.add(MemberBuilder.functionMember(declaration));
-                }
-
-                if(declaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
-                    variableDeclaration(declaration);
-                }
-            };
-
-            source.declarations.forEach(topLevelDeclaration => {
-                if(topLevelDeclaration.kind === AstNodeKind.EXPORT) {
-                    return declaration(topLevelDeclaration.declaration);
-                }
-
-                if(topLevelDeclaration.kind === AstNodeKind.FUNCTION_DECLARATION || topLevelDeclaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
-                    return declaration(topLevelDeclaration);
-                }
+            definition.functions.forEach(func => {
+                scope.add(MemberBuilder.functionMember(func));
             });
 
-            functions.forEach(functionDeclaration);
+            definition.variables.forEach(variable => {
+                variableDeclaration(variable);
+            });
+
+            definition.functions.forEach(functionDeclaration);
         };
 
         const handleError = (error: unknown) => {

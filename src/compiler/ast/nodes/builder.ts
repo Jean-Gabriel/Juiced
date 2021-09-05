@@ -26,8 +26,8 @@ const source = ({ declarations }: SourceProps): Source => {
     };
 };
 
-type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Identifier, statements: Statement[] }
-const functionDeclaration = ({ identifier, args, type, statements }: FunctionDeclarationProps): FunctionDeclaration => {
+type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Identifier, body: Statement[] }
+const functionDeclaration = ({ identifier, args, type, body: statements }: FunctionDeclarationProps): FunctionDeclaration => {
     return {
         kind: AstNodeKind.FUNCTION_DECLARATION,
         identifier,

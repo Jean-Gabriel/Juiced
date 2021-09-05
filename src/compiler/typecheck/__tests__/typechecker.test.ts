@@ -8,7 +8,7 @@ import { createTypechecker } from "../typechecker";
 
 describe('Typechecker', () => {
 
-    it('can invoke a function declared before an after invocator', () => {
+    it('can invoke a function declared before and after invocator', () => {
         expectTypechecking(`
             returns_bool = fun (): bool {
                 true;

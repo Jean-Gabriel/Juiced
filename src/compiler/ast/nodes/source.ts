@@ -1,7 +1,8 @@
 import type { Declaration } from "./declarations/declaration";
 import type { Export } from "./export";
 import type { Expression } from "./expressions/expression";
-import type { AstNode, AstNodeKind } from "./node";
+import type { AstNodeKind } from "./node";
+import type { AstNode } from "./node";
 
 export type TopLevelDeclaration = Export | Declaration | Expression
 

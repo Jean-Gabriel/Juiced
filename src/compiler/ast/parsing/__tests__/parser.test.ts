@@ -22,7 +22,7 @@ describe('Parser', () => {
                         identifier: AstBuilder.identifier({ value: 'add' }),
                         args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32'}), AstBuilder.typedIdentifier({ value: 'b', type: 'i32'}) ],
                         type: AstBuilder.identifier({ value: 'i32' }),
-                        statements: [
+                        body: [
                             AstBuilder.binaryExpression({
                                 left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' }) }),
                                 operator: OperatorKind.PLUS,
@@ -47,7 +47,7 @@ describe('Parser', () => {
                         identifier: AstBuilder.identifier({ value: 'areEqual' }),
                         args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
                         type: AstBuilder.identifier({ value: 'i32' }),
-                        statements: [
+                        body: [
                             AstBuilder.variableDeclaration({
                                 identifier: AstBuilder.identifier({ value: 'x' }),
                                 expression: AstBuilder.binaryExpression({
@@ -76,7 +76,7 @@ describe('Parser', () => {
                             identifier: AstBuilder.identifier({ value: 'math' }),
                             args: [],
                             type: AstBuilder.identifier({ value: 'i32' }),
-                            statements: [
+                            body: [
                                 AstBuilder.binaryExpression({
                                     left: AstBuilder.intLiteral({ int: 2 }),
                                     operator: OperatorKind.MULTIPLICATION,
@@ -248,7 +248,7 @@ describe('Parser', () => {
                             identifier: AstBuilder.identifier({ value: 'return_one' }),
                             args: [],
                             type: AstBuilder.identifier({ value: 'i32' }),
-                            statements: [
+                            body: [
                                 AstBuilder.intLiteral({ int: 1 })
                             ]
                         })

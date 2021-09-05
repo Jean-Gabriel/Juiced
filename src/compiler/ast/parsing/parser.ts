@@ -143,7 +143,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 identifier: AstBuilder.identifier({ value: identifier.literal }),
                 args,
                 type: AstBuilder.identifier({ value: type.lexeme }),
-                statements: body
+                body: body
             });
         };
 
