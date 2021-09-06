@@ -1,4 +1,5 @@
 import { createTestDiagnoticsReporter } from "../../../../../test/diagnostic/reporter";
+import { Primitive, Type } from "../../../juice/type";
 import { createSourceReader } from "../../../source/reader";
 import { createTokenReader } from "../../../token/reader";
 import { createTokenizer } from "../../../token/tokenizer";
@@ -20,8 +21,11 @@ describe('Parser', () => {
                 AstBuilder.exportation({
                     declaration: AstBuilder.functionDeclaration({
                         identifier: AstBuilder.identifier({ value: 'add' }),
-                        args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32'}), AstBuilder.typedIdentifier({ value: 'b', type: 'i32'}) ],
-                        type: AstBuilder.identifier({ value: 'i32' }),
+                        args: [
+                            AstBuilder.typedIdentifier({ value: 'a', type: Type.from(Primitive.I32) }),
+                            AstBuilder.typedIdentifier({ value: 'b', type: Type.from(Primitive.I32) })
+                        ],
+                        type: Type.from(Primitive.I32),
                         body: [
                             AstBuilder.binaryExpression({
                                 left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' }) }),
@@ -45,8 +49,11 @@ describe('Parser', () => {
                 declarations: [
                     AstBuilder.functionDeclaration({
                         identifier: AstBuilder.identifier({ value: 'areEqual' }),
-                        args: [ AstBuilder.typedIdentifier({ value: 'a', type: 'i32' }), AstBuilder.typedIdentifier({ value: 'b', type: 'i32' }) ],
-                        type: AstBuilder.identifier({ value: 'i32' }),
+                        args: [
+                            AstBuilder.typedIdentifier({ value: 'a', type: Type.from(Primitive.I32) }),
+                            AstBuilder.typedIdentifier({ value: 'b', type: Type.from(Primitive.I32) })
+                        ],
+                        type: Type.from(Primitive.I32),
                         body: [
                             AstBuilder.variableDeclaration({
                                 identifier: AstBuilder.identifier({ value: 'x' }),
@@ -75,7 +82,7 @@ describe('Parser', () => {
                         declaration: AstBuilder.functionDeclaration({
                             identifier: AstBuilder.identifier({ value: 'math' }),
                             args: [],
-                            type: AstBuilder.identifier({ value: 'i32' }),
+                            type: Type.from(Primitive.I32),
                             body: [
                                 AstBuilder.binaryExpression({
                                     left: AstBuilder.intLiteral({ int: 2 }),
@@ -247,7 +254,7 @@ describe('Parser', () => {
                         declaration: AstBuilder.functionDeclaration({
                             identifier: AstBuilder.identifier({ value: 'return_one' }),
                             args: [],
-                            type: AstBuilder.identifier({ value: 'i32' }),
+                            type: Type.from(Primitive.I32),
                             body: [
                                 AstBuilder.intLiteral({ int: 1 })
                             ]

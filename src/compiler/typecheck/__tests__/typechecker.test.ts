@@ -7,7 +7,6 @@ import { createTokenizer } from "../../token/tokenizer";
 import { createTypechecker } from "../typechecker";
 
 describe('Typechecker', () => {
-
     it('can invoke a function declared before and after invocator', () => {
         expectTypechecking(`
             returns_bool = fun (): bool {
@@ -156,7 +155,7 @@ describe('Typechecker', () => {
 
         const reporter = createTestDiagnoticsReporter();
         const typechecker = createTypechecker({
-            createDiagnosticReporter: createTestDiagnoticsReporter
+            createDiagnosticReporter: () => reporter
         });
 
         return {

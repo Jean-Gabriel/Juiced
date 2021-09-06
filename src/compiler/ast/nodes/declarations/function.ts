@@ -1,3 +1,4 @@
+import type { Type } from "../../../juice/type";
 import type { Identifier, TypedIdentifier } from "../identifier";
 import type { AstNodeKind } from "../node";
 import type { Statement } from "../statements/statement";
@@ -8,6 +9,6 @@ export interface FunctionDeclaration extends DeclarationNode {
 
     identifier: Identifier
     arguments: TypedIdentifier[]
-    type: Identifier
+    type: Type
     body: Statement[]
 }

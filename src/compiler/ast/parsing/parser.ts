@@ -16,6 +16,7 @@ import type { TokenReaderFactory } from "../../token/reader";
 import type { AstOptimizerFactory } from "./optimization/optimizer";
 import type { Declaration } from "../nodes/declarations/declaration";
 import { AstNodeKind } from "../nodes/node";
+import { Type } from "../../juice/type";
 
 interface Parser {
     parse: (tokens: Token[]) => Module
@@ -142,7 +143,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             return AstBuilder.functionDeclaration({
                 identifier: AstBuilder.identifier({ value: identifier.literal }),
                 args,
-                type: AstBuilder.identifier({ value: type.lexeme }),
+                type: Type.from(type.lexeme),
                 body: body
             });
         };
@@ -165,7 +166,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                     .consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE)
                     .orElseThrow(new ParsingError('Arguments needs a type after colon.'));
 
-                args.push(AstBuilder.typedIdentifier({ value: identifier.literal, type: type.lexeme }));
+                args.push(AstBuilder.typedIdentifier({ value: identifier.literal, type: Type.from(type.lexeme) }));
             }
 
             return args;

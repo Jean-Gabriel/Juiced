@@ -1,6 +1,7 @@
 import type { FunctionDeclaration } from "../../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../../ast/nodes/declarations/variable";
 import type { TypedIdentifier } from "../../ast/nodes/identifier";
+import type { Type } from "../../juice/type";
 import type { FunctionMember, VariableMember } from "./member";
 import { MemberKind } from "./member";
 
@@ -8,7 +9,7 @@ type FunctionMemberProps = { fun: FunctionDeclaration }
 const functionMember = ({ fun }: FunctionMemberProps): FunctionMember => {
     return {
         name: fun.identifier.value,
-        type: fun.type.value,
+        type: fun.type,
         args: fun.arguments.map(functionArgument),
         kind: MemberKind.FUNCTION
     };
@@ -22,7 +23,7 @@ const functionArgument = (arg: TypedIdentifier): VariableMember => {
     };
 };
 
-type VariableProps = { variable: VariableDeclaration, inferedType: string }
+type VariableProps = { variable: VariableDeclaration, inferedType: Type }
 const variable = ({ variable, inferedType }: VariableProps): VariableMember => {
     return {
         name: variable.identifier.value,
