@@ -1,6 +1,7 @@
 import FunctionDeclarationFixture from "../../../../test/compiler/ast/nodes/declaration/function";
 import VariableDeclarationFixture from "../../../../test/compiler/ast/nodes/declaration/variable";
 import AstBuilder from "../../ast/nodes/builder";
+import { Primitive, Type } from "../../juice/type";
 import MemberBuilder from "../members/builder";
 import { Scope } from "../scope";
 
@@ -14,7 +15,7 @@ describe('Scope', () => {
 
     it('should add member to scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const member = MemberBuilder.variable({ variable, inferedType: 'i32' });
+        const member = MemberBuilder.variable({ variable, inferedType: Type.from(Primitive.I32) });
 
         scope.add(member);
 
@@ -24,7 +25,7 @@ describe('Scope', () => {
 
     it('should find member from a higher scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const member = MemberBuilder.variable({ variable, inferedType: 'i32' });
+        const member = MemberBuilder.variable({ variable, inferedType: Type.from(Primitive.I32) });
         scope.add(member);
 
         scope = scope.push();
@@ -35,7 +36,7 @@ describe('Scope', () => {
 
     it('should find function arguments', () => {
         const fun = FunctionDeclarationFixture.create(_ =>
-            _.args = [ AstBuilder.typedIdentifier({ value: 'test', type: 'i32'}) ]
+            _.args = [ AstBuilder.typedIdentifier({ value: 'test', type: Type.from(Primitive.I32) }) ]
         );
         const member = MemberBuilder.functionMember({ fun });
         scope.add(member);
@@ -44,7 +45,7 @@ describe('Scope', () => {
 
         const expected = MemberBuilder.variable({
             variable: VariableDeclarationFixture.create(_ => _.identifier = AstBuilder.identifier({ value: 'test' })),
-            inferedType: 'i32'
+            inferedType: Type.from(Primitive.I32)
         });
         expect(found).toEqual(expected);
     });
@@ -55,7 +56,7 @@ describe('Scope', () => {
 
     it('should not find variable of poped scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const member = MemberBuilder.variable({ variable, inferedType: 'i32' });
+        const member = MemberBuilder.variable({ variable, inferedType: Type.from(Primitive.I32) });
         scope = scope.push();
 
         scope.add(member);

@@ -15,6 +15,7 @@ import { isTypecheckingError, TypecheckingError } from "./error";
 import MemberBuilder from "./members/builder";
 import { MemberKind } from "./members/member";
 import { Scope } from "./scope";
+import { Primitive, Type } from "../juice/type";
 
 interface Typechecker {
     run: (module: Module) => void
@@ -25,8 +26,6 @@ type TypecheckerFactoryProps = {
 }
 
 type TypecheckerFactory = (factoryProps: TypecheckerFactoryProps) => Typechecker
-
-type InferedType = string
 
 export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter }) => {
 
@@ -51,7 +50,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         const reporter = createDiagnosticReporter();
         let scope = Scope.empty();
 
-        const invocation = (invocation: Invocation): InferedType => {
+        const invocation = (invocation: Invocation): Type => {
             const found = scope.lookup(invocation.invoked.value);
 
             if(!found) {
@@ -70,7 +69,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
                 const type = expression(param);
                 const argument = found.args[index];
 
-                if(argument.type !== type) {
+                if(!argument.type.isSame(type)) {
                     throw new TypecheckingError('Function argument was invoked with expression of the wrong type.');
                 }
             });
@@ -78,20 +77,20 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
             return found.type;
         };
 
-        const grouping = (grouping: GroupingExpression): InferedType => {
+        const grouping = (grouping: GroupingExpression): Type => {
             return expression(grouping.expression);
         };
 
-        const binary = (binary: BinaryExpression): InferedType => {
+        const binary = (binary: BinaryExpression): Type => {
             const right = expression(binary.right);
             const left = expression(binary.left);
 
-            if(right != left) {
+            if(!right.isSame(left)) {
                 throw new TypecheckingError('Both sides of binary operation must have the same type.');
             }
 
             const type = right;
-            if(type === 'bool') {
+            if(type.is(Primitive.BOOL)) {
                 if(!BOOLEAN_OPERATORS.includes(binary.operator)) {
                     throw new TypecheckingError('Invalid bool operator.');
                 }
@@ -99,13 +98,13 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
                 return type;
             }
 
-            if(type === 'i32' || type === 'f32') {
+            if(type.is(Primitive.I32) || type.is(Primitive.F32)) {
                 if(!NUMBER_OPERATORS.includes(binary.operator)) {
                     throw new TypecheckingError('Invalid i32 or f32 operator.');
                 }
 
                 if(BOOLEAN_OPERATORS.includes(binary.operator)) {
-                    return 'bool';
+                    return Type.from(Primitive.BOOL);
                 }
 
                 return type;
@@ -114,11 +113,11 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
             throw new TypecheckingError('Invalid binary expression.');
         };
 
-        const unary = (unary: UnaryExpression): InferedType => {
+        const unary = (unary: UnaryExpression): Type => {
             const type = expression(unary.expression);
 
             if(unary.operator === OperatorKind.MINUS || unary.operator === OperatorKind.PLUS) {
-                if(type != 'i32' && type != 'f32') {
+                if(type.is(Primitive.I32) && type.is(Primitive.F32)) {
                     throw new TypecheckingError('Minus unary must affect an i32 or f32.');
                 }
 
@@ -126,7 +125,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
             }
 
             if(unary.operator === OperatorKind.NOT) {
-                if(type != 'bool') {
+                if(type.is(Primitive.BOOL)) {
                     throw new TypecheckingError('Minus unary must affect a bool.');
                 }
 
@@ -136,18 +135,17 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
             throw new TypecheckingError('Invalid unary expression.');
         };
 
-        //TODO: pass types from token to ast to prevent duplicating type
-        const expression = (expression: Expression): InferedType => {
+        const expression = (expression: Expression): Type => {
             if(expression.kind === AstNodeKind.INT_LITERAL) {
-                return 'i32';
+                return Type.from(Primitive.I32);
             }
 
             if(expression.kind === AstNodeKind.FLOAT_LITERAL) {
-                return 'f32';
+                return Type.from(Primitive.F32);
             }
 
             if(expression.kind === AstNodeKind.BOOLEAN_LITERAL) {
-                return 'bool';
+                return Type.from(Primitive.BOOL);
             }
 
             if(expression.kind === AstNodeKind.ACCESSOR) {
@@ -195,8 +193,8 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
                     return variableDeclaration(statement);
                 }
 
-                const infered = expression(statement);
-                if(infered != fun.type.value) {
+                const type = expression(statement);
+                if(!type.isSame(fun.type)) {
                     throw new TypecheckingError('Function does not return expected type.');
                 }
             });

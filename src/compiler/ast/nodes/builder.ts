@@ -14,6 +14,7 @@ import { AstNodeKind } from "./node";
 import type { Export, ExportVisitor } from "./export";
 import type { GroupingExpression } from "./expressions/grouping";
 import type { Invocation } from "./expressions/invocation";
+import type { Type } from "../../juice/type";
 
 type ModuleProps = { declarations: TopLevelDeclaration[] }
 const buildModule = ({ declarations }: ModuleProps): Module => {
@@ -26,7 +27,7 @@ const buildModule = ({ declarations }: ModuleProps): Module => {
     };
 };
 
-type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Identifier, body: Statement[] }
+type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Type, body: Statement[] }
 const functionDeclaration = ({ identifier, args, type, body: statements }: FunctionDeclarationProps): FunctionDeclaration => {
     return {
         kind: AstNodeKind.FUNCTION_DECLARATION,
@@ -187,7 +188,7 @@ const identifier = ({ value }: IdentifierProps): Identifier => {
     return { value };
 };
 
-type TypedIdentifierProps = { value: string, type: string }
+type TypedIdentifierProps = { value: string, type: Type }
 const typedIdentifier = ({ value, type }: TypedIdentifierProps): TypedIdentifier => {
     return { value, type };
 };
