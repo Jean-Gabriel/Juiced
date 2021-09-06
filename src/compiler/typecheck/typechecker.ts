@@ -12,8 +12,8 @@ import { AstNodeKind } from "../ast/nodes/node";
 import type { Module } from "../ast/nodes/module";
 import { moduleDeclarationsOf } from "./declarations/module";
 import { isTypecheckingError, TypecheckingError } from "./error";
-import MemberBuilder from "./members/builder";
-import { MemberKind } from "./members/member";
+import SymbolsBuilder from "./symbols/builder";
+import { SymbolKind } from "./symbols/symbol";
 import { Scope } from "./scope";
 import { Primitive, Type } from "../juice/type";
 
@@ -57,7 +57,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
                 throw new TypecheckingError('Trying to access not declared function.');
             }
 
-            if(found.kind !== MemberKind.FUNCTION) {
+            if(found.kind !== SymbolKind.FUNCTION) {
                 throw new TypecheckingError('Only functions can be invoked.');
             }
 
@@ -149,12 +149,12 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
             }
 
             if(expression.kind === AstNodeKind.ACCESSOR) {
-                const member = scope.lookup(expression.identifier.value);
-                if(!member) {
+                const symbol = scope.lookup(expression.identifier.value);
+                if(!symbol) {
                     throw new TypecheckingError('Trying to access not declared variable.');
                 }
 
-                return member.type;
+                return symbol.type;
             }
 
             if(expression.kind === AstNodeKind.INVOCATION) {
@@ -178,7 +178,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
 
         const variableDeclaration = (variable: VariableDeclaration)  => {
             const inferedType = expression(variable.expression);
-            scope.add(MemberBuilder.variable({ variable, inferedType }));
+            scope.add(SymbolsBuilder.variableSymbol({ variable, type: inferedType }));
         };
 
         const functionDeclaration = (fun: FunctionDeclaration) => {
@@ -202,11 +202,11 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
             scope = scope.pop();
         };
 
-        const check = (module: Module) => {
+        const resolve = (module: Module) => {
             const declarations = moduleDeclarationsOf(module);
 
             declarations.functions.forEach(fun => {
-                scope.add(MemberBuilder.functionMember({ fun }));
+                scope.add(SymbolsBuilder.functionSymbol({ fun }));
             });
 
             declarations.variables.forEach(variable => {
@@ -225,7 +225,7 @@ export const createTypechecker: TypecheckerFactory = ({ createDiagnosticReporter
         };
 
         try {
-            check(module);
+            resolve(module);
         } catch(e) {
             handleError(e);
         }

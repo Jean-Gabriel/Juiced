@@ -1,5 +1,5 @@
-import type { Member} from "./members/member";
-import { MemberKind } from "./members/member";
+import type { Symbol} from "./symbols/symbol";
+import { SymbolKind } from "./symbols/symbol";
 
 type Props = {
     parent: Scope | null
@@ -15,18 +15,18 @@ export class Scope {
     }
 
     private readonly parent: Scope | null = null
-    private readonly members: Member[] = []
+    private readonly symbols: Symbol[] = []
 
     private constructor({ parent }: Props) {
         this.parent = parent;
     }
 
-    add(member: Member) {
-        this.members.push(member);
+    add(symbol: Symbol) {
+        this.symbols.push(symbol);
     }
 
-    lookup(identifier: string): Member | null {
-        const found = this.listMembers().find(member => member.name === identifier);
+    lookup(identifier: string): Symbol | null {
+        const found = this.expandSymbols().find(symbol => symbol.name === identifier);
 
         if(found) {
             return found;
@@ -47,15 +47,15 @@ export class Scope {
         return this.parent;
     }
 
-    private listMembers(): Member[] {
-        return this.members.flatMap(member => {
-            if(member.kind === MemberKind.VARIABLE) {
-                return [member];
+    private expandSymbols(): Symbol[] {
+        return this.symbols.flatMap(symbol => {
+            if(symbol.kind === SymbolKind.VARIABLE) {
+                return [symbol];
             }
 
-            if(member.kind === MemberKind.FUNCTION) {
-                const args = member.args;
-                return [member, ...args];
+            if(symbol.kind === SymbolKind.FUNCTION) {
+                const args = symbol.args;
+                return [symbol, ...args];
             }
 
             return [];
