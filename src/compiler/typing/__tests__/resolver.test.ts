@@ -1,5 +1,4 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
-import { createChalkDiagnosticReporter } from "../../../diagnostic/chalk/reporter";
 import { createAstOptimizer } from "../../ast/parsing/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
@@ -154,7 +153,7 @@ describe('Typechecker', () => {
 
         const ast = parser.parse(tokens);
 
-        const reporter = createChalkDiagnosticReporter();
+        const reporter = createTestDiagnoticsReporter();
         const typechecker = createTypeResolver({
             createDiagnosticReporter: () => reporter
         });
