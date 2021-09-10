@@ -22,6 +22,11 @@ export class ResolverScope {
     }
 
     add(resolved: Resolved) {
+        const found = this.lookup(resolved.declaration.identifier);
+        if(found) {
+            throw new Error('Cannot add two resolved node with the same identifier to the same scope.');
+        }
+
         this.resolved.push(resolved);
     }
 

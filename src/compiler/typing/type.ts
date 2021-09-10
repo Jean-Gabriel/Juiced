@@ -9,7 +9,7 @@ export class Type {
         return new Type(type);
     }
 
-    constructor(
+    private constructor(
         private readonly type: string
     ) {}
 
