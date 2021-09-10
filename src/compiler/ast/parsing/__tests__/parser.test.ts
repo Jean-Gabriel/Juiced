@@ -1,5 +1,5 @@
 import { createTestDiagnoticsReporter } from "../../../../../test/diagnostic/reporter";
-import { Primitive, Type } from "../../../juice/type";
+import { Primitive, Type } from "../../../typing/type";
 import { createSourceReader } from "../../../source/reader";
 import { createTokenReader } from "../../../token/reader";
 import { createTokenizer } from "../../../token/tokenizer";
@@ -22,8 +22,14 @@ describe('Parser', () => {
                     declaration: AstBuilder.functionDeclaration({
                         identifier: AstBuilder.identifier({ value: 'add' }),
                         args: [
-                            AstBuilder.typedIdentifier({ value: 'a', type: Type.from(Primitive.I32) }),
-                            AstBuilder.typedIdentifier({ value: 'b', type: Type.from(Primitive.I32) })
+                            AstBuilder.functionArgument({
+                                identifier: AstBuilder.identifier({ value: 'a' }),
+                                type: Type.from(Primitive.I32)
+                            }),
+                            AstBuilder.functionArgument({
+                                identifier: AstBuilder.identifier({ value: 'b' }),
+                                type: Type.from(Primitive.I32)
+                            })
                         ],
                         type: Type.from(Primitive.I32),
                         body: [
@@ -50,8 +56,14 @@ describe('Parser', () => {
                     AstBuilder.functionDeclaration({
                         identifier: AstBuilder.identifier({ value: 'areEqual' }),
                         args: [
-                            AstBuilder.typedIdentifier({ value: 'a', type: Type.from(Primitive.I32) }),
-                            AstBuilder.typedIdentifier({ value: 'b', type: Type.from(Primitive.I32) })
+                            AstBuilder.functionArgument({
+                                identifier: AstBuilder.identifier({ value: 'a' }),
+                                type: Type.from(Primitive.I32)
+                            }),
+                            AstBuilder.functionArgument({
+                                identifier: AstBuilder.identifier({ value: 'b' }),
+                                type: Type.from(Primitive.I32)
+                            })
                         ],
                         type: Type.from(Primitive.I32),
                         body: [

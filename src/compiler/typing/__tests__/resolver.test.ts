@@ -4,7 +4,7 @@ import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
 import { createTokenReader } from "../../token/reader";
 import { createTokenizer } from "../../token/tokenizer";
-import { createTypechecker } from "../typechecker";
+import { createTypeResolver } from "../resolver";
 
 describe('Typechecker', () => {
     it('can invoke a function declared before and after invocator', () => {
@@ -42,7 +42,7 @@ describe('Typechecker', () => {
             }
 
             sum = const add(1);
-        `).errors();
+        `).errors(1);
 
         expectTypechecking(`
             add = fun (a: i32, b: i32): i32 {
@@ -50,7 +50,7 @@ describe('Typechecker', () => {
             }
 
             sum = const add(1, 2, 3);
-        `).errors();
+        `).errors(1);
     });
 
     it('cannot invoke a function with invalid parameters type', () => {
@@ -60,13 +60,13 @@ describe('Typechecker', () => {
             }
 
             sum = const add(false, 1.0);
-        `).errors();
+        `).errors(1);
     });
 
     it('cannot invoke a non-existent function ', () => {
         expectTypechecking(`
             var = const nonexistent();
-        `).errors();
+        `).errors(1);
     });
 
     it('functions returns expression type must match their specified type', () => {
@@ -80,7 +80,7 @@ describe('Typechecker', () => {
             returns_bool = fun (): bool {
                 1.0;
             }
-        `).errors();
+        `).errors(1);
     });
 
     it('variable declarations in functions can refer to a variable of a higher scope', () => {
@@ -100,20 +100,20 @@ describe('Typechecker', () => {
             }
 
             error = const lower_scope_val; 
-        `).errors();
+        `).errors(1);
     });
 
     it('variable declarations should not reference undeclared variable', () => {
         expectTypechecking(`
             errors = const does_not_exists + 1; 
-        `).errors();
+        `).errors(1);
 
         expectTypechecking(`
             references_undeclared_variable = fun (): f32 {
                 errors = const does_not_exists;
                 1.0;
             }
-        `).errors();
+        `).errors(1);
     });
 
     it('expressions should use values or other expressions of same type', () => {
@@ -132,7 +132,17 @@ describe('Typechecker', () => {
 
                 float_val + bool_val + int_val;
             }
-        `).errors();
+        `).errors(1);
+    });
+
+    it('shoud report every error it encounters', () => {
+        expectTypechecking(`
+            error = const does_not_exists;
+
+            invalid_return_type = fun (): i32 {
+                true;
+            }
+        `).errors(2);
     });
 
     const expectTypechecking = (module: string) => {
@@ -154,18 +164,20 @@ describe('Typechecker', () => {
         const ast = parser.parse(tokens);
 
         const reporter = createTestDiagnoticsReporter();
-        const typechecker = createTypechecker({
+        const typechecker = createTypeResolver({
             createDiagnosticReporter: () => reporter
         });
 
         return {
             succeeds: () => {
-                typechecker.run(ast);
+                typechecker.resolve(ast);
                 expect(reporter.errored()).toBeFalsy();
             },
-            errors: () => {
-                expect(() => typechecker.run(ast)).toThrowError();
+            errors: (numberOfErrors: number) => {
+                expect(() => typechecker.resolve(ast)).toThrowError();
+
                 expect(reporter.errored()).toBeTruthy();
+                expect(reporter.emit).toHaveBeenCalledTimes(numberOfErrors);
             }
         };
     };

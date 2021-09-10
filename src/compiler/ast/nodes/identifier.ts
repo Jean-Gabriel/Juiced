@@ -1,4 +1,4 @@
-import type { Type } from "../../juice/type";
+import type { Type } from "../../typing/type";
 
 export interface Identifier {
     value: string

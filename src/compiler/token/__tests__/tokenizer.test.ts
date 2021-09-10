@@ -1,6 +1,5 @@
 import { TokenFixture } from "../../../../test/compiler/token/token";
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
-import { Primitive } from "../../juice/type";
 import { createSourceReader } from "../../source/reader";
 import { TokenKind } from "../kinds";
 import type { Token } from "../token";
@@ -29,9 +28,9 @@ describe('Tokenizer', () => {
         ['const', TokenFixture.create(_ => _.atLine(1).withLexeme('const').nonLiteral(TokenKind.CONST))],
         ['fun', TokenFixture.create(_ => _.atLine(1).withLexeme('fun').nonLiteral(TokenKind.FUN))],
         ['export', TokenFixture.create(_ => _.atLine(1).withLexeme('export').nonLiteral(TokenKind.EXPORT))],
-        [Primitive.I32, TokenFixture.create(_ => _.atLine(1).withLexeme(Primitive.I32).nonLiteral(TokenKind.INT_TYPE))],
-        [Primitive.F32, TokenFixture.create(_ => _.atLine(1).withLexeme(Primitive.F32).nonLiteral(TokenKind.FLOAT_TYPE))],
-        [Primitive.BOOL, TokenFixture.create(_ => _.atLine(1).withLexeme(Primitive.BOOL).nonLiteral(TokenKind.BOOLEAN_TYPE))]
+        ['i32', TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE))],
+        ['f32', TokenFixture.create(_ => _.atLine(1).withLexeme('f32').nonLiteral(TokenKind.FLOAT_TYPE))],
+        ['bool', TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE))]
     ])('should create token for %s', (char: string, expected: Token) => {
         expectTokenize(char).createsTokens(expected);
     });
@@ -52,10 +51,10 @@ describe('Tokenizer', () => {
             TokenFixture.create(_ => _.atLine(1).withLexeme('(').nonLiteral(TokenKind.OPEN_PARENTHESIS)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme(Primitive.I32).nonLiteral(TokenKind.INT_TYPE)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(')').nonLiteral(TokenKind.CLOSE_PARENTHESIS)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme(Primitive.BOOL).nonLiteral(TokenKind.BOOLEAN_TYPE)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('{').nonLiteral(TokenKind.OPEN_BRACKETS)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(2).withLexeme('*').nonLiteral(TokenKind.STAR)),
