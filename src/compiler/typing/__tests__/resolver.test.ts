@@ -135,6 +135,16 @@ describe('Typechecker', () => {
         `).errors(1);
     });
 
+    it('shoud report every error it encounters', () => {
+        expectTypechecking(`
+            error = const does_not_exists;
+
+            invalid_return_type = fun (): i32 {
+                true;
+            }
+        `).errors(2);
+    });
+
     const expectTypechecking = (module: string) => {
         const withoutStartAndEndLineBreak = module.replace(/^\n|\n$/g, '');
 

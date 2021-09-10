@@ -210,18 +210,22 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
             declaration.arguments.forEach(arg => arg.acceptDeclarationVisitor(declarationVisitor));
             declaration.body.forEach((statement, index) => {
-                const type = statement.acceptStatementVisitor(statementVisitor);
+                try {
+                    const type = statement.acceptStatementVisitor(statementVisitor);
 
-                if(!type) {
-                    if(index === declaration.body.length - 1) {
-                        throw new TypeResolvingError('A function must return an expression.');
+                    if(!type) {
+                        if(index === declaration.body.length - 1) {
+                            throw new TypeResolvingError('A function must return an expression.');
+                        }
+
+                        return;
                     }
 
-                    return;
-                }
-
-                if(!type.isSame(declaration.type)) {
-                    throw new TypeResolvingError('Function does not return expected type.');
+                    if(!type.isSame(declaration.type)) {
+                        throw new TypeResolvingError('Function does not return expected type.');
+                    }
+                } catch(e: unknown) {
+                    handleError(e);
                 }
             });
 
@@ -244,8 +248,21 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
             functions.forEach(fun => scope.add(NodeResolver.fun(fun)));
 
-            variables.forEach(variable => variable.acceptDeclarationVisitor(declarationVisitor));
-            functions.forEach(fun => fun.acceptDeclarationVisitor(declarationVisitor));
+            variables.forEach(variable => {
+                try {
+                    variable.acceptDeclarationVisitor(declarationVisitor);
+                } catch(e: unknown) {
+                    handleError(e);
+                }
+            });
+
+            functions.forEach(fun => {
+                try {
+                    fun.acceptDeclarationVisitor(declarationVisitor);
+                } catch(e: unknown) {
+                    handleError(e);
+                }
+            });
         }
     };
 
