@@ -3,7 +3,6 @@ import { DiagnosticCategory } from "../../../diagnostic/reporter";
 import type { Module, TopLevelDeclaration } from "../nodes/module";
 import AstBuilder from "../nodes/builder";
 import { TokenKind } from "../../token/kinds";
-import type { TypedIdentifier } from "../nodes/identifier";
 import type { Statement } from "../nodes/statements/statement";
 import type { StringLiteralToken, Token } from "../../token/token";
 import { booleanLiteralToken } from "../../token/token";
@@ -16,7 +15,8 @@ import type { TokenReaderFactory } from "../../token/reader";
 import type { AstOptimizerFactory } from "./optimization/optimizer";
 import type { Declaration } from "../nodes/declarations/declaration";
 import { AstNodeKind } from "../nodes/node";
-import { Type } from "../../juice/type";
+import { Type } from "../../typing/type";
+import type { FunctionArgument } from "../nodes/declarations/arg";
 
 interface Parser {
     parse: (tokens: Token[]) => Module
@@ -149,7 +149,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         };
 
         const functionArguments = () => {
-            const args: TypedIdentifier[] = [];
+            const args: FunctionArgument[] = [];
 
             while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS) && !reader.isAtEnd()) {
                 if(args.length) {
@@ -166,7 +166,13 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                     .consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE)
                     .orElseThrow(new ParsingError('Arguments needs a type after colon.'));
 
-                args.push(AstBuilder.typedIdentifier({ value: identifier.literal, type: Type.from(type.lexeme) }));
+
+                const argument = AstBuilder.functionArgument({
+                    identifier: AstBuilder.identifier({ value: identifier.literal }),
+                    type: Type.from(type.lexeme)
+                });
+
+                args.push(argument);
             }
 
             return args;

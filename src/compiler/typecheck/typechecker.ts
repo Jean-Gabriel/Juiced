@@ -15,7 +15,7 @@ import { isTypecheckingError, TypecheckingError } from "./error";
 import SymbolsBuilder from "./symbols/builder";
 import { SymbolKind } from "./symbols/symbol";
 import { Scope } from "./scope";
-import { Primitive, Type } from "../juice/type";
+import { Primitive, Type } from "../typing/type";
 
 interface Typechecker {
     run: (module: Module) => void

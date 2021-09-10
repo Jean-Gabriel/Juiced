@@ -6,7 +6,7 @@ import type { BinaryExpression } from "./expressions/binary";
 import type { Expression, ExpressionVisitor } from "./expressions/expression";
 import type { BinaryOperator, UnaryOperator } from "./expressions/operators";
 import type { UnaryExpression } from "./expressions/unary";
-import type { Identifier, TypedIdentifier } from "./identifier";
+import type { Identifier } from "./identifier";
 import type { Module, ModuleVisitor, TopLevelDeclaration } from "./module";
 import type { Statement, StatementVisitor } from "./statements/statement";
 import type { BooleanLiteral, FloatLiteral, IntLiteral } from "./expressions/literal";
@@ -14,7 +14,8 @@ import { AstNodeKind } from "./node";
 import type { Export, ExportVisitor } from "./export";
 import type { GroupingExpression } from "./expressions/grouping";
 import type { Invocation } from "./expressions/invocation";
-import type { Type } from "../../juice/type";
+import type { Type } from "../../typing/type";
+import type { FunctionArgument } from "./declarations/arg";
 
 type ModuleProps = { declarations: TopLevelDeclaration[] }
 const buildModule = ({ declarations }: ModuleProps): Module => {
@@ -27,16 +28,28 @@ const buildModule = ({ declarations }: ModuleProps): Module => {
     };
 };
 
-type FunctionDeclarationProps = { identifier: Identifier, args: TypedIdentifier[], type: Type, body: Statement[] }
-const functionDeclaration = ({ identifier, args, type, body: statements }: FunctionDeclarationProps): FunctionDeclaration => {
+type FunctionDeclarationProps = { identifier: Identifier, args: FunctionArgument[], type: Type, body: Statement[] }
+const functionDeclaration = ({ identifier, args, type, body }: FunctionDeclarationProps): FunctionDeclaration => {
     return {
         kind: AstNodeKind.FUNCTION_DECLARATION,
         identifier,
-        body: statements,
+        body,
         arguments: args,
         type,
         acceptDeclarationVisitor<T>(visitor: DeclarationVisitor<T>) {
             return visitor.visitFunctionDeclaration(this);
+        }
+    };
+};
+
+type FunctionArgumentProps = { identifier: Identifier, type: Type }
+const functionArgument = ({ identifier, type }: FunctionArgumentProps): FunctionArgument => {
+    return {
+        kind: AstNodeKind.FUNCTION_ARGUMENT,
+        identifier,
+        type,
+        acceptDeclarationVisitor<T>(visitor: DeclarationVisitor<T>) {
+            return visitor.visitFunctionArgument(this);
         }
     };
 };
@@ -188,11 +201,6 @@ const identifier = ({ value }: IdentifierProps): Identifier => {
     return { value };
 };
 
-type TypedIdentifierProps = { value: string, type: Type }
-const typedIdentifier = ({ value, type }: TypedIdentifierProps): TypedIdentifier => {
-    return { value, type };
-};
-
 const AstBuilder = {
     module: buildModule,
     accessor,
@@ -203,7 +211,7 @@ const AstBuilder = {
     exportation,
     floatLiteral,
     booleanLiteral,
-    typedIdentifier,
+    functionArgument,
     unaryExpression,
     binaryExpression,
     variableDeclaration,

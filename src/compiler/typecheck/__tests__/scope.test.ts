@@ -1,7 +1,7 @@
 import FunctionDeclarationFixture from "../../../../test/compiler/ast/nodes/declaration/function";
 import VariableDeclarationFixture from "../../../../test/compiler/ast/nodes/declaration/variable";
 import AstBuilder from "../../ast/nodes/builder";
-import { Primitive, Type } from "../../juice/type";
+import { Primitive, Type } from "../../typing/type";
 import SymbolsBuilder from "../symbols/builder";
 import { Scope } from "../scope";
 
@@ -36,7 +36,7 @@ describe('Scope', () => {
 
     it('should find function arguments', () => {
         const fun = FunctionDeclarationFixture.create(_ =>
-            _.args = [ AstBuilder.typedIdentifier({ value: 'test', type: Type.from(Primitive.I32) }) ]
+            _.args = [ AstBuilder.functionArgument({ identifier: AstBuilder.identifier({ value: 'test' }), type: Type.from(Primitive.I32) }) ]
         );
         const symbol = SymbolsBuilder.functionSymbol({ fun });
         scope.add(symbol);

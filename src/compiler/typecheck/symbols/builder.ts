@@ -1,7 +1,7 @@
 import type { FunctionDeclaration } from "../../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../../ast/nodes/declarations/variable";
 import type { TypedIdentifier } from "../../ast/nodes/identifier";
-import type { Type } from "../../juice/type";
+import type { Type } from "../../typing/type";
 import type { FunctionSymbol, VariableSymbol } from "./symbol";
 import { SymbolKind } from "./symbol";
 
