@@ -10,7 +10,6 @@ import type { BinaryExpression } from "../ast/nodes/expressions/binary";
 import type { Expression, ExpressionVisitor } from "../ast/nodes/expressions/expression";
 import type { GroupingExpression } from "../ast/nodes/expressions/grouping";
 import type { Invocation } from "../ast/nodes/expressions/invocation";
-import type { BooleanLiteral, FloatLiteral, IntLiteral } from "../ast/nodes/expressions/literal";
 import { OperatorKind } from "../ast/nodes/expressions/operators";
 import type { UnaryExpression } from "../ast/nodes/expressions/unary";
 import type { Module, ModuleVisitor } from "../ast/nodes/module";
@@ -58,6 +57,21 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         scope = ResolverScope.empty();
     };
 
+    const moduleDeclarationsOf = (module: Module): [VariableDeclaration[], FunctionDeclaration[]] => {
+        const exports = module.declarations.filter((decl): decl is Export => decl.kind === AstNodeKind.EXPORT).map(exportation => exportation.declaration);
+
+        const functions = [
+            ...module.declarations.filter((decl): decl is FunctionDeclaration => decl.kind === AstNodeKind.FUNCTION_DECLARATION),
+            ...exports.filter((decl): decl is FunctionDeclaration => decl.kind === AstNodeKind.FUNCTION_DECLARATION)
+        ];
+        const variables = [
+            ...module.declarations.filter((decl): decl is VariableDeclaration => decl.kind === AstNodeKind.VARIABLE_DECLARATION),
+            ...exports.filter((decl): decl is VariableDeclaration => decl.kind === AstNodeKind.VARIABLE_DECLARATION)
+        ];
+
+        return [variables, functions];
+    };
+
     const invocation = (invocation: Invocation): Type => {
         const found = scope.lookup(invocation.invoked);
 
@@ -69,11 +83,11 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
             throw new TypeResolvingError('Only functions can be invoked.');
         }
 
-        if(found.declaration.arguments.length !== invocation.parameters.length) {
+        const args = found.declaration.arguments;
+        if(args.length !== invocation.parameters.length) {
             throw new TypeResolvingError('Function was invoked with more parameters than it has arguments.');
         }
 
-        const args = found.declaration.arguments;
         invocation.parameters.forEach((param, index) => {
             const type = param.acceptExpressionVisitor(expressionVisitor);
             const argument = args[index];
@@ -159,22 +173,22 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
                 throw new TypeResolvingError('Trying to access not declared variable.');
             }
 
-            return symbol?.type;
+            return symbol.type;
         },
 
         visitInvocation: function (expression: Invocation) {
             return invocation(expression);
         },
 
-        visitIntLiteral: function (expression: IntLiteral) {
+        visitIntLiteral: function () {
             return Type.from(Primitive.I32);
         },
 
-        visitFloatLiteral: function (expression: FloatLiteral) {
+        visitFloatLiteral: function () {
             return Type.from(Primitive.F32);
         },
 
-        visitBooleanLiteral: function (expression: BooleanLiteral) {
+        visitBooleanLiteral: function () {
             return Type.from(Primitive.BOOL);
         }
     };
@@ -182,21 +196,11 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
     const statementVisitor: StatementVisitor<Type | void> = {
         visitVariableDeclaration: function (declaration: VariableDeclaration): void {
             const type = declaration.expression.acceptExpressionVisitor(expressionVisitor);
-            if(!type) {
-                return;
-            }
-
             scope.add(NodeResolver.variable(declaration, type));
         },
 
-        visitExpression: function (expression: Expression): Type | void {
-            const type = expression.acceptExpressionVisitor(expressionVisitor);
-
-            if(!type) {
-                return;
-            }
-
-            return type;
+        visitExpression: function (expression: Expression): Type {
+            return expression.acceptExpressionVisitor(expressionVisitor);
         }
     };
 
@@ -236,16 +240,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
     const moduleVisitor: ModuleVisitor<void> = {
         visitModule: function (module: Module): void {
-            const exports = module.declarations.filter((decl): decl is Export => decl.kind === AstNodeKind.EXPORT).map(exportation => exportation.declaration);
-
-            const functions = [
-                ...module.declarations.filter((decl): decl is FunctionDeclaration => decl.kind === AstNodeKind.FUNCTION_DECLARATION),
-                ...exports.filter((decl): decl is FunctionDeclaration => decl.kind === AstNodeKind.FUNCTION_DECLARATION)
-            ];
-            const variables = [
-                ...module.declarations.filter((decl): decl is VariableDeclaration => decl.kind === AstNodeKind.VARIABLE_DECLARATION),
-                ...exports.filter((decl): decl is VariableDeclaration => decl.kind === AstNodeKind.VARIABLE_DECLARATION)
-            ];
+            const [variables, functions] = moduleDeclarationsOf(module);
 
             functions.forEach(fun => scope.add(NodeResolver.fun(fun)));
 
