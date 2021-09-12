@@ -17,20 +17,21 @@ import { AstNodeKind } from "../ast/nodes/node";
 import type { StatementVisitor } from "../ast/nodes/statements/statement";
 import { isTypeResolverError, TypeResolvingError } from "./error";
 import { NodeResolver } from "./resolved/type";
-import { ResolverScope } from "./scope";
 import { Primitive, Type } from "./type";
+import type { TypeContextFactory } from "./context";
 
 interface TypeResolver {
     resolve: (module: Module) => void
 }
 
 type TypeResolverFactoryProps = {
-    createDiagnosticReporter: DiagnosticReporterFactory
+    createDiagnosticReporter: DiagnosticReporterFactory,
+    createTypeContext: TypeContextFactory
 }
 
 type TypeResolverFactory = (factoryProps: TypeResolverFactoryProps) => TypeResolver
 
-export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReporter }) => {
+export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReporter, createTypeContext }) => {
 
     const BOOLEAN_OPERATORS = [
         OperatorKind.EQUAL_EQUAL,
@@ -50,11 +51,11 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
     ];
 
     let reporter = createDiagnosticReporter();
-    let scope = ResolverScope.empty();
+    let context = createTypeContext();
 
     const reset = () => {
         reporter = createDiagnosticReporter();
-        scope = ResolverScope.empty();
+        context = createTypeContext();
     };
 
     const moduleDeclarationsOf = (module: Module): [VariableDeclaration[], FunctionDeclaration[]] => {
@@ -73,17 +74,17 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
     };
 
     const invocation = (invocation: Invocation): Type => {
-        const found = scope.lookup(invocation.invoked);
+        const found = context.lookup(invocation.invoked);
 
         if(!found) {
             throw new TypeResolvingError('Trying to access not declared function.');
         }
 
-        if(found.declaration.kind !== AstNodeKind.FUNCTION_DECLARATION) {
+        if(found.node.kind !== AstNodeKind.FUNCTION_DECLARATION) {
             throw new TypeResolvingError('Only functions can be invoked.');
         }
 
-        const args = found.declaration.arguments;
+        const args = found.node.arguments;
         if(args.length !== invocation.parameters.length) {
             throw new TypeResolvingError('Function was invoked with more parameters than it has arguments.');
         }
@@ -168,7 +169,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         },
 
         visitAccessor: function (expression: Accessor) {
-            const symbol = scope.lookup(expression.identifier);
+            const symbol = context.lookup(expression.identifier);
             if(!symbol) {
                 throw new TypeResolvingError('Trying to access not declared variable.');
             }
@@ -196,7 +197,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
     const statementVisitor: StatementVisitor<Type | void> = {
         visitVariableDeclaration: function (declaration: VariableDeclaration): void {
             const type = declaration.expression.acceptExpressionVisitor(expressionVisitor);
-            scope.add(NodeResolver.variable(declaration, type));
+            context.add(NodeResolver.resolveVariable(declaration, type));
         },
 
         visitExpression: function (expression: Expression): Type {
@@ -206,7 +207,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
     const declarationVisitor: DeclarationVisitor<void> = {
         visitFunctionDeclaration: function (declaration: FunctionDeclaration): void {
-            scope = scope.push();
+            context.pushScope();
 
             declaration.arguments.forEach(arg => arg.acceptDeclarationVisitor(declarationVisitor));
             declaration.body.forEach((statement, index) => {
@@ -229,16 +230,16 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
                 }
             });
 
-            scope = scope.pop();
+            context.popScope();
         },
 
         visitParameter: function (declaration: Parameter): void {
-            scope.add(NodeResolver.parameter(declaration));
+            context.add(NodeResolver.resolveParameter(declaration));
         },
 
         visitVariableDeclaration: function (declaration: VariableDeclaration): void {
             const type = declaration.expression.acceptExpressionVisitor(expressionVisitor);
-            scope.add(NodeResolver.variable(declaration, type));
+            context.add(NodeResolver.resolveVariable(declaration, type));
         }
     };
 
@@ -246,7 +247,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         visitModule: function (module: Module): void {
             const [variables, functions] = moduleDeclarationsOf(module);
 
-            functions.forEach(fun => scope.add(NodeResolver.fun(fun)));
+            functions.forEach(fun => context.add(NodeResolver.resolveFunction(fun)));
 
             variables.forEach(variable => {
                 try {

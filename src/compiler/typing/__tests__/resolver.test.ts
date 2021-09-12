@@ -5,6 +5,7 @@ import { createSourceReader } from "../../source/reader";
 import { createTokenReader } from "../../token/reader";
 import { createLexer } from "../../token/lexer";
 import { createTypeResolver } from "../resolver";
+import { createTypeContext } from "../context";
 
 describe('Typechecker', () => {
     it('can invoke a function declared before and after invocator', () => {
@@ -165,7 +166,8 @@ describe('Typechecker', () => {
 
         const reporter = createTestDiagnoticsReporter();
         const typechecker = createTypeResolver({
-            createDiagnosticReporter: () => reporter
+            createDiagnosticReporter: () => reporter,
+            createTypeContext,
         });
 
         return {
