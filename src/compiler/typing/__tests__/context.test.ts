@@ -2,35 +2,36 @@ import FunctionDeclarationFixture from "../../../../test/compiler/ast/nodes/decl
 import VariableDeclarationFixture from "../../../../test/compiler/ast/nodes/declaration/variable";
 import AstBuilder from "../../ast/nodes/builder";
 import { NodeResolver } from "../resolved/type";
-import { ResolverScope } from "../scope";
+import type { TypeContext } from "../context";
+import { createTypeContext } from "../context";
 import { Primitive, Type } from "../type";
 
-describe('ResolverScope', () => {
+describe('TypeContext', () => {
 
-    let scope: ResolverScope = ResolverScope.empty();
+    let context: TypeContext = createTypeContext();
 
     beforeEach(() => {
-        scope = ResolverScope.empty();
+        context = createTypeContext();
     });
 
     it('should add resolved variable to scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const resolved = NodeResolver.variable(variable, Type.from(Primitive.I32));
+        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.I32));
 
-        scope.add(resolved);
+        context.add(resolved);
 
-        const found = scope.lookup(resolved.declaration.identifier);
+        const found = context.lookup(resolved.node.identifier);
         expect(found).toEqual(resolved);
     });
 
-    it('should find symbol from a higher scope', () => {
+    it('should find resolved node from a higher scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const resolved = NodeResolver.variable(variable, Type.from(Primitive.I32));
-        scope.add(resolved);
+        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.I32));
+        context.add(resolved);
 
-        scope = scope.push();
+        context.pushScope();
 
-        const found = scope.lookup(resolved.declaration.identifier);
+        const found = context.lookup(resolved.node.identifier);
         expect(found).toEqual(resolved);
     });
 
@@ -38,24 +39,24 @@ describe('ResolverScope', () => {
         const identifier = AstBuilder.identifier({ value: 'identifier' });
         const variable = VariableDeclarationFixture.create(_ => _.identifier = identifier);
         const fun = FunctionDeclarationFixture.create(_ => _.identifier = identifier);
-        scope.add(NodeResolver.variable(variable, Type.from(Primitive.I32)));
+        context.add(NodeResolver.resolveVariable(variable, Type.from(Primitive.I32)));
 
-        expect(() => scope.add(NodeResolver.fun(fun))).toThrow();
+        expect(() => context.add(NodeResolver.resolveFunction(fun))).toThrow();
     });
 
     it('should not be able to pop highest scope', () => {
-        expect(() => scope.pop()).toThrowError();
+        expect(() => context.popScope()).toThrowError();
     });
 
     it('should not find variable of poped scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const symbol = NodeResolver.variable(variable, Type.from(Primitive.I32));
-        scope = scope.push();
+        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.I32));
+        context.pushScope();
 
-        scope.add(symbol);
+        context.add(resolved);
 
-        scope = scope.pop();
-        const found = scope.lookup(symbol.declaration.identifier);
+        context.popScope();
+        const found = context.lookup(resolved.node.identifier);
         expect(found).toBeNull();
     });
 });
