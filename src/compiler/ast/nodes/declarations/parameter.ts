@@ -3,8 +3,8 @@ import type { Identifier } from "../identifier";
 import type { AstNodeKind } from "../node";
 import type { DeclarationNode } from "./declaration";
 
-export interface FunctionArgument extends DeclarationNode {
-    kind: AstNodeKind.FUNCTION_ARGUMENT
+export interface Parameter extends DeclarationNode {
+    kind: AstNodeKind.PARAMETER
 
     identifier: Identifier
     type: Type

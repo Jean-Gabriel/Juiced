@@ -1,6 +1,6 @@
 import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../diagnostic/reporter";
-import type { FunctionArgument } from "../ast/nodes/declarations/arg";
+import type { Parameter } from "../ast/nodes/declarations/parameter";
 import type { DeclarationVisitor } from "../ast/nodes/declarations/declaration";
 import type { FunctionDeclaration } from "../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
@@ -232,8 +232,8 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
             scope = scope.pop();
         },
 
-        visitFunctionArgument: function (declaration: FunctionArgument): void {
-            scope.add(NodeResolver.argument(declaration));
+        visitParameter: function (declaration: Parameter): void {
+            scope.add(NodeResolver.parameter(declaration));
         },
 
         visitVariableDeclaration: function (declaration: VariableDeclaration): void {

@@ -4,7 +4,7 @@ export enum AstNodeKind {
     EXPORT,
 
     FUNCTION_DECLARATION,
-    FUNCTION_ARGUMENT,
+    PARAMETER,
     VARIABLE_DECLARATION,
 
     ACCESSOR,

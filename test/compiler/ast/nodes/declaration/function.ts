@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 import AstBuilder from "../../../../../src/compiler/ast/nodes/builder";
-import type { FunctionArgument } from "../../../../../src/compiler/ast/nodes/declarations/arg";
+import type { Parameter } from "../../../../../src/compiler/ast/nodes/declarations/parameter";
 import type { FunctionDeclaration } from "../../../../../src/compiler/ast/nodes/declarations/function";
 import type { Identifier } from "../../../../../src/compiler/ast/nodes/identifier";
 import type { Statement } from "../../../../../src/compiler/ast/nodes/statements/statement";
@@ -16,7 +16,7 @@ export default class FunctionDeclarationFixture {
     constructor(
         public identifier: Identifier = AstBuilder.identifier({ value: v4() }),
         public type: Type = Type.from(Primitive.I32),
-        public args: FunctionArgument[] = [],
+        public args: Parameter[] = [],
         public body: Statement[] = []
     ) {}
 

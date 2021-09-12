@@ -1,4 +1,4 @@
-import type { FunctionArgument } from "../../ast/nodes/declarations/arg";
+import type { Parameter } from "../../ast/nodes/declarations/parameter";
 import type { Declaration } from "../../ast/nodes/declarations/declaration";
 import type { FunctionDeclaration } from "../../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../../ast/nodes/declarations/variable";
@@ -16,7 +16,7 @@ const fun = (declaration: FunctionDeclaration): Resolved => {
     };
 };
 
-const argument = (declaration: FunctionArgument): Resolved => {
+const parameter = (declaration: Parameter): Resolved => {
     return {
         declaration,
         type: declaration.type
@@ -24,14 +24,16 @@ const argument = (declaration: FunctionArgument): Resolved => {
 };
 
 const variable = (declaration: VariableDeclaration, type: Type): Resolved => {
+    declaration.type = type;
+
     return {
         declaration,
-        type
+        type: declaration.type
     };
 };
 
 export const NodeResolver = {
     fun,
-    argument,
+    parameter,
     variable
 };
