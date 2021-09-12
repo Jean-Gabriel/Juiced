@@ -1,7 +1,7 @@
 import FunctionDeclarationFixture from "../../../../test/compiler/ast/nodes/declaration/function";
 import VariableDeclarationFixture from "../../../../test/compiler/ast/nodes/declaration/variable";
 import AstBuilder from "../../ast/nodes/builder";
-import { NodeResolver } from "../resolved/type";
+import { NodeResolver } from "../resolve/type";
 import type { TypeContext } from "../context";
 import { createTypeContext } from "../context";
 import { Primitive, Type } from "../type";

@@ -1,5 +1,5 @@
 import type { Identifier } from '../ast/nodes/identifier';
-import type { ResolvedNode } from './resolved/type';
+import type { ResolvedNode } from './resolve/type';
 
 export type TypeContextFactory = () => TypeContext
 export const createTypeContext = () => TypeContext.empty();

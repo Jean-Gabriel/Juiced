@@ -16,7 +16,7 @@ import type { Module, ModuleVisitor } from "../ast/nodes/module";
 import { AstNodeKind } from "../ast/nodes/node";
 import type { StatementVisitor } from "../ast/nodes/statements/statement";
 import { isTypeResolverError, TypeResolvingError } from "./error";
-import { NodeResolver } from "./resolved/type";
+import { NodeResolver } from "./resolve/type";
 import { Primitive, Type } from "./type";
 import type { TypeContextFactory } from "./context";
 
