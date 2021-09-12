@@ -7,18 +7,18 @@ import type { BooleanLiteralTokenKind, NonLiteralTokenKind, NumberLiteralTokenKi
 import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
 import type { SourceReaderFactory } from "../source/reader";
 
-interface Tokenizer {
+interface Lexer {
     tokenize: (source: string) => Token[]
 }
 
-type TokenizerFactoryProps = {
+type LexerFactoryProps = {
     createSourceReader: SourceReaderFactory,
     createDiagnosticReporter: DiagnosticReporterFactory
 }
 
-type TokenizerFactory = (factoryProps: TokenizerFactoryProps) => Tokenizer
+type LexerFactory = (factoryProps: LexerFactoryProps) => Lexer
 
-export const createTokenizer: TokenizerFactory = ({ createSourceReader, createDiagnosticReporter }) => {
+export const createLexer: LexerFactory = ({ createSourceReader, createDiagnosticReporter }) => {
     const IGNORED = ['', ' ', ' \r', '\t'];
 
     const tokenize = (source: string): Token[] => {

@@ -3,9 +3,9 @@ import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/report
 import { createSourceReader } from "../../source/reader";
 import { TokenKind } from "../kinds";
 import type { Token } from "../token";
-import { createTokenizer } from "../tokenizer";
+import { createLexer } from "../lexer";
 
-describe('Tokenizer', () => {
+describe('Lexer', () => {
     it.each([
         ['=', TokenFixture.create(_ => _.atLine(1).withLexeme('=').nonLiteral(TokenKind.EQUAL))],
         ['==', TokenFixture.create(_ => _.atLine(1).withLexeme('==').nonLiteral(TokenKind.EQUAL_EQUAL))],
@@ -90,18 +90,18 @@ describe('Tokenizer', () => {
         const withoutStartAndEndLineBreak = sequence.replace(/^\n|\n$/g, '');
 
         const reporter = createTestDiagnoticsReporter();
-        const tokenizer = createTokenizer({
+        const lexer = createLexer({
             createSourceReader,
             createDiagnosticReporter: () => reporter
         });
 
         return {
             createsTokens: (...expected: Token[]) => {
-                const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
+                const tokens = lexer.tokenize(withoutStartAndEndLineBreak);
                 expected.forEach(token => expect(tokens).toContainEqual(token));
             },
             reportsError: (numberOfErrors: number) => {
-                expect(() => tokenizer.tokenize(withoutStartAndEndLineBreak)).toThrowError();
+                expect(() => lexer.tokenize(withoutStartAndEndLineBreak)).toThrowError();
                 expect(reporter.emit).toHaveBeenCalledTimes(numberOfErrors);
                 expect(reporter.report).toHaveBeenCalledTimes(1);
             }
