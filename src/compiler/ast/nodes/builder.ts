@@ -15,7 +15,7 @@ import type { Export, ExportVisitor } from "./export";
 import type { GroupingExpression } from "./expressions/grouping";
 import type { Invocation } from "./expressions/invocation";
 import type { Type } from "../../typing/type";
-import type { FunctionArgument } from "./declarations/arg";
+import type { Parameter } from "./declarations/parameter";
 
 type ModuleProps = { declarations: TopLevelDeclaration[] }
 const buildModule = ({ declarations }: ModuleProps): Module => {
@@ -28,7 +28,7 @@ const buildModule = ({ declarations }: ModuleProps): Module => {
     };
 };
 
-type FunctionDeclarationProps = { identifier: Identifier, args: FunctionArgument[], type: Type, body: Statement[] }
+type FunctionDeclarationProps = { identifier: Identifier, args: Parameter[], type: Type, body: Statement[] }
 const functionDeclaration = ({ identifier, args, type, body }: FunctionDeclarationProps): FunctionDeclaration => {
     return {
         kind: AstNodeKind.FUNCTION_DECLARATION,
@@ -42,14 +42,14 @@ const functionDeclaration = ({ identifier, args, type, body }: FunctionDeclarati
     };
 };
 
-type FunctionArgumentProps = { identifier: Identifier, type: Type }
-const functionArgument = ({ identifier, type }: FunctionArgumentProps): FunctionArgument => {
+type ParameterProps = { identifier: Identifier, type: Type }
+const parameter = ({ identifier, type }: ParameterProps): Parameter => {
     return {
-        kind: AstNodeKind.FUNCTION_ARGUMENT,
+        kind: AstNodeKind.PARAMETER,
         identifier,
         type,
         acceptDeclarationVisitor<T>(visitor: DeclarationVisitor<T>) {
-            return visitor.visitFunctionArgument(this);
+            return visitor.visitParameter(this);
         }
     };
 };
@@ -211,7 +211,7 @@ const AstBuilder = {
     exportation,
     floatLiteral,
     booleanLiteral,
-    functionArgument,
+    functionArgument: parameter,
     unaryExpression,
     binaryExpression,
     variableDeclaration,

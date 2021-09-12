@@ -1,5 +1,5 @@
 import type { AstNode } from "../node";
-import type { FunctionArgument } from "./arg";
+import type { Parameter } from "./parameter";
 import type { FunctionDeclaration } from "./function";
 import type { VariableDeclaration } from "./variable";
 
@@ -9,11 +9,11 @@ export interface DeclarationNode extends AstNode {
 
 export interface DeclarationVisitor<T> {
     visitFunctionDeclaration(declaration: FunctionDeclaration): T
-    visitFunctionArgument(declaration: FunctionArgument): T
+    visitParameter(declaration: Parameter): T
     visitVariableDeclaration(declaration: VariableDeclaration): T
 }
 
 export type Declaration =
     | FunctionDeclaration
-    | FunctionArgument
+    | Parameter
     | VariableDeclaration

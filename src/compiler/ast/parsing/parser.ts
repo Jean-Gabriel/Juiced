@@ -16,7 +16,7 @@ import type { AstOptimizerFactory } from "./optimization/optimizer";
 import type { Declaration } from "../nodes/declarations/declaration";
 import { AstNodeKind } from "../nodes/node";
 import { Type } from "../../typing/type";
-import type { FunctionArgument } from "../nodes/declarations/arg";
+import type { Parameter } from "../nodes/declarations/parameter";
 
 interface Parser {
     parse: (tokens: Token[]) => Module
@@ -149,7 +149,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         };
 
         const functionArguments = () => {
-            const args: FunctionArgument[] = [];
+            const args: Parameter[] = [];
 
             while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS) && !reader.isAtEnd()) {
                 if(args.length) {
