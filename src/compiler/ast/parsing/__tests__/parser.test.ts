@@ -2,7 +2,7 @@ import { createTestDiagnoticsReporter } from "../../../../../test/diagnostic/rep
 import { Primitive, Type } from "../../../typing/type";
 import { createSourceReader } from "../../../source/reader";
 import { createTokenReader } from "../../../token/reader";
-import { createTokenizer } from "../../../token/tokenizer";
+import { createLexer } from "../../../token/lexer";
 import AstBuilder from "../../nodes/builder";
 import { OperatorKind } from "../../nodes/expressions/operators";
 import type { Module } from "../../nodes/module";
@@ -382,12 +382,12 @@ describe('Parser', () => {
     const expectParse = (module: string) => {
         const withoutStartAndEndLineBreak = module.replace(/^\n|\n$/g, '');
 
-        const tokenizer = createTokenizer({
+        const lexer = createLexer({
             createSourceReader,
             createDiagnosticReporter: createTestDiagnoticsReporter
         });
 
-        const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
+        const tokens = lexer.tokenize(withoutStartAndEndLineBreak);
 
         const reporter = createTestDiagnoticsReporter();
         const parser = createParser({

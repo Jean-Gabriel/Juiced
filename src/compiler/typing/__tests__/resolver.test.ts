@@ -3,7 +3,7 @@ import { createAstOptimizer } from "../../ast/parsing/optimization/optimizer";
 import { createParser } from "../../ast/parsing/parser";
 import { createSourceReader } from "../../source/reader";
 import { createTokenReader } from "../../token/reader";
-import { createTokenizer } from "../../token/tokenizer";
+import { createLexer } from "../../token/lexer";
 import { createTypeResolver } from "../resolver";
 
 describe('Typechecker', () => {
@@ -148,12 +148,12 @@ describe('Typechecker', () => {
     const expectTypechecking = (module: string) => {
         const withoutStartAndEndLineBreak = module.replace(/^\n|\n$/g, '');
 
-        const tokenizer = createTokenizer({
+        const lexer = createLexer({
             createSourceReader,
             createDiagnosticReporter: createTestDiagnoticsReporter
         });
 
-        const tokens = tokenizer.tokenize(withoutStartAndEndLineBreak);
+        const tokens = lexer.tokenize(withoutStartAndEndLineBreak);
 
         const parser = createParser({
             createTokenReader,
