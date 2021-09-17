@@ -1,10 +1,9 @@
 import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
 import { DiagnosticCategory } from "../../diagnostic/reporter";
 import type { Parameter } from "../ast/nodes/declarations/parameter";
-import type { DeclarationVisitor } from "../ast/nodes/declarations/declaration";
+import type { Declaration, DeclarationVisitor } from "../ast/nodes/declarations/declaration";
 import type { FunctionDeclaration } from "../ast/nodes/declarations/function";
 import type { VariableDeclaration } from "../ast/nodes/declarations/variable";
-import type { Export } from "../ast/nodes/export";
 import type { Accessor } from "../ast/nodes/expressions/accessor";
 import type { BinaryExpression } from "../ast/nodes/expressions/binary";
 import type { Expression, ExpressionVisitor } from "../ast/nodes/expressions/expression";
@@ -58,19 +57,30 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         context = createTypeContext();
     };
 
-    const moduleDeclarationsOf = (module: Module): [VariableDeclaration[], FunctionDeclaration[]] => {
-        const exports = module.declarations.filter((decl): decl is Export => decl.kind === AstNodeKind.EXPORT).map(exportation => exportation.declaration);
+    const declarationsOf = (module: Module): [VariableDeclaration[], FunctionDeclaration[]] => {
+        const result = module.declarations.reduce((acc, decl) => {
+            const declaration = (declaration: Declaration) => {
+                if(declaration.kind === AstNodeKind.FUNCTION_DECLARATION) {
+                    acc.functions = [...acc.functions, declaration];
+                }
 
-        const functions = [
-            ...module.declarations.filter((decl): decl is FunctionDeclaration => decl.kind === AstNodeKind.FUNCTION_DECLARATION),
-            ...exports.filter((decl): decl is FunctionDeclaration => decl.kind === AstNodeKind.FUNCTION_DECLARATION)
-        ];
-        const variables = [
-            ...module.declarations.filter((decl): decl is VariableDeclaration => decl.kind === AstNodeKind.VARIABLE_DECLARATION),
-            ...exports.filter((decl): decl is VariableDeclaration => decl.kind === AstNodeKind.VARIABLE_DECLARATION)
-        ];
+                if(declaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
+                    acc.variables = [...acc.variables, declaration];
+                }
+            };
 
-        return [variables, functions];
+            if(decl.kind === AstNodeKind.EXPORT) {
+                declaration(decl.declaration);
+            }
+
+            if(decl.kind === AstNodeKind.FUNCTION_DECLARATION || decl.kind === AstNodeKind.VARIABLE_DECLARATION) {
+                declaration(decl);
+            }
+
+            return acc;
+        }, { functions: new Array<FunctionDeclaration>(), variables: new Array<VariableDeclaration>()});
+
+        return [result.variables, result.functions];
     };
 
     const invocation = (invocation: Invocation): Type => {
@@ -245,7 +255,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
     const moduleVisitor: ModuleVisitor<void> = {
         visitModule: function (module: Module): void {
-            const [variables, functions] = moduleDeclarationsOf(module);
+            const [variables, functions] = declarationsOf(module);
 
             functions.forEach(fun => context.add(NodeResolver.resolveFunction(fun)));
 

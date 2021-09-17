@@ -1,10 +1,10 @@
-import type Module from "module";
+import type { Module } from "../../ast/nodes/module";
 import type { CodeGenerator } from "../codegenerator";
 
-type WATGenerator = CodeGenerator
-type WATGeneratorFactory = () => WATGenerator
+type WebAssemblyGenerator = CodeGenerator
+type WebAssemblyGeneratorFactory = () => WebAssemblyGenerator
 
-export const createWARGenerator: WATGeneratorFactory = () => {
+export const createWebAssemblyGenerator: WebAssemblyGeneratorFactory = () => {
 
     const generate = (module: Module, outputPath: string) => {
         return undefined;
