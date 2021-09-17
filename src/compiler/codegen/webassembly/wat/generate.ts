@@ -89,7 +89,7 @@ export const generateWAT = (module: Module): SExp => {
     };
 
     const watLocalDefinition = (local: VariableDeclaration) => {
-        return sExp('local', identifier(context.scoped(local.identifier.value)), watType(local.type));
+        return sExp('local', identifier(context.local(local.identifier)), watType(local.type));
     };
 
     const watContextOfDeclaration = ({ kind }: Declaration) => {
@@ -142,6 +142,8 @@ export const generateWAT = (module: Module): SExp => {
 
     const declarationVisitor: DeclarationVisitor<SExp> = {
         visitFunctionDeclaration: function (declaration: FunctionDeclaration): SExp {
+            const global = context.global(declaration.identifier);
+
             context.pushScope(declaration.identifier);
 
             const parameters = declaration.arguments.map(arg => arg.acceptDeclarationVisitor(this));
@@ -149,7 +151,7 @@ export const generateWAT = (module: Module): SExp => {
 
             const watFunction = sExp(
                 'func',
-                identifier(declaration.identifier.value),
+                identifier(global),
                 ...parameters,
                 sExp('result', watType(declaration.type)),
                 ...locals,
@@ -164,7 +166,7 @@ export const generateWAT = (module: Module): SExp => {
         visitParameter: function (declaration: Parameter): SExp {
             return sExp(
                 'param',
-                identifier(context.scoped(declaration.identifier.value)),
+                identifier(context.local(declaration.identifier)),
                 watType(declaration.type)
             );
         },
@@ -172,7 +174,7 @@ export const generateWAT = (module: Module): SExp => {
         visitVariableDeclaration: function (declaration: VariableDeclaration): SExp {
             const watDeclaration = sExp(
                 'global',
-                identifier(context.scoped(declaration.identifier.value)),
+                identifier(context.global(declaration.identifier)),
                 sExp('mut', watType(declaration.type)),
                 watInitialGlobalValue(declaration)
             );
@@ -188,7 +190,7 @@ export const generateWAT = (module: Module): SExp => {
                 string(node.declaration.identifier.value),
                 sExp(
                     watContextOfDeclaration(node.declaration),
-                    identifier(context.scoped(node.declaration.identifier.value))
+                    identifier(context.find(node.declaration.identifier))
                 )
             );
         }
