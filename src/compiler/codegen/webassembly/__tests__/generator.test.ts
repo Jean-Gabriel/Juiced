@@ -36,6 +36,23 @@ describe('WebAssemblyGenerator', () => {
         expect(module.variable.value).toEqual(1);
     });
 
+    it('it can call an exported function with parameters', async () => {
+        type Module = {
+            canDriveAt: (age: number) => boolean
+        }
+
+        const module = await mount<Module>(`
+            MINIMAL_DRIVING_AGE = const 17;    
+
+            export canDriveAt = fun (age: i32): bool {
+                age >= MINIMAL_DRIVING_AGE;
+            }
+        `);
+
+        expect(module.canDriveAt(17)).toBeTruthy();
+        expect(module.canDriveAt(16)).toBeFalsy();
+    });
+
     const mount = async <T extends WebAssembly.Exports> (module: string) => {
         const { tokenize, parse, resolve, codegenWebAssembly } = CompilationHelper;
 
