@@ -10,19 +10,15 @@ import { createTypeResolver } from "../../../../typing/resolver";
 import { generateWAT } from "../generate";
 
 describe('GenerateWAT', () => {
-    it('it should generate wat code for program', () => {
-        const program = `export pi = const 3.1416;
-        identity = const (1.0 + 1.0) / 2.0;
-        two = const 2.0;
+    test('generate wat cuz no cli :(', () => {
+        const program = `
+            export pi = const 3.1416;
 
-        identity_function = fun (): f32 {
-            1.0;
-        }
-        
-        export circumference_of_circle = fun (radius: f32): f32 {
-            even_more_identity = const 1.0;
-            (radius / (two * pi)) * identity * even_more_identity * identity_function(); 
-        }`;
+            identity = const 1.0;
+            export circumferenceOfCircle = fun (radius: f32): f32 {
+                (radius * (2.0 * pi)) * identity;
+            }
+        `;
 
         const lexer = createLexer({
             createDiagnosticReporter: createTestDiagnoticsReporter,
@@ -46,6 +42,8 @@ describe('GenerateWAT', () => {
 
         resolver.resolve(ast);
 
-        console.dir(generateWAT(ast), { depth: null });
+        const generated = generateWAT(ast);
+
+        console.log(generated.read());
     });
 });

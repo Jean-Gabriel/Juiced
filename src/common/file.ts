@@ -15,4 +15,8 @@ export class File {
     save(path: string) {
         fs.writeFileSync(`${__dirname}/${path}`, this.content);
     }
+
+    read() {
+        return this.content;
+    }
 }

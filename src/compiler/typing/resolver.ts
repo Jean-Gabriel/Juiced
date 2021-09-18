@@ -18,6 +18,7 @@ import { isTypeResolverError, TypeResolvingError } from "./error";
 import { NodeResolver } from "./resolve/type";
 import { Primitive, Type } from "./type";
 import type { TypeContextFactory } from "./context";
+import type { BooleanLiteral, FloatLiteral, IntLiteral } from "../ast/nodes/expressions/literal";
 
 interface TypeResolver {
     resolve: (module: Module) => void
@@ -167,15 +168,27 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
     const expressionVisitor: ExpressionVisitor<Type> = {
         visitGroupingExpression: function (expression: GroupingExpression) {
-            return expression.expression.acceptExpressionVisitor(expressionVisitor);
+            const type = expression.expression.acceptExpressionVisitor(expressionVisitor);
+
+            expression.type = type;
+
+            return type;
         },
 
         visitBinaryExpression: function (expression: BinaryExpression) {
-            return binary(expression);
+            const type = binary(expression);
+
+            expression.type = type;
+
+            return type;
         },
 
         visitUnaryExpression: function (expression: UnaryExpression) {
-            return unary(expression);
+            const type = unary(expression);
+
+            expression.type = type;
+
+            return type;
         },
 
         visitAccessor: function (expression: Accessor) {
@@ -184,23 +197,40 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
                 throw new TypeResolvingError('Trying to access not declared variable.');
             }
 
+            expression.type = symbol.type;
             return symbol.type;
         },
 
         visitInvocation: function (expression: Invocation) {
-            return invocation(expression);
+            const type = invocation(expression);
+
+            expression.type = type;
+
+            return type;
         },
 
-        visitIntLiteral: function () {
-            return Type.from(Primitive.I32);
+        visitIntLiteral: function (expression: IntLiteral) {
+            const type = Type.from(Primitive.I32);
+
+            expression.type = type;
+
+            return type;
         },
 
-        visitFloatLiteral: function () {
-            return Type.from(Primitive.F32);
+        visitFloatLiteral: function (expression: FloatLiteral) {
+            const type = Type.from(Primitive.F32);
+
+            expression.type = type;
+
+            return type;
         },
 
-        visitBooleanLiteral: function () {
-            return Type.from(Primitive.BOOL);
+        visitBooleanLiteral: function (expression: BooleanLiteral) {
+            const type = Type.from(Primitive.BOOL);
+
+            expression.type = type;
+
+            return type;
         }
     };
 

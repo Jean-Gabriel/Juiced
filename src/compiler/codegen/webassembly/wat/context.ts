@@ -1,16 +1,23 @@
+import type { VariableDeclaration } from "../../../ast/nodes/declarations/variable";
 import type { Identifier } from "../../../ast/nodes/identifier";
 
 type Alias = string
 
-enum VariableType {
+export enum WATVariableScope {
     GLOBAL,
     LOCAL
 }
 
+type WATVariable =
+    | { local: string, scope: WATVariableScope.LOCAL }
+    | { global: string, scope: WATVariableScope.GLOBAL }
+
 export default class WATGenerationContext {
 
-    private readonly globals: Map<Identifier, Alias> = new Map()
-    private readonly locals: Map<Identifier, Alias> = new Map()
+    private readonly globals: Map<string, Alias> = new Map()
+    private readonly locals: Map<string, Alias> = new Map()
+
+    private readonly lateinitGlobals: Array<VariableDeclaration> = []
 
     private readonly scopes: Identifier[] = []
 
@@ -23,42 +30,46 @@ export default class WATGenerationContext {
         this.locals.clear();
     }
 
-    global(identifier: Identifier) {
-        this.globals.set(identifier, this.scoped(identifier));
+    global({ value }: Identifier) {
+        this.globals.set(value, this.scoped(value));
 
-        return this.globals.get(identifier)!!;
+        return this.globals.get(value)!!;
     }
 
-    local(identifier: Identifier) {
-        this.locals.set(identifier, this.scoped(identifier));
+    local({ value }: Identifier) {
+        this.locals.set(value, this.scoped(value));
 
-        return this.locals.get(identifier)!!;
+        return this.locals.get(value)!!;
     }
 
-    find(identifier: Identifier) {
-        const local = this.locals.get(identifier);
+    find({ value }: Identifier): WATVariable {
+        const local = this.locals.get(value);
         if(local) {
-            return local;
+            return { local, scope: WATVariableScope.LOCAL };
         }
 
-        const global = this.globals.get(identifier);
+        const global = this.globals.get(value);
         if(global) {
-            return global;
+            return { global, scope: WATVariableScope.GLOBAL };
         }
 
-        throw new Error(`Unable to find local or global with name ${identifier.value}`);
+        throw new Error(`Unable to find local or global with name ${value}`);
     }
 
-    scope() {
-        return this.scopesName.join("/");
+    addLateinitGlobal(declaration: VariableDeclaration) {
+        this.lateinitGlobals.push(declaration);
     }
 
-    private scoped({ value }: Identifier): string {
+    getLateinitGlobals() {
+        return this.lateinitGlobals;
+    }
+
+    scoped(identifier: string): string {
         if(!this.scopes.length) {
-            return value;
+            return identifier;
         }
 
-        return `${this.scopesName.join("/")}/${value}`;
+        return `${this.scopesName.join("/")}/${identifier}`;
     }
 
     private get scopesName() {
