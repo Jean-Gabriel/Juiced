@@ -2,6 +2,7 @@ import type { VariableDeclaration } from "../../../ast/nodes/declarations/variab
 import type { Identifier } from "../../../ast/nodes/identifier";
 
 type Alias = string
+type Name = string
 
 export enum WATVariableScope {
     GLOBAL,
@@ -14,8 +15,8 @@ type WATVariable =
 
 export default class WATGenerationContext {
 
-    private readonly globals: Map<string, Alias> = new Map()
-    private readonly locals: Map<string, Alias> = new Map()
+    private readonly globals: Map<Name, Alias> = new Map()
+    private readonly locals: Map<Name, Alias> = new Map()
 
     private readonly lateinitGlobals: Array<VariableDeclaration> = []
 
@@ -31,15 +32,17 @@ export default class WATGenerationContext {
     }
 
     global({ value }: Identifier) {
-        this.globals.set(value, this.scoped(value));
+        const alias = this.alias(value);
+        this.globals.set(value, alias);
 
-        return this.globals.get(value)!!;
+        return alias;
     }
 
     local({ value }: Identifier) {
-        this.locals.set(value, this.scoped(value));
+        const alias = this.alias(value);
+        this.locals.set(value, alias);
 
-        return this.locals.get(value)!!;
+        return alias;
     }
 
     find({ value }: Identifier): WATVariable {
@@ -64,7 +67,7 @@ export default class WATGenerationContext {
         return this.lateinitGlobals;
     }
 
-    scoped(identifier: string): string {
+    alias(identifier: string): string {
         if(!this.scopes.length) {
             return identifier;
         }
