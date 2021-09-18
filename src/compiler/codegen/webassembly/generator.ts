@@ -1,6 +1,6 @@
 import type { Module } from "../../ast/nodes/module";
 import type { CodeGenerator } from "../codegenerator";
-import { generateWASM } from "./wasm/generate";
+import { generateWASMFromFile as generateWASMFromFile } from "./wasm/generate";
 import { generateWAT } from "./wat/generate";
 
 type WebAssemblyGenerator = CodeGenerator
@@ -19,7 +19,7 @@ export const createWebAssemblyGenerator: WebAssemblyGeneratorFactory = () => {
         const wat = generateWAT(module);
         const created = wat.save(path, watName);
 
-        const wasm = await generateWASM(created);
+        const wasm = await generateWASMFromFile(created);
         wasm.save(path, wasmName);
     };
 

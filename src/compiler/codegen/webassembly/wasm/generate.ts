@@ -4,7 +4,7 @@ import { readFileSync } from "fs";
 
 type Path = string;
 
-export const generateWASM = async (wat: Path): Promise<File> => {
+export const generateWASMFromFile = async (wat: Path): Promise<File> => {
     const { parseWat } = await wabt();
 
     const module = parseWat(wat, readFileSync(wat, 'utf-8'));
