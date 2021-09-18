@@ -1,6 +1,6 @@
 export pi = const 3.1416;
 
 identity = const 1.0;
-export circumferenceOfCircle = fun (radius: f32): f32 {
+export circumferenceOfCircle = fun (radius: float): float {
     (radius * (2.0 * pi)) * identity;
 }

@@ -16,12 +16,12 @@ const type = (type: Type | undefined): string => {
         throw new Error(`Unexpected undefined type at code generation.`);
     }
 
-    if(type.is(Primitive.I32)) {
+    if(type.is(Primitive.INT)) {
         return 'i32';
     }
 
-    if(type.is(Primitive.F32)) {
-        return 'f32';
+    if(type.is(Primitive.FLOAT)) {
+        return 'f64';
     }
 
     if(type.is(Primitive.BOOL)) {
@@ -36,12 +36,12 @@ const initialValue = (type: Type | undefined) => {
         throw new Error(`Unexpected undefined type at code generation.`);
     }
 
-    if(type.is(Primitive.I32)) {
+    if(type.is(Primitive.INT)) {
         return 'i32.const 0';
     }
 
-    if(type.is(Primitive.F32)) {
-        return 'f32.const 0';
+    if(type.is(Primitive.FLOAT)) {
+        return 'f64.const 0';
     }
 
     if(type.is(Primitive.BOOL)) {
@@ -56,24 +56,24 @@ const initialValue = (type: Type | undefined) => {
 const operator = (operator: OperatorKind, type: Type) => {
     switch(operator) {
         case OperatorKind.DIVISION: {
-            if(type.is(Primitive.I32)) { return `div_s`; }
+            if(type.is(Primitive.INT)) { return `div_s`; }
             else { return 'div'; }
         };
         case OperatorKind.EQUAL_EQUAL: return 'eq';
         case OperatorKind.GREATER_EQUAL: {
-            if(type.is(Primitive.I32)) { return 'ge_s'; }
+            if(type.is(Primitive.INT)) { return 'ge_s'; }
             else { return 'ge'; }
         };
         case OperatorKind.GREATER_THAN: {
-            if(type.is(Primitive.I32)) { return 'gt_s'; }
+            if(type.is(Primitive.INT)) { return 'gt_s'; }
             else { return 'gt'; }
         };
         case OperatorKind.LESS_EQUAL: {
-            if(type.is(Primitive.I32)) { return 'le_s'; }
+            if(type.is(Primitive.INT)) { return 'le_s'; }
             else { return 'le'; }
         };
         case OperatorKind.LESS_THAN: {
-            if(type.is(Primitive.I32)) { return 'lt_s'; }
+            if(type.is(Primitive.INT)) { return 'lt_s'; }
             else { return 'lt'; }
         };
         case OperatorKind.MINUS: return 'sub';
