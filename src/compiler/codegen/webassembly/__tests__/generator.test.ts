@@ -19,7 +19,7 @@ describe('WebAssemblyGenerator', () => {
         fs.unlinkSync(wat);
     });
 
-    it('it can export functions and variables', async () => {
+    it('can export functions and variables', async () => {
         type Module = {
             variable: WebAssembly.Global
             function: () => number
@@ -36,7 +36,7 @@ describe('WebAssemblyGenerator', () => {
         expect(module.variable.value).toEqual(1);
     });
 
-    it('it can call an exported function with parameters', async () => {
+    it('can call an exported function with parameters', async () => {
         type Module = {
             canDriveAt: (age: number) => boolean
         }
