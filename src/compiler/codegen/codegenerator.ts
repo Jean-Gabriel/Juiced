@@ -1,10 +1,10 @@
 import type { Module } from "../ast/nodes/module";
 
-type OutputOptions = {
+export type CodeGeneratorOutputOptions = {
     path: string
     name: string
 }
 
 export interface CodeGenerator {
-    generate(module: Module, output: OutputOptions): void
+    generate(module: Module, output: CodeGeneratorOutputOptions): Promise<void>
 }

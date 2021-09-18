@@ -56,24 +56,24 @@ const initialValue = (type: Type | undefined) => {
 const operator = (operator: OperatorKind, type: Type) => {
     switch(operator) {
         case OperatorKind.DIVISION: {
-            if(type.is(Primitive.I32)) { return `div_u`; }
+            if(type.is(Primitive.I32)) { return `div_s`; }
             else { return 'div'; }
         };
         case OperatorKind.EQUAL_EQUAL: return 'eq';
         case OperatorKind.GREATER_EQUAL: {
-            if(type.is(Primitive.I32)) { return 'ge_u'; }
+            if(type.is(Primitive.I32)) { return 'ge_s'; }
             else { return 'ge'; }
         };
         case OperatorKind.GREATER_THAN: {
-            if(type.is(Primitive.I32)) { return 'gt_u'; }
+            if(type.is(Primitive.I32)) { return 'gt_s'; }
             else { return 'gt'; }
         };
         case OperatorKind.LESS_EQUAL: {
-            if(type.is(Primitive.I32)) { return 'le_u'; }
+            if(type.is(Primitive.I32)) { return 'le_s'; }
             else { return 'le'; }
         };
         case OperatorKind.LESS_THAN: {
-            if(type.is(Primitive.I32)) { return 'lt_u'; }
+            if(type.is(Primitive.I32)) { return 'lt_s'; }
             else { return 'lt'; }
         };
         case OperatorKind.MINUS: return 'sub';

@@ -4,6 +4,8 @@ type Props = {
     content: string | Buffer,
 }
 
+type Path = string
+
 export class File {
 
     private readonly content: string | Buffer
@@ -12,8 +14,12 @@ export class File {
         this.content = content;
     }
 
-    save(path: string, name: string) {
-        fs.writeFileSync(`${__dirname}/${path}/${name}`, this.content);
+    save(path: string, name: string): Path {
+        const savedAt = `${process.cwd()}${path}/${name}`;
+
+        fs.writeFileSync(savedAt, this.content);
+
+        return savedAt;
     }
 
     read() {

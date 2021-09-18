@@ -12,14 +12,15 @@ type OutputOptions = {
 }
 
 export const createWebAssemblyGenerator: WebAssemblyGeneratorFactory = () => {
-    const generate = (module: Module, { path, name = 'main' }: OutputOptions) => {
+    const generate = async (module: Module, { path, name = 'main' }: OutputOptions) => {
         const watName = `${name}.wat`;
         const wasmName = `${name}.wasm`;
 
         const wat = generateWAT(module);
-        wat.save(path, watName);
+        const created = wat.save(path, watName);
 
-        generateWASM(wat, { watFile: watName }).then((wasm => wasm.save(path, wasmName)));
+        const wasm = await generateWASM(created);
+        wasm.save(path, wasmName);
     };
 
     return {
