@@ -1,4 +1,3 @@
-import { inspect } from "util";
 
 export type SExp = SExp[] | string
 
@@ -8,9 +7,10 @@ export const sExp = {
     identifier: (value: string) => `$${value}`
 };
 
-//TODO: Add proper print function once module generation testing is done
-export const print = (sExp: SExp) => inspect(sExp)
-    .replace(/\[/g, '(')
-    .replace(/\]/g, ')')
-    .replace(/\,/g, '')
-    .replace(/\'/g, '');
+export const print = (sExp: SExp): string => {
+    if(typeof sExp === 'string') {
+        return sExp;
+    }
+
+    return `(${sExp.map(subSExp => print(subSExp)).join(' ')})`;
+};
