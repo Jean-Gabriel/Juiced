@@ -15,7 +15,7 @@ export default class FunctionDeclarationFixture {
 
     constructor(
         public identifier: Identifier = AstBuilder.identifier({ value: v4() }),
-        public type: Type = Type.from(Primitive.I32),
+        public type: Type = Type.from(Primitive.INT),
         public args: Parameter[] = [],
         public body: Statement[] = []
     ) {}

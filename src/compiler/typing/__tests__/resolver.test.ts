@@ -24,7 +24,7 @@ describe('Typechecker', () => {
 
     it('can invoke a function with parameters', () => {
         expectTypechecking(`
-            add = fun (a: i32, b: i32): i32 {
+            add = fun (a: int, b: int): int {
                 a + b;
             }
 
@@ -34,7 +34,7 @@ describe('Typechecker', () => {
 
     it('cannot invoke a function with invalid number of parameters', () => {
         expectTypechecking(`
-            add = fun (a: i32, b: i32): i32 {
+            add = fun (a: int, b: int): int {
                 a + b;
             }
 
@@ -42,7 +42,7 @@ describe('Typechecker', () => {
         `).errors(1);
 
         expectTypechecking(`
-            add = fun (a: i32, b: i32): i32 {
+            add = fun (a: int, b: int): int {
                 a + b;
             }
 
@@ -52,7 +52,7 @@ describe('Typechecker', () => {
 
     it('cannot invoke a function with invalid parameters type', () => {
         expectTypechecking(`
-            add = fun (a: i32, b: i32): i32 {
+            add = fun (a: int, b: int): int {
                 a + b;
             }
 
@@ -83,7 +83,7 @@ describe('Typechecker', () => {
     it('variable declarations in functions can refer to a variable of a higher scope', () => {
         expectTypechecking(`
             in_a_higher_scope = const 1.0;
-            returns_higher_scope_val = fun (): f32 {
+            returns_higher_scope_val = fun (): float {
                 in_a_higher_scope;
             }
         `).succeeds();
@@ -91,7 +91,7 @@ describe('Typechecker', () => {
 
     it('variable declarations in a lower scope cannot be accessed in a higher scope', () => {
         expectTypechecking(`
-            function = fun (): f32 {
+            function = fun (): float {
                 lower_scope_val = const 1.0;
                 1.0;
             }
@@ -106,7 +106,7 @@ describe('Typechecker', () => {
         `).errors(1);
 
         expectTypechecking(`
-            references_undeclared_variable = fun (): f32 {
+            references_undeclared_variable = fun (): float {
                 errors = const does_not_exists;
                 1.0;
             }
@@ -115,7 +115,7 @@ describe('Typechecker', () => {
 
     it('expressions should use values or other expressions of same type', () => {
         expectTypechecking(`
-            function = fun (float_val: f32): f32 {
+            function = fun (float_val: float): float {
                 other_float_val = const 1.0;
 
                 float_val + other_float_val;
@@ -123,7 +123,7 @@ describe('Typechecker', () => {
         `).succeeds();
 
         expectTypechecking(`
-            function = fun (float_val: f32): f32 {
+            function = fun (float_val: float): float {
                 int_val = const 1;
                 bool_val = const false;
 
@@ -136,7 +136,7 @@ describe('Typechecker', () => {
         expectTypechecking(`
             error = const does_not_exists;
 
-            invalid_return_type = fun (): i32 {
+            invalid_return_type = fun (): int {
                 true;
             }
         `).errors(2);

@@ -28,8 +28,8 @@ describe('Lexer', () => {
         ['const', TokenFixture.create(_ => _.atLine(1).withLexeme('const').nonLiteral(TokenKind.CONST))],
         ['fun', TokenFixture.create(_ => _.atLine(1).withLexeme('fun').nonLiteral(TokenKind.FUN))],
         ['export', TokenFixture.create(_ => _.atLine(1).withLexeme('export').nonLiteral(TokenKind.EXPORT))],
-        ['i32', TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE))],
-        ['f32', TokenFixture.create(_ => _.atLine(1).withLexeme('f32').nonLiteral(TokenKind.FLOAT_TYPE))],
+        ['int', TokenFixture.create(_ => _.atLine(1).withLexeme('int').nonLiteral(TokenKind.INT_TYPE))],
+        ['float', TokenFixture.create(_ => _.atLine(1).withLexeme('float').nonLiteral(TokenKind.FLOAT_TYPE))],
         ['bool', TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE))]
     ])('should create token for %s', (char: string, expected: Token) => {
         expectTokenize(char).createsTokens(expected);
@@ -41,7 +41,7 @@ describe('Lexer', () => {
 
     it('should tokenize a function declaration', () => {
         expectTokenize(`
-            square = fun (a: i32): bool {
+            square = fun (a: int): bool {
                 a * a;
             }
         `).createsTokens(
@@ -51,7 +51,7 @@ describe('Lexer', () => {
             TokenFixture.create(_ => _.atLine(1).withLexeme('(').nonLiteral(TokenKind.OPEN_PARENTHESIS)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('a').withLiteral('a').string(TokenKind.IDENTIFIER)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
-            TokenFixture.create(_ => _.atLine(1).withLexeme('i32').nonLiteral(TokenKind.INT_TYPE)),
+            TokenFixture.create(_ => _.atLine(1).withLexeme('int').nonLiteral(TokenKind.INT_TYPE)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(')').nonLiteral(TokenKind.CLOSE_PARENTHESIS)),
             TokenFixture.create(_ => _.atLine(1).withLexeme(':').nonLiteral(TokenKind.COLON)),
             TokenFixture.create(_ => _.atLine(1).withLexeme('bool').nonLiteral(TokenKind.BOOLEAN_TYPE)),

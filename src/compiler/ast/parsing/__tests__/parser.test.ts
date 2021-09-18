@@ -11,7 +11,7 @@ import { CompilationHelper } from "../../../../../test/compiler/helper";
 describe('Parser', () => {
     it('should parse top level exported function declaration', () => {
         expectParse(`
-            export add = fun (a: i32, b: i32): i32 {
+            export add = fun (a: int, b: int): int {
                 a + b;
             }
         `).createsAst(
@@ -23,14 +23,14 @@ describe('Parser', () => {
                         args: [
                             AstBuilder.functionArgument({
                                 identifier: AstBuilder.identifier({ value: 'a' }),
-                                type: Type.from(Primitive.I32)
+                                type: Type.from(Primitive.INT)
                             }),
                             AstBuilder.functionArgument({
                                 identifier: AstBuilder.identifier({ value: 'b' }),
-                                type: Type.from(Primitive.I32)
+                                type: Type.from(Primitive.INT)
                             })
                         ],
-                        type: Type.from(Primitive.I32),
+                        type: Type.from(Primitive.INT),
                         body: [
                             AstBuilder.binaryExpression({
                                 left: AstBuilder.accessor({ identifier: AstBuilder.identifier({ value: 'a' }) }),
@@ -46,7 +46,7 @@ describe('Parser', () => {
 
     it('should parse variable declaration in function', () => {
         expectParse(`
-            areEqual = fun (a: i32, b: i32): i32 {
+            areEqual = fun (a: int, b: int): int {
                 x = const a == b;
             }
         `).createsAst(
@@ -57,14 +57,14 @@ describe('Parser', () => {
                         args: [
                             AstBuilder.functionArgument({
                                 identifier: AstBuilder.identifier({ value: 'a' }),
-                                type: Type.from(Primitive.I32)
+                                type: Type.from(Primitive.INT)
                             }),
                             AstBuilder.functionArgument({
                                 identifier: AstBuilder.identifier({ value: 'b' }),
-                                type: Type.from(Primitive.I32)
+                                type: Type.from(Primitive.INT)
                             })
                         ],
-                        type: Type.from(Primitive.I32),
+                        type: Type.from(Primitive.INT),
                         body: [
                             AstBuilder.variableDeclaration({
                                 identifier: AstBuilder.identifier({ value: 'x' }),
@@ -83,7 +83,7 @@ describe('Parser', () => {
 
     it('should parse return expression in function', () => {
         expectParse(`
-            export math = fun (): i32 {
+            export math = fun (): int {
                 2 * -4;
             }
         `).createsAst(
@@ -93,7 +93,7 @@ describe('Parser', () => {
                         declaration: AstBuilder.functionDeclaration({
                             identifier: AstBuilder.identifier({ value: 'math' }),
                             args: [],
-                            type: Type.from(Primitive.I32),
+                            type: Type.from(Primitive.INT),
                             body: [
                                 AstBuilder.binaryExpression({
                                     left: AstBuilder.intLiteral({ int: 2 }),
@@ -254,7 +254,7 @@ describe('Parser', () => {
 
     it('should ignore not returning expressions in functions', () => {
         expectParse(`
-            export return_one = fun (): i32 {
+            export return_one = fun (): int {
                 1 + 1;
                 1;
             }
@@ -265,7 +265,7 @@ describe('Parser', () => {
                         declaration: AstBuilder.functionDeclaration({
                             identifier: AstBuilder.identifier({ value: 'return_one' }),
                             args: [],
-                            type: Type.from(Primitive.I32),
+                            type: Type.from(Primitive.INT),
                             body: [
                                 AstBuilder.intLiteral({ int: 1 })
                             ]
@@ -336,7 +336,7 @@ describe('Parser', () => {
 
     it('should recover from broken function body expression to semicolon', () => {
         expectParse(`
-            export error = fun (): i32 {
+            export error = fun (): int {
                 1 * * 1;
                 1;
             }
@@ -346,7 +346,7 @@ describe('Parser', () => {
 
     it('should recover from broken function body expression to close bracket if semicolon is missing', () => {
         expectParse(`
-            export error = fun (): i32 {
+            export error = fun (): int {
                 1 * * 1
                 1;
             }
@@ -356,7 +356,7 @@ describe('Parser', () => {
 
     it('should not be able to recover from broken function body if semicolon and close bracket are missing', () => {
         expectParse(`
-            export error = fun (): i32 {
+            export error = fun (): int {
                 1 * * 1
                 1
             y = const 2 + 2;

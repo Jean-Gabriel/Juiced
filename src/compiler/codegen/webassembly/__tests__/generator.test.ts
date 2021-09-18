@@ -27,7 +27,7 @@ describe('WebAssemblyGenerator', () => {
 
         const module = await mount<Module>(`
             export variable = const 1;
-            export function = fun (): i32 {
+            export function = fun (): int {
                 -(1 + 3) / 2 + variable;
             }
         `);
@@ -44,7 +44,7 @@ describe('WebAssemblyGenerator', () => {
         const module = await mount<Module>(`
             MINIMAL_DRIVING_AGE = const 17;    
 
-            export canDriveAt = fun (age: i32): bool {
+            export canDriveAt = fun (age: int): bool {
                 age >= MINIMAL_DRIVING_AGE;
             }
         `);

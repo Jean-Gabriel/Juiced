@@ -129,9 +129,9 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
             return type;
         }
 
-        if(type.is(Primitive.I32) || type.is(Primitive.F32)) {
+        if(type.is(Primitive.INT) || type.is(Primitive.FLOAT)) {
             if(!NUMBER_OPERATORS.includes(binary.operator)) {
-                throw new TypeResolvingError('Invalid i32 or f32 operator.');
+                throw new TypeResolvingError('Invalid int or float operator.');
             }
 
             if(BOOLEAN_OPERATORS.includes(binary.operator)) {
@@ -148,8 +148,8 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         const type = unary.expression.acceptExpressionVisitor(expressionVisitor);
 
         if(unary.operator === OperatorKind.MINUS || unary.operator === OperatorKind.PLUS) {
-            if(type.is(Primitive.I32) && type.is(Primitive.F32)) {
-                throw new TypeResolvingError('Minus unary must affect an i32 or f32.');
+            if(type.is(Primitive.INT) && type.is(Primitive.FLOAT)) {
+                throw new TypeResolvingError('Minus unary must affect an int or float.');
             }
 
             return type;
@@ -210,7 +210,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         },
 
         visitIntLiteral: function (expression: IntLiteral) {
-            const type = Type.from(Primitive.I32);
+            const type = Type.from(Primitive.INT);
 
             expression.type = type;
 
@@ -218,7 +218,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         },
 
         visitFloatLiteral: function (expression: FloatLiteral) {
-            const type = Type.from(Primitive.F32);
+            const type = Type.from(Primitive.FLOAT);
 
             expression.type = type;
 

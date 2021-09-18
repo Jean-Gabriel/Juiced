@@ -1,6 +1,6 @@
 export enum Primitive {
-    I32 = 'i32',
-    F32 = 'f32',
+    INT = 'int',
+    FLOAT = 'float',
     BOOL = 'bool'
 }
 

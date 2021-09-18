@@ -16,7 +16,7 @@ describe('TypeContext', () => {
 
     it('should add resolved variable to scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.I32));
+        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.INT));
 
         context.add(resolved);
 
@@ -26,7 +26,7 @@ describe('TypeContext', () => {
 
     it('should find resolved node from a higher scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.I32));
+        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.INT));
         context.add(resolved);
 
         context.pushScope();
@@ -39,7 +39,7 @@ describe('TypeContext', () => {
         const identifier = AstBuilder.identifier({ value: 'identifier' });
         const variable = VariableDeclarationFixture.create(_ => _.identifier = identifier);
         const fun = FunctionDeclarationFixture.create(_ => _.identifier = identifier);
-        context.add(NodeResolver.resolveVariable(variable, Type.from(Primitive.I32)));
+        context.add(NodeResolver.resolveVariable(variable, Type.from(Primitive.INT)));
 
         expect(() => context.add(NodeResolver.resolveFunction(fun))).toThrow();
     });
@@ -50,7 +50,7 @@ describe('TypeContext', () => {
 
     it('should not find variable of poped scope', () => {
         const variable = VariableDeclarationFixture.create();
-        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.I32));
+        const resolved = NodeResolver.resolveVariable(variable, Type.from(Primitive.INT));
         context.pushScope();
 
         context.add(resolved);
