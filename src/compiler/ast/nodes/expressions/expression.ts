@@ -1,3 +1,4 @@
+import type { Type } from "../../../typing/type";
 import type { AstNode } from "../node";
 import type { Accessor } from "./accessor";
 import type { BinaryExpression } from "./binary";
@@ -7,6 +8,7 @@ import type { BooleanLiteral, FloatLiteral, IntLiteral, Literal } from "./litera
 import type { UnaryExpression } from "./unary";
 
 export interface ExpressionNode extends AstNode {
+    type?: Type
     acceptExpressionVisitor<T>(visitor: ExpressionVisitor<T>): T
 }
 

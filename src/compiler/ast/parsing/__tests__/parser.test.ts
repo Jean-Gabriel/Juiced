@@ -1,13 +1,12 @@
 import { createTestDiagnoticsReporter } from "../../../../../test/diagnostic/reporter";
 import { Primitive, Type } from "../../../typing/type";
-import { createSourceReader } from "../../../source/reader";
 import { createTokenReader } from "../../../token/reader";
-import { createLexer } from "../../../token/lexer";
 import AstBuilder from "../../nodes/builder";
 import { OperatorKind } from "../../nodes/expressions/operators";
 import type { Module } from "../../nodes/module";
 import { createAstOptimizer } from "../optimization/optimizer";
 import { createParser } from "../parser";
+import { CompilationHelper } from "../../../../../test/compiler/helper";
 
 describe('Parser', () => {
     it('should parse top level exported function declaration', () => {
@@ -380,14 +379,9 @@ describe('Parser', () => {
     });
 
     const expectParse = (module: string) => {
-        const withoutStartAndEndLineBreak = module.replace(/^\n|\n$/g, '');
+        const { tokenize } = CompilationHelper;
 
-        const lexer = createLexer({
-            createSourceReader,
-            createDiagnosticReporter: createTestDiagnoticsReporter
-        });
-
-        const tokens = lexer.tokenize(withoutStartAndEndLineBreak);
+        const tokens = tokenize(module);
 
         const reporter = createTestDiagnoticsReporter();
         const parser = createParser({

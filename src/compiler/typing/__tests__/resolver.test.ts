@@ -1,11 +1,7 @@
 import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
-import { createAstOptimizer } from "../../ast/parsing/optimization/optimizer";
-import { createParser } from "../../ast/parsing/parser";
-import { createSourceReader } from "../../source/reader";
-import { createTokenReader } from "../../token/reader";
-import { createLexer } from "../../token/lexer";
 import { createTypeResolver } from "../resolver";
 import { createTypeContext } from "../context";
+import { CompilationHelper } from "../../../../test/compiler/helper";
 
 describe('Typechecker', () => {
     it('can invoke a function declared before and after invocator', () => {
@@ -147,22 +143,9 @@ describe('Typechecker', () => {
     });
 
     const expectTypechecking = (module: string) => {
-        const withoutStartAndEndLineBreak = module.replace(/^\n|\n$/g, '');
+        const { tokenize, parse } = CompilationHelper;
 
-        const lexer = createLexer({
-            createSourceReader,
-            createDiagnosticReporter: createTestDiagnoticsReporter
-        });
-
-        const tokens = lexer.tokenize(withoutStartAndEndLineBreak);
-
-        const parser = createParser({
-            createTokenReader,
-            createDiagnosticReporter: createTestDiagnoticsReporter,
-            createAstOptimizer
-        });
-
-        const ast = parser.parse(tokens);
+        const ast = parse(tokenize(module));
 
         const reporter = createTestDiagnoticsReporter();
         const typechecker = createTypeResolver({
