@@ -1,14 +1,15 @@
 import fs from 'fs';
 
 type Props = {
-    content: string | Buffer,
+    content: Stream,
 }
 
 type Path = string
+type Stream = string | NodeJS.ArrayBufferView
 
 export class File {
 
-    private readonly content: string | Buffer
+    private readonly content: Stream
 
     constructor({ content }: Props) {
         this.content = content;
@@ -20,9 +21,5 @@ export class File {
         fs.writeFileSync(savedAt, this.content);
 
         return savedAt;
-    }
-
-    read() {
-        return this.content;
     }
 }
