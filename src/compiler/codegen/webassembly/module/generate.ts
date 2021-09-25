@@ -11,8 +11,6 @@ import type { Parameter } from "../../../ast/nodes/declarations/parameter";
 import type { Type } from "../../../typing/type";
 import { Primitive } from "../../../typing/type";
 
-type ModuleName = string
-
 interface SignatureView {
     name: string,
     type: string
@@ -31,7 +29,7 @@ interface View {
 
 const pathToTemplate = `${__dirname}/templates/module.template`;
 
-export const generateWebAssemblyModule = (module: Module, name: ModuleName): File => {
+export const generateWebAssemblyModule = (module: Module, moduleName: string): File => {
 
     const typescriptTypeOf = (type?: Type): string => {
         if(type === undefined) {
@@ -106,7 +104,7 @@ export const generateWebAssemblyModule = (module: Module, name: ModuleName): Fil
                 );
 
             return {
-                module: capitalize(name),
+                module: capitalize(moduleName),
                 exports: exports.map(exp => exp.acceptExport(exportVisitor)),
                 signatures: declarations.map(declaration => declaration.acceptDeclarationVisitor(declarationVisitor))
             };
