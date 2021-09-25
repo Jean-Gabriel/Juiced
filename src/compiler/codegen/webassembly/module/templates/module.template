@@ -1,0 +1,21 @@
+import fs from 'fs';
+
+export interface [[ module ]] {
+    [[# signatures ]]
+    [[ name ]]: [[ &type ]]
+    [[/ signatures ]]
+}
+
+const mount = (pathToWasm: string): [[ module ]] => {
+    const created = fs.readFileSync(pathToWasm);
+    const wasmModule = new WebAssembly.Module(created);
+    const { exports } = new WebAssembly.Instance(wasmModule) as any;
+
+    return {
+        [[# exports]]
+        [[ name ]]: [[ accessor ]],
+        [[/ exports]]
+    };
+};
+
+export default mount;

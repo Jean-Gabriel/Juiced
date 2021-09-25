@@ -2,38 +2,64 @@ import type { CodeGeneratorOutputOptions } from "../../codegenerator";
 import { v4 as uuid } from 'uuid';
 import fs from 'fs';
 import { CompilationHelper } from "../../../../../test/compiler/helper";
+import { File } from "../../../../common/file";
 
 describe('WebAssemblyGenerator', () => {
-    const outputOptions: CodeGeneratorOutputOptions = {
-        path: `/test`,
-        name: uuid()
+
+    let outputOptions: CodeGeneratorOutputOptions;
+    let directoryPath: string;
+    let filePathWithoutExtension: string;
+    let wasm: string;
+    let wat: string;
+    let ts: string;
+
+    const generateNewOutputPath = () => {
+        outputOptions = {
+            path: `/test/${uuid()}`,
+            name: `main`
+        };
+
+        directoryPath = `${process.cwd()}${outputOptions.path}`;
+
+        filePathWithoutExtension = `${directoryPath}/${outputOptions.name}`;
+
+        wasm = `${filePathWithoutExtension}.wasm`;
+        wat = `${filePathWithoutExtension}.wat`;
+        ts = `${filePathWithoutExtension}.ts`;
     };
 
-    const filePathWithoutExtension = `${process.cwd()}${outputOptions.path}/${outputOptions.name}`;
+    beforeEach(() => {
+        generateNewOutputPath();
 
-    const wasm = `${filePathWithoutExtension}.wasm`;
-    const wat = `${filePathWithoutExtension}.wat`;
+        fs.mkdirSync(directoryPath);
+    });
 
     afterEach(() => {
         fs.unlinkSync(wasm);
         fs.unlinkSync(wat);
+        fs.unlinkSync(ts);
+
+        fs.rmdirSync(directoryPath);
     });
 
     it('can export functions and variables', async () => {
         type Module = {
-            variable: WebAssembly.Global
+            variable: number
+            boolean: boolean
             function: () => number
         }
 
-        const module = await mount<Module>(`
+        const module = await compileAndImport<Module>(`
             export variable = const 1;
+            export boolean = const true;
             export function = fun (): int {
                 -(1 + 3) / 2 + variable;
             }
         `);
 
         expect(module.function()).toEqual(-1);
-        expect(module.variable.value).toEqual(1);
+        expect(module.variable).toEqual(1);
+        expect(module.boolean === true).toBeTruthy();
     });
 
     it('can call an exported function with parameters', async () => {
@@ -41,7 +67,7 @@ describe('WebAssemblyGenerator', () => {
             canDriveAt: (age: number) => boolean
         }
 
-        const module = await mount<Module>(`
+        const module = await compileAndImport<Module>(`
             MINIMAL_DRIVING_AGE = const 17;    
 
             export canDriveAt = fun (age: int): bool {
@@ -53,19 +79,28 @@ describe('WebAssemblyGenerator', () => {
         expect(module.canDriveAt(16)).toBeFalsy();
     });
 
-    const mount = async <T extends WebAssembly.Exports> (module: string) => {
+    it('it should correctly output typescript module', async () => {
+        await compileAndImport(`
+            export pi = const 3.1416;
+            export isMathModule = const true;
+
+            export square = fun (num: int): int {
+                num * num;
+            }
+        `);
+
+        const output = File.read(ts);
+
+        const expected = File.read(`${process.cwd()}/test/compiler/codegen/webassembly/module.expected.ts`);
+        expect(output.asString()).toEqual(expected.asString());
+    });
+
+    const compileAndImport = async <T extends object> (module: string) => {
         const { tokenize, parse, resolve, codegenWebAssembly } = CompilationHelper;
 
         await codegenWebAssembly(resolve(parse(tokenize(module))), outputOptions);
 
-        interface MountedModule<T extends WebAssembly.Exports> extends WebAssembly.Instance {
-            readonly exports: T
-        }
-
-        const created = fs.readFileSync(wasm);
-        const wasmModule = new WebAssembly.Module(created);
-        const wasmInstance = new WebAssembly.Instance(wasmModule) as MountedModule<T>;
-
-        return wasmInstance.exports;
+        const imported = await import(ts);
+        return imported.default(wasm) as T;
     };
 });
