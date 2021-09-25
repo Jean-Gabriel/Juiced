@@ -110,7 +110,7 @@ export const generateWAT = (module: Module): File => {
             return sExp.create(`i32.const ${expression.value}`);
         },
         visitFloatLiteral: function (expression: FloatLiteral): SExp {
-            return sExp.create(`float.const ${expression.value}`);
+            return sExp.create(`f64.const ${expression.value}`);
         },
         visitBooleanLiteral: function (expression: BooleanLiteral): SExp {
             return sExp.create(`i32.const ${Number(expression.value)}`);

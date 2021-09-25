@@ -2,21 +2,32 @@ import type { CodeGeneratorOutputOptions } from "../../codegenerator";
 import { v4 as uuid } from 'uuid';
 import fs from 'fs';
 import { CompilationHelper } from "../../../../../test/compiler/helper";
+import { File } from "../../../../common/file";
 
 describe('WebAssemblyGenerator', () => {
     const outputOptions: CodeGeneratorOutputOptions = {
-        path: `/test`,
-        name: uuid()
+        path: `/test/${uuid()}`,
+        name: 'main'
     };
 
-    const filePathWithoutExtension = `${process.cwd()}${outputOptions.path}/${outputOptions.name}`;
+    const directoryPath = `${process.cwd()}${outputOptions.path}`;
+
+    const filePathWithoutExtension = `${directoryPath}/${outputOptions.name}`;
 
     const wasm = `${filePathWithoutExtension}.wasm`;
     const wat = `${filePathWithoutExtension}.wat`;
+    const ts = `${filePathWithoutExtension}.ts`;
+
+    beforeEach(() => {
+        fs.mkdirSync(directoryPath);
+    });
 
     afterEach(() => {
         fs.unlinkSync(wasm);
         fs.unlinkSync(wat);
+        fs.unlinkSync(ts);
+
+        fs.rmdirSync(directoryPath);
     });
 
     it('can export functions and variables', async () => {
@@ -51,6 +62,21 @@ describe('WebAssemblyGenerator', () => {
 
         expect(module.canDriveAt(17)).toBeTruthy();
         expect(module.canDriveAt(16)).toBeFalsy();
+    });
+
+    it('it should correctly output typescript module', async () => {
+        await mount(`
+            export pi = const 3.1416;    
+
+            export square = fun (num: int): int {
+                num * num;
+            }
+        `);
+
+        const output = File.read(ts);
+
+        const expected = File.read(`${process.cwd()}/test/compiler/codegen/webassembly/module.expected.ts`);
+        expect(output.asString()).toEqual(expected.asString());
     });
 
     const mount = async <T extends WebAssembly.Exports> (module: string) => {
