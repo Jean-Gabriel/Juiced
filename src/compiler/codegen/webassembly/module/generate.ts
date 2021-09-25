@@ -79,6 +79,10 @@ export const generateWebAssemblyModule = (module: Module, name: ModuleName): Fil
 
             if(node.declaration.kind === AstNodeKind.VARIABLE_DECLARATION) {
                 accessor += `${node.declaration.identifier.value}.value`;
+
+                if(node.declaration.type?.is(Primitive.BOOL)) {
+                    accessor = `Boolean(${accessor})`;
+                }
             }
 
             return {

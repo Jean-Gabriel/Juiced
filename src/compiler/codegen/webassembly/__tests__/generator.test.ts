@@ -66,7 +66,8 @@ describe('WebAssemblyGenerator', () => {
 
     it('it should correctly output typescript module', async () => {
         await mount(`
-            export pi = const 3.1416;    
+            export pi = const 3.1416;
+            export isMathModule = const true;
 
             export square = fun (num: int): int {
                 num * num;
