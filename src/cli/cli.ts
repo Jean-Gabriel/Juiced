@@ -13,7 +13,7 @@ import { createChalkDiagnosticReporter } from '../diagnostic/chalk/reporter';
 
 const options = yargs
     .usage("Usage: -c <module-to-compile> -p <output-path> -n <output-module-name>")
-    .option('c', { alias: 'compile', describe: 'Module to compile', type: 'string', default: 'main.juice'})
+    .option('c', { alias: 'compile', describe: 'Module to compile', type: 'string', default: 'main.jas'})
     .option('p', { alias: 'path', describe: 'Output path', type: 'string', default: 'build' })
     .option('n', { alias: 'module-name', describe: 'Output module name', type: 'string', default: 'module' })
     .argv;
