@@ -5,20 +5,32 @@ import { CompilationHelper } from "../../../../../test/compiler/helper";
 import { File } from "../../../../common/file";
 
 describe('WebAssemblyGenerator', () => {
-    const outputOptions: CodeGeneratorOutputOptions = {
-        path: `/test/${uuid()}`,
-        name: 'main'
+
+    let outputOptions: CodeGeneratorOutputOptions;
+    let directoryPath: string;
+    let filePathWithoutExtension: string;
+    let wasm: string;
+    let wat: string;
+    let ts: string;
+
+    const generateNewOutputPath = () => {
+        outputOptions = {
+            path: `/test/${uuid()}`,
+            name: `main`
+        };
+
+        directoryPath = `${process.cwd()}${outputOptions.path}`;
+
+        filePathWithoutExtension = `${directoryPath}/${outputOptions.name}`;
+
+        wasm = `${filePathWithoutExtension}.wasm`;
+        wat = `${filePathWithoutExtension}.wat`;
+        ts = `${filePathWithoutExtension}.ts`;
     };
 
-    const directoryPath = `${process.cwd()}${outputOptions.path}`;
-
-    const filePathWithoutExtension = `${directoryPath}/${outputOptions.name}`;
-
-    const wasm = `${filePathWithoutExtension}.wasm`;
-    const wat = `${filePathWithoutExtension}.wat`;
-    const ts = `${filePathWithoutExtension}.ts`;
-
     beforeEach(() => {
+        generateNewOutputPath();
+
         fs.mkdirSync(directoryPath);
     });
 
@@ -32,19 +44,22 @@ describe('WebAssemblyGenerator', () => {
 
     it('can export functions and variables', async () => {
         type Module = {
-            variable: WebAssembly.Global
+            variable: number
+            boolean: boolean
             function: () => number
         }
 
-        const module = await mount<Module>(`
+        const module = await compileAndImport<Module>(`
             export variable = const 1;
+            export boolean = const true;
             export function = fun (): int {
                 -(1 + 3) / 2 + variable;
             }
         `);
 
         expect(module.function()).toEqual(-1);
-        expect(module.variable.value).toEqual(1);
+        expect(module.variable).toEqual(1);
+        expect(module.boolean === true).toBeTruthy();
     });
 
     it('can call an exported function with parameters', async () => {
@@ -52,7 +67,7 @@ describe('WebAssemblyGenerator', () => {
             canDriveAt: (age: number) => boolean
         }
 
-        const module = await mount<Module>(`
+        const module = await compileAndImport<Module>(`
             MINIMAL_DRIVING_AGE = const 17;    
 
             export canDriveAt = fun (age: int): bool {
@@ -65,7 +80,7 @@ describe('WebAssemblyGenerator', () => {
     });
 
     it('it should correctly output typescript module', async () => {
-        await mount(`
+        await compileAndImport(`
             export pi = const 3.1416;
             export isMathModule = const true;
 
@@ -80,19 +95,12 @@ describe('WebAssemblyGenerator', () => {
         expect(output.asString()).toEqual(expected.asString());
     });
 
-    const mount = async <T extends WebAssembly.Exports> (module: string) => {
+    const compileAndImport = async <T extends object> (module: string) => {
         const { tokenize, parse, resolve, codegenWebAssembly } = CompilationHelper;
 
         await codegenWebAssembly(resolve(parse(tokenize(module))), outputOptions);
 
-        interface MountedModule<T extends WebAssembly.Exports> extends WebAssembly.Instance {
-            readonly exports: T
-        }
-
-        const created = fs.readFileSync(wasm);
-        const wasmModule = new WebAssembly.Module(created);
-        const wasmInstance = new WebAssembly.Instance(wasmModule) as MountedModule<T>;
-
-        return wasmInstance.exports;
+        const imported = await import(ts);
+        return imported.default(wasm) as T;
     };
 });
