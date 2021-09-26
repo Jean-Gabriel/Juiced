@@ -2,12 +2,10 @@ type Props = {
     source: string
 }
 
-export type SourceReaderFactory = (props: Props) => SourceReader
-export const createSourceReader: SourceReaderFactory = ({ source }: Props) => {
-    const withoutNewLines = source.replace(/\r|\n/g, '');
+const NEW_LINES_REGEX = /\r|\n/g;
 
-    return new SourceReader({ source: withoutNewLines });
-};
+export type SourceReaderFactory = (props: Props) => SourceReader
+export const createSourceReader: SourceReaderFactory = ({ source }: Props) => new SourceReader({ source });
 
 export class SourceReader {
     private readonly source: string;
@@ -35,7 +33,7 @@ export class SourceReader {
         }
 
         let current = this.source.charAt(this.index++);
-        while(current && current === '\n') {
+        while(current && current.match(NEW_LINES_REGEX)) {
             this.line++;
             current = this.source.charAt(this.index++);
         }
