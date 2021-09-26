@@ -3,7 +3,11 @@ type Props = {
 }
 
 export type SourceReaderFactory = (props: Props) => SourceReader
-export const createSourceReader: SourceReaderFactory = ({ source }: Props) => new SourceReader({ source });
+export const createSourceReader: SourceReaderFactory = ({ source }: Props) => {
+    const withoutNewLines = source.replace(/\r|\n/g, '');
+
+    return new SourceReader({ source: withoutNewLines });
+};
 
 export class SourceReader {
     private readonly source: string;
