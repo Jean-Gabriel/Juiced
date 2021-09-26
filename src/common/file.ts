@@ -23,7 +23,7 @@ export class File {
     }
 
     save(path: string, name: string): Path {
-        const savedAt = `${process.cwd()}${path}/${name}`;
+        const savedAt = `${process.cwd()}/${path}/${name}`;
 
         fs.writeFileSync(savedAt, this.content);
 

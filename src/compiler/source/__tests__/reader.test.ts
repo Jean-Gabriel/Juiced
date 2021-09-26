@@ -58,7 +58,7 @@ describe('SourceReader', () => {
     });
 
     it('should increment line when encoutering a new line', () => {
-        const reader = givenSourceReader('\n\n');
+        const reader = givenSourceReader('\r\n');
 
         reader.read();
 
