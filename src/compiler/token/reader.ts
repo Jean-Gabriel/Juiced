@@ -69,6 +69,14 @@ export default class TokenReader {
         return this.isPositionAtEnd(this.index);
     }
 
+    current(): Token {
+        if(this.isAtEnd()) {
+            return this.tokens[this.tokens.length - 1];
+        }
+
+        return this.tokens[this.index];
+    }
+
     private isPositionAtEnd(position: number) {
         return position >= this.tokens.length;
     }

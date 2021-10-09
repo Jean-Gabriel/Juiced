@@ -1,5 +1,5 @@
 import type { DiagnosticReporterFactory } from "../../../diagnostic/reporter";
-import { DiagnosticCategory } from "../../../diagnostic/reporter";
+import { diagnostic } from "../../../diagnostic/reporter";
 import type { Module, TopLevelDeclaration } from "../nodes/module";
 import AstBuilder from "../nodes/builder";
 import { TokenKind } from "../../token/kinds";
@@ -64,7 +64,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                     topLevel = expression();
                 }
 
-                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of top level expression.'));
+                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError(`Expected semicolon at end of top level expression on ${reader.current().lexeme} at line ${reader.current().line}.`));
                 return topLevel;
             } catch(e: unknown) {
                 handleError(e, { recoverAfter: [ TokenKind.SEMICOLON ] });
@@ -76,9 +76,9 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             const identifier = reader
                 .consume(TokenKind.IDENTIFIER)
                 .unguard(stringLiteralToken)
-                .orElseThrow(new ParsingError('Expected identifier at the start of a declaration.'));
+                .orElseThrow(new ParsingError(`Expected identifier at the start of a declaration on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
-            reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError('Expected = after identifier.'));
+            reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError(`Expected = after identifier ${identifier.literal} at line ${reader.current().line}.`));
 
             let declaration: Declaration;
 
@@ -87,7 +87,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             } else if(reader.currentIs(TokenKind.CONST)) {
                 declaration = variableDeclaration(identifier);
             } else {
-                throw new  ParsingError('Expected declaration to be either a function or a variable.');
+                throw new  ParsingError(`Expected declaration to be either a function or a variable on ${reader.current().lexeme} at line ${reader.current().line}.`);
             }
 
             return declaration;
@@ -107,7 +107,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                     statement = expression();
                 }
 
-                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError('Expected semicolon at end of top level expression.'));
+                reader.consume(TokenKind.SEMICOLON).orElseThrow(new ParsingError(`Expected semicolon at end of expression on ${reader.current().lexeme} at line ${reader.current().line}.`));
                 return statement;
             } catch(e: unknown) {
                 handleError(e, { recoverAfter: [ TokenKind.SEMICOLON, TokenKind.CLOSE_BRACKETS ] });
@@ -121,7 +121,9 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 .unguard(stringLiteralToken)
                 .orElseThrow(new Error('Tried to create a variable declaration without an identifier.'));
 
-            reader.consume(TokenKind.EQUAL).orElseThrow(new ParsingError('Expected = after identifier.'));
+            reader
+                .consume(TokenKind.EQUAL)
+                .orElseThrow(new ParsingError(`Expected = after identifier ${identifier.literal} at line ${reader.current().line}.`));
 
             return variableDeclaration(identifier);
         };
@@ -129,14 +131,14 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         const functionDeclaration = (identifier: StringLiteralToken) => {
             reader.consume(TokenKind.FUN).orElseThrow(new Error('Tried to create a function declaration without a fun keyword.'));
 
-            reader.consume(TokenKind.OPEN_PARENTHESIS).orElseThrow(new ParsingError('Expected ( after = keyword in function declaration.'));
+            reader.consume(TokenKind.OPEN_PARENTHESIS).orElseThrow(new ParsingError(`Expected ( after = keyword in function declaration ${identifier.literal} at line ${reader.current().line}.`));
             const args = functionArguments();
-            reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError('Expected ) after typed arguments in function declaration.'));
+            reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError(`Expected ) after typed arguments in function declaration ${identifier.literal} at line ${reader.current().line}.`));
 
-            reader.consume(TokenKind.COLON).orElseThrow(new ParsingError('Expected : after arguments in function declaration.'));
+            reader.consume(TokenKind.COLON).orElseThrow(new ParsingError(`Expected : after arguments in function declaration ${identifier.literal} at line ${reader.current().line}.`));
             const type = reader
                 .consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE)
-                .orElseThrow(new ParsingError('Expected type after arrow in function declaration.'));
+                .orElseThrow(new ParsingError(`Expected type after arrow in function declaration ${identifier.literal} at line ${reader.current().line}.`));
 
             const body = functionBody();
 
@@ -153,18 +155,20 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
 
             while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS) && !reader.isAtEnd()) {
                 if(args.length) {
-                    reader.consume(TokenKind.COMA).orElseThrow(new ParsingError('Arguments needs to be separated by a coma.'));
+                    reader.consume(TokenKind.COMA).orElseThrow(new ParsingError(`Expected arguments needs to be separated by a coma on ${reader.current().lexeme} at line ${reader.current().line}.`));
                 }
 
                 const identifier = reader
                     .consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken)
-                    .orElseThrow(new ParsingError('Arguments needs an identifier before colon and type.'));
+                    .orElseThrow(new ParsingError(`Exprected arguments to have an identifier before colon and type on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
-                reader.consume(TokenKind.COLON).orElseThrow(new ParsingError('Arguments needs a colon after identifier and type.'));
+                reader
+                    .consume(TokenKind.COLON)
+                    .orElseThrow(new ParsingError(`Expected argument ${identifier.literal} to have a colon between identifier and type on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 const type = reader
                     .consume(TokenKind.INT_TYPE, TokenKind.FLOAT_TYPE, TokenKind.BOOLEAN_TYPE)
-                    .orElseThrow(new ParsingError('Arguments needs a type after colon.'));
+                    .orElseThrow(new ParsingError(`Expected arguments ${identifier.literal} to have a type after colon ${reader.current().line}.`));
 
 
                 const argument = AstBuilder.functionArgument({
@@ -181,19 +185,19 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
         const functionBody = () => {
             const statements: Statement[] = [];
 
-            reader.consume(TokenKind.OPEN_BRACKETS).orElseThrow(new ParsingError('Expected { at start of function body.'));
+            reader.consume(TokenKind.OPEN_BRACKETS).orElseThrow(new ParsingError(`Expected { at start of function body on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
             while(!reader.currentIs(TokenKind.CLOSE_BRACKETS) && !reader.isAtEnd()) {
                 statements.push(statement());
             }
 
-            reader.consume(TokenKind.CLOSE_BRACKETS).orElseThrow(new ParsingError('Expected } at end of function body.'));
+            reader.consume(TokenKind.CLOSE_BRACKETS).orElseThrow(new ParsingError(`Expected } at end of function body on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
             return statements;
         };
 
         const variableDeclaration = (identifier: StringLiteralToken) => {
-            reader.consume(TokenKind.CONST).orElseThrow(new ParsingError('Expected variable declaration to be a constant.'));
+            reader.consume(TokenKind.CONST).orElseThrow(new ParsingError(`Expected variable declaration ${identifier.literal} to be a constant at line ${reader.current().line}.`));
 
             return AstBuilder.variableDeclaration({
                 identifier: AstBuilder.identifier({ value: identifier.literal}),
@@ -207,7 +211,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             while(reader.currentIs(TokenKind.BANG_EQUAL, TokenKind.EQUAL_EQUAL)) {
                 const operator = reader.consume(TokenKind.BANG_EQUAL, TokenKind.EQUAL_EQUAL)
                     .map((value) => binaryOperators.get(value.kind))
-                    .orElseThrow(new ParsingError('Expected == or != operator at start of equality.'));
+                    .orElseThrow(new ParsingError(`Expected == or != operator at start of equality on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 const right = comparison();
                 left = AstBuilder.binaryExpression({ left, operator, right });
@@ -222,7 +226,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             while(reader.currentIs(TokenKind.GREATER_THAN, TokenKind.GREATER_EQUAL, TokenKind.LESS_THAN, TokenKind.LESS_EQUAL)) {
                 const operator = reader.consume(TokenKind.GREATER_THAN, TokenKind.GREATER_EQUAL, TokenKind.LESS_THAN, TokenKind.LESS_EQUAL)
                     .map((value) => binaryOperators.get(value.kind))
-                    .orElseThrow(new ParsingError('Expected <, <=, > or >= operator at start of comparison.'));
+                    .orElseThrow(new ParsingError(`Expected <, <=, > or >= operator at start of comparison on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 const right = addition();
                 left = AstBuilder.binaryExpression({ left, operator, right });
@@ -237,7 +241,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             while(reader.currentIs(TokenKind.MINUS, TokenKind.PLUS)) {
                 const operator = reader.consume(TokenKind.MINUS, TokenKind.PLUS)
                     .map((value) => binaryOperators.get(value.kind))
-                    .orElseThrow(new ParsingError('Expected + or - operator at start of addition.'));
+                    .orElseThrow(new ParsingError(`Expected + or - operator at start of addition on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 const right = multiplication();
                 left = AstBuilder.binaryExpression({ left, operator, right });
@@ -252,7 +256,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             while(reader.currentIs(TokenKind.SLASH, TokenKind.STAR)) {
                 const operator = reader.consume(TokenKind.SLASH, TokenKind.STAR)
                     .map((value) => binaryOperators.get(value.kind))
-                    .orElseThrow(new ParsingError('Expected / or * operator at start of multiplication.'));
+                    .orElseThrow(new ParsingError(`Expected / or * operator at start of multiplication on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 const right = unary();
                 left = AstBuilder.binaryExpression({ left, operator, right });
@@ -265,7 +269,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             if(reader.currentIs(TokenKind.MINUS, TokenKind.BANG, TokenKind.PLUS)) {
                 const operator = reader.consume(TokenKind.MINUS, TokenKind.BANG, TokenKind.PLUS)
                     .map((value) => unaryOperators.get(value.kind))
-                    .orElseThrow(new ParsingError('Expected -, ! or + operator at start of unary.'));
+                    .orElseThrow(new ParsingError(`Expected -, ! or + operator at start of unary on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 const right = unary();
                 return AstBuilder.unaryExpression({ operator, expression: right });
@@ -278,7 +282,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             if(reader.currentIs(TokenKind.INT)) {
                 const int = reader
                     .consume(TokenKind.INT).unguard(numberLiteralToken)
-                    .orElseThrow(new ParsingError('Expected int as int literal primary.'));
+                    .orElseThrow(new ParsingError(`Expected int as int literal primary on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 return AstBuilder.intLiteral({ int: int.literal });
             }
@@ -286,7 +290,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             if(reader.currentIs(TokenKind.FLOAT)) {
                 const float = reader
                     .consume(TokenKind.FLOAT).unguard(numberLiteralToken)
-                    .orElseThrow(new ParsingError('Expected float as float literal primary.'));
+                    .orElseThrow(new ParsingError(`Expected float as float literal primary on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 return AstBuilder.floatLiteral({ float: float.literal });
             }
@@ -294,7 +298,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             if(reader.currentIs(TokenKind.BOOLEAN)) {
                 const boolean = reader
                     .consume(TokenKind.BOOLEAN).unguard(booleanLiteralToken)
-                    .orElseThrow(new ParsingError('Expected boolean as boolean literal primary.'));
+                    .orElseThrow(new ParsingError(`Expected boolean as boolean literal primary on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 return AstBuilder.booleanLiteral({ bool: boolean.literal });
             }
@@ -302,11 +306,14 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
             if(reader.currentIs(TokenKind.IDENTIFIER)) {
                 const identifier = reader
                     .consume(TokenKind.IDENTIFIER).unguard(stringLiteralToken)
-                    .orElseThrow(new ParsingError('Expected identifier as accessor.'));
+                    .orElseThrow(new ParsingError(`Expected identifier as accessor on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 if(reader.consume(TokenKind.OPEN_PARENTHESIS).isPresent()) {
                     const parameters = invocationParameters();
-                    reader.consume(TokenKind.CLOSE_PARENTHESIS).orElseThrow(new ParsingError('Expected ) at the end of invocation.'));
+
+                    reader
+                        .consume(TokenKind.CLOSE_PARENTHESIS)
+                        .orElseThrow(new ParsingError(`Expected ) at the end of invocation ${identifier.literal} at line ${reader.current().line}.`));
 
                     return AstBuilder.invocation({ invoked: AstBuilder.identifier({ value: identifier.literal }), parameters });
                 }
@@ -318,12 +325,12 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 const expr = expression();
                 reader
                     .consume(TokenKind.CLOSE_PARENTHESIS)
-                    .orElseThrow(new ParsingError('Expected ) after grouping expression.'));
+                    .orElseThrow(new ParsingError(`Expected ) after grouping expression on ${reader.current().lexeme} at line ${reader.current().line}.`));
 
                 return AstBuilder.grouping({ expression: expr });
             }
 
-            throw new ParsingError('Expected a float, int, boolean or identifier as a primary.');
+            throw new ParsingError(`Expected a float, int, boolean or identifier as a primary on ${reader.current().lexeme} at line ${reader.current().line}.`);
         };
 
         const invocationParameters = () => {
@@ -331,7 +338,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
 
             while(!reader.currentIs(TokenKind.CLOSE_PARENTHESIS) && !reader.isAtEnd()) {
                 if(!reader.consume(TokenKind.COMA).isPresent() && parameters.length) {
-                    throw new ParsingError('Expected invocation parameters to be seperated by a coma.');
+                    throw new ParsingError(`Expected invocation parameters to be seperated by a coma on ${reader.current().lexeme} at line ${reader.current().line}.`);
                 }
 
                 parameters.push(expression());
@@ -354,7 +361,7 @@ export const createParser: ParserFactory = ({ createTokenReader, createDiagnosti
                 throw error;
             }
 
-            reporter.emit({ category: DiagnosticCategory.ERROR, message: error.message });
+            reporter.emit(diagnostic.error(error.message));
 
             if(options && options.recoverAfter) {
                 recover(...options.recoverAfter);

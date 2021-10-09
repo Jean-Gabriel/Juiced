@@ -2,10 +2,16 @@ export enum DiagnosticCategory {
     ERROR = 'ERROR'
 }
 
-export type Diagnostic = {
+export type  ErrorDiagnostic = {
+    category: DiagnosticCategory.ERROR
     message: string
-    category: DiagnosticCategory
 }
+
+export type Diagnostic = ErrorDiagnostic
+
+export const diagnostic = {
+    error: (message: string): ErrorDiagnostic => ({ category: DiagnosticCategory.ERROR, message })
+};
 
 export type DiagnosticReporterFactory = () => DiagnosticReporter
 

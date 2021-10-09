@@ -1,4 +1,3 @@
-import { createTestDiagnoticsReporter } from "../../../../../test/diagnostic/reporter";
 import { Primitive, Type } from "../../../typing/type";
 import { createTokenReader } from "../../../token/reader";
 import AstBuilder from "../../nodes/builder";
@@ -7,6 +6,7 @@ import type { Module } from "../../nodes/module";
 import { createAstOptimizer } from "../optimization/optimizer";
 import { createParser } from "../parser";
 import { CompilationHelper } from "../../../../../test/compiler/helper";
+import { createTestDiagnoticsReporter } from "../../../../../test/diagnostic/reporter";
 
 describe('Parser', () => {
     it('should parse top level exported function declaration', () => {

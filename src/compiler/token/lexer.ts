@@ -1,10 +1,10 @@
-import { DiagnosticCategory } from "../../diagnostic/reporter";
 import { isBoolean, parseBoolean } from "../utils/boolean";
 import { isAlpha, isAlphaNumeric, isDigit } from "../utils/char";
 import { keywords } from "./keywords";
 import { TokenKind } from "./kinds";
 import type { BooleanLiteralTokenKind, NonLiteralTokenKind, NumberLiteralTokenKind, StringLiteralTokenKind, Token } from "./token";
 import type { DiagnosticReporterFactory } from "../../diagnostic/reporter";
+import { diagnostic } from "../../diagnostic/reporter";
 import type { SourceReaderFactory } from "../source/reader";
 
 interface Lexer {
@@ -69,7 +69,7 @@ export const createLexer: LexerFactory = ({ createSourceReader, createDiagnostic
         };
 
         const error = (message: string) => {
-            reporter.emit({ category: DiagnosticCategory.ERROR, message });
+            reporter.emit(diagnostic.error(message));
         };
 
 
