@@ -1,7 +1,7 @@
-import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
 import { createTypeResolver } from "../resolver";
 import { createTypeContext } from "../context";
 import { CompilationHelper } from "../../../../test/compiler/helper";
+import { createTestDiagnoticsReporter } from "../../../../test/diagnostic/reporter";
 
 describe('Typechecker', () => {
     it('can invoke a function declared before and after invocator', () => {

@@ -88,16 +88,16 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         const found = context.lookup(invocation.invoked);
 
         if(!found) {
-            throw new TypeResolvingError('Trying to access not declared function.');
+            throw new TypeResolvingError(`Trying to access not declared function [${invocation.invoked.value}].`);
         }
 
         if(found.node.kind !== AstNodeKind.FUNCTION_DECLARATION) {
-            throw new TypeResolvingError('Only functions can be invoked.');
+            throw new TypeResolvingError(`Invoked [${found.node.identifier.value}] is not a function.`);
         }
 
         const args = found.node.arguments;
         if(args.length !== invocation.parameters.length) {
-            throw new TypeResolvingError('Function was invoked with more parameters than it has arguments.');
+            throw new TypeResolvingError(`Function [${found.node.identifier.value}] was invoked with more parameters than it has arguments.`);
         }
 
         invocation.parameters.forEach((param, index) => {
@@ -105,7 +105,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
             const argument = args[index];
 
             if(!argument.type.isSame(type)) {
-                throw new TypeResolvingError('Function argument was invoked with expression of the wrong type.');
+                throw new TypeResolvingError(`Function [${found.node.identifier.value}] argument [${argument.identifier.value}] was invoked with expression of type [${type.describe()}] instead of [${argument.type.describe()}].`);
             }
         });
 
@@ -117,13 +117,13 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         const left = binary.left.acceptExpressionVisitor(expressionVisitor);
 
         if(!right.isSame(left)) {
-            throw new TypeResolvingError('Both sides of binary operation must have the same type.');
+            throw new TypeResolvingError(`Both sides of binary operation must have the same type ([${left.describe()}] is not equivalent to [${right.describe()}]).`);
         }
 
         const type = right;
         if(type.is(Primitive.BOOL)) {
             if(!BOOLEAN_OPERATORS.includes(binary.operator)) {
-                throw new TypeResolvingError('Invalid bool operator.');
+                throw new TypeResolvingError(`[${binary.operator}] is not a bool operator.`);
             }
 
             return type;
@@ -131,7 +131,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
         if(type.is(Primitive.INT) || type.is(Primitive.FLOAT)) {
             if(!NUMBER_OPERATORS.includes(binary.operator)) {
-                throw new TypeResolvingError('Invalid int or float operator.');
+                throw new TypeResolvingError(`[${binary.operator}] is not a int or float operator.`);
             }
 
             if(BOOLEAN_OPERATORS.includes(binary.operator)) {
@@ -141,7 +141,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
             return type;
         }
 
-        throw new TypeResolvingError('Invalid binary expression.');
+        throw new TypeResolvingError(`Invalid binary expression [${left.describe()} ${binary.operator} ${right.describe()}].`);
     };
 
     const unary = (unary: UnaryExpression): Type => {
@@ -149,7 +149,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
         if(unary.operator === OperatorKind.MINUS || unary.operator === OperatorKind.PLUS) {
             if(type.is(Primitive.INT) && type.is(Primitive.FLOAT)) {
-                throw new TypeResolvingError('Minus unary must affect an int or float.');
+                throw new TypeResolvingError('Minus unary must affect an int or a float.');
             }
 
             return type;
@@ -163,7 +163,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
             return type;
         }
 
-        throw new TypeResolvingError('Invalid unary expression.');
+        throw new TypeResolvingError(`Invalid unary expression [${type.describe()} ${unary.operator}].`);
     };
 
     const expressionVisitor: ExpressionVisitor<Type> = {
@@ -194,7 +194,7 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
         visitAccessor: function (expression: Accessor) {
             const symbol = context.lookup(expression.identifier);
             if(!symbol) {
-                throw new TypeResolvingError('Trying to access not declared variable.');
+                throw new TypeResolvingError(`Trying to access not declared variable [${expression.identifier.value}].`);
             }
 
             expression.type = symbol.type;
@@ -256,14 +256,14 @@ export const createTypeResolver: TypeResolverFactory = ({ createDiagnosticReport
 
                     if(!type) {
                         if(index === declaration.body.length - 1) {
-                            throw new TypeResolvingError('A function must return an expression.');
+                            throw new TypeResolvingError(`Function [${declaration.identifier.value}] must return an expression.`);
                         }
 
                         return;
                     }
 
                     if(!type.isSame(declaration.type)) {
-                        throw new TypeResolvingError('Function does not return expected type.');
+                        throw new TypeResolvingError(`Function [${declaration.identifier.value}] returns ${type.describe()} instead of ${declaration.type.describe()}.`);
                     }
                 } catch(e: unknown) {
                     handleError(e);

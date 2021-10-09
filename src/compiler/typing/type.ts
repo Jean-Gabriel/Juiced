@@ -5,6 +5,7 @@ export enum Primitive {
 }
 
 export class Type {
+
     static from(type: string) {
         return new Type(type);
     }
@@ -20,4 +21,8 @@ export class Type {
     is(type: string) {
         return type === this.type;
     }
+
+    describe(): string {
+        return this.type;
+     }
 }
