@@ -7,8 +7,11 @@ import { File } from "../../../../common/file";
 describe('WebAssemblyGenerator', () => {
 
     let outputOptions: CodeGeneratorOutputOptions;
+
     let directoryPath: string;
+
     let filePathWithoutExtension: string;
+
     let wasm: string;
     let wat: string;
     let ts: string;
