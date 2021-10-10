@@ -15,7 +15,7 @@ type WATVariable =
 
 export default class WATGenerationContext {
 
-    private readonly globals: Map<Name, Alias> = new Map()
+    private readonly globals: Name[] = []
     private readonly locals: Map<Name, Alias> = new Map()
 
     private readonly lateinitGlobals: Array<VariableDeclaration> = []
@@ -32,10 +32,9 @@ export default class WATGenerationContext {
     }
 
     global({ value }: Identifier) {
-        const alias = this.alias(value);
-        this.globals.set(value, alias);
+        this.globals.push(value);
 
-        return alias;
+        return value;
     }
 
     local({ value }: Identifier) {
@@ -45,13 +44,13 @@ export default class WATGenerationContext {
         return alias;
     }
 
-    find({ value }: Identifier): WATVariable {
+    get({ value }: Identifier): WATVariable {
         const local = this.locals.get(value);
         if(local) {
             return { local, scope: WATVariableScope.LOCAL };
         }
 
-        const global = this.globals.get(value);
+        const global = this.globals.find(global => global === value);
         if(global) {
             return { global, scope: WATVariableScope.GLOBAL };
         }
@@ -67,7 +66,7 @@ export default class WATGenerationContext {
         return this.lateinitGlobals;
     }
 
-    alias(identifier: string): string {
+    private alias(identifier: string): string {
         if(!this.scopes.length) {
             return identifier;
         }

@@ -91,10 +91,10 @@ const initialization = (context: WATGenerationContext, expressionVisitor: Expres
         return sExp.create();
     }
 
-    const init = sExp.identifier(context.alias(uuid()));
+    const init = sExp.identifier(uuid());
 
     const assignments = lateinits.flatMap(lateinit => {
-        const found = context.find(lateinit.identifier);
+        const found = context.get(lateinit.identifier);
 
         if(found.scope !== WATVariableScope.GLOBAL) {
             throw new Error('Unexpected lateinit local variable.');

@@ -1,7 +1,5 @@
 import { Optional } from "../optional";
 
-type NumberValue = { value: number, numberValueOnlyField: number }
-
 describe('Optional', () => {
     it('should map optional using function', () => {
         const number = Optional.of(1);
@@ -22,6 +20,8 @@ describe('Optional', () => {
     });
 
     it('should unguard guarded type', () => {
+        type NumberValue = { value: number, numberValueOnlyField: number }
+
         const value = { value: 1 };
         const guarded = Optional.of(value);
 

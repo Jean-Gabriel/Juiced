@@ -107,12 +107,31 @@ describe('TokenReader', () => {
         expect(found).toBeFalsy();
     });
 
+    it('should get current token', () => {
+        const bang = TokenFixture.create(_ => _.nonLiteral(TokenKind.BANG));
+        const reader = createTokenReader({ tokens: [ bang ]});
+
+        const current = reader.current();
+
+        expect(current).toEqual(bang);
+    });
+
     describe('given reader is at end', () => {
 
         it('should be at end', () => {
             const reader = createTokenReader({ tokens: [] });
 
             expect(reader.isAtEnd()).toBeTruthy();
+        });
+
+        it('should consider last token as current token', () => {
+            const bang = TokenFixture.create(_ => _.nonLiteral(TokenKind.BANG));
+            const reader = createTokenReader({ tokens: [ bang ]});
+            reader.advance();
+
+            const current = reader.current();
+
+            expect(current).toEqual(bang);
         });
 
         it('should return empty optional when consuming', () => {
