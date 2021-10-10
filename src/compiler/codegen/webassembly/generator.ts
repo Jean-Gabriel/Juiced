@@ -19,13 +19,13 @@ export const createWebAssemblyGenerator: WebAssemblyGeneratorFactory = () => {
         const tsModuleName = `${name}.ts`;
 
         const wat = generateWAT(module);
-        const created = wat.save(path, watName);
+        const created = wat.saveFromCwd(path, watName);
 
         const wasm = await generateWASMFromFile(created);
-        wasm.save(path, wasmName);
+        wasm.saveFromCwd(path, wasmName);
 
         const tsModule = generateWebAssemblyModule(module, name);
-        tsModule.save(path, tsModuleName);
+        tsModule.saveFromCwd(path, tsModuleName);
     };
 
     return {
