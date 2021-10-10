@@ -89,7 +89,7 @@ export const generateWAT = (module: Module): File => {
             throw new Error(`Unexpected unary operator ${expression.operator}`);
          },
         visitAccessor: function (expression: Accessor): SExp {
-            const accessor = context.find(expression.identifier);
+            const accessor = context.get(expression.identifier);
 
             if(accessor.scope === WATVariableScope.GLOBAL) {
                 return sExp.create('global.get', sExp.identifier(accessor.global));
@@ -98,7 +98,7 @@ export const generateWAT = (module: Module): File => {
             return sExp.create('local.get', sExp.identifier(accessor.local));
         },
         visitInvocation: function (expression: Invocation): SExp {
-            const invocation = context.find(expression.invoked);
+            const invocation = context.get(expression.invoked);
 
             if(invocation.scope !== WATVariableScope.GLOBAL) {
                 throw Error('Unexpected call to variable declaration.');
@@ -120,7 +120,7 @@ export const generateWAT = (module: Module): File => {
     const statementVisitor: StatementVisitor<SExp> = {
         visitVariableDeclaration: function (declaration: VariableDeclaration): SExp {
             const watExpression = declaration.expression.acceptExpressionVisitor(expressionVisitor);
-            const local = context.find(declaration.identifier);
+            const local = context.get(declaration.identifier);
 
             if(local.scope !== WATVariableScope.LOCAL) {
                 throw new Error('Unexpected global declared in function.');
@@ -183,7 +183,7 @@ export const generateWAT = (module: Module): File => {
 
     const exportVisitor: ExportVisitor<SExp> = {
         visitExport: function (node: Export): SExp {
-            const found = context.find(node.declaration.identifier);
+            const found = context.get(node.declaration.identifier);
 
             if(found.scope !== WATVariableScope.GLOBAL) {
                 throw Error('Unexpected exported global');
