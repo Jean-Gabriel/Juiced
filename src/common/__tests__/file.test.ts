@@ -20,4 +20,15 @@ describe('file', () => {
 
         expect(read.asString()).toEqual('Hello world!');
     });
+
+    it('should create missing directories when saving file', () => {
+        const file = new File({ content: 'Hello world!' });
+
+        const path = file.saveFromCwd('/test/common/does/not/exists', 'save_file_test.txt');
+
+        const read = File.read(path);
+        unlinkSync(path);
+
+        expect(read.asString()).toEqual('Hello world!');
+    });
 });

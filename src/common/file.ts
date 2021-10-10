@@ -1,4 +1,5 @@
 import fs from 'fs';
+import fse from 'fs-extra';
 
 type Props = {
     content: Stream,
@@ -25,7 +26,7 @@ export class File {
     saveFromCwd(path: string, name: string): Path {
         const savedAt = `${process.cwd()}/${path}/${name}`;
 
-        fs.writeFileSync(savedAt, this.content);
+        fse.outputFileSync(savedAt, this.content, { encoding: 'utf-8' });
 
         return savedAt;
     }
